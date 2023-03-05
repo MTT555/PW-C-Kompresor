@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
 	showList(&head);
 #endif
 	fseek(in, 0, SEEK_SET);
-	huffman(in, out, comp_level, cipher, "Politechnika_Warszawska");
+	huffman(in, out, comp_level, cipher, "Politechnika_Warszawska",&head);
 	
 	// char test[] = "aaaa";
 	// printf("%s\n", test);
