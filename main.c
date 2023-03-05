@@ -109,6 +109,7 @@ int main(int argc, char *argv[]) {
 	}
 	fclose(in);
 
+	sortTheList(&head);//sortuje liste wystapien znakow niemalejaco
 #ifdef DEBUG
 
 	//wypisujemy liste z wystapieniami

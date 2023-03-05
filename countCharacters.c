@@ -42,3 +42,33 @@ iterator = iterator->next;
 
 
 }
+void sortTheList(count **head){
+//sortuje liste niemalejaco algorytmem sortowania babelkowego
+
+	int ifSwapped;
+	count *ptr1;
+	count *ptr2 = NULL;
+	if(*head == NULL) return;
+	do {
+		ifSwapped = 0;
+		ptr1 = (*head);
+
+		while(ptr1->next != ptr2){
+		if(ptr1->amount > ptr1->next->amount){
+		swap(ptr1,ptr1->next);
+		ifSwapped = 1;
+		}
+		ptr1 = ptr1->next;
+		}
+		ptr2=ptr1;
+
+	}while(ifSwapped);
+}
+void swap(count *ptr1, count *ptr2){
+
+	int temp = ptr1->amount;
+	ptr1->amount = ptr2->amount;
+	ptr2->amount = temp;
+
+
+}	
