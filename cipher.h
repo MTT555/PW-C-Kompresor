@@ -1,0 +1,1 @@
+void vigenere(char *text, int size, const char *key, int key_size);
