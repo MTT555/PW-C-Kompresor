@@ -1,3 +1,5 @@
+#include "cipher.h"
+
 /**
 Funkcja szyfrujaca dany ciag znakow (argument --c)
     char *text - tekst, ktory chcemy zaszyfrowac

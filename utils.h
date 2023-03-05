@@ -1,7 +1,11 @@
-// Definicja zmiennej bool (moze sie przyda)
+#ifndef UTILS_H
+#define UTILS_H
+
+// Definicja zmiennej bool
 typedef enum {
-    false = 0,
-    true = 1
+    false, true
 } bool;
 
 void help(char *program_name, FILE *stream);
+
+#endif //UTILS_H
