@@ -83,13 +83,11 @@ code[top] = 1;
 create_huffmann_tree(&((*head)->right), code, comp_level, top+1,listC);
 
 }
-if ((*head)->character != NULL) { // czyli doszliśmy do liścia
+if (!((*head)->left) && !((*head)->right)) // jezeli dostalismy sie w koncu do liscia
 addToTheList1(listC, (*head)->character, code, top);//dodajemy kazdy kod do listy
 }
 
 
-
-}
 void print_huffmann_tree(listCodes **head){
 listCodes *iterator = (*head);
 while (iterator != NULL){
