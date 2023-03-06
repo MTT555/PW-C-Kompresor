@@ -88,7 +88,7 @@ addToTheList1(listC, (*head)->character, code, top);//dodajemy kazdy kod do list
 
 char *setEndOfString(char *string){
 if(string == NULL) return NULL;
-//czasem się zdarzy że będą się wyświetlać dziwne krzaki przy niektórych kodach- ten poniższy kod ma temu zapobiec
+//czasem się zdarzy że będą się wyświetlać dziwne krzaki przy niektórych kodach (szczególnie krótkich)- ten poniższy kod ma temu zapobiec
 	for (int i = 0; i < strlen(string); i++){
 		if (string[i] != '1' && string[i] != '0'){
 			string[i] = '\0';
