@@ -66,7 +66,6 @@ new->character = character;
 new->code = malloc(sizeof(char)*length);
 for (int i = 0; i < length; i++){
 new->code[i] = '0'+code[i];
-
 }
 new->next = (*listC);
 (*listC) = new;
@@ -87,11 +86,21 @@ if (!((*head)->left) && !((*head)->right)) // jezeli dostalismy sie w koncu do l
 addToTheList1(listC, (*head)->character, code, top);//dodajemy kazdy kod do listy
 }
 
-
+char *setEndOfString(char *string){
+if(string == NULL) return NULL;
+//czasem się zdarzy że będą się wyświetlać dziwne krzaki przy niektórych kodach- ten poniższy kod ma temu zapobiec
+	for (int i = 0; i < strlen(string); i++){
+		if (string[i] != '1' && string[i] != '0'){
+			string[i] = '\0';
+			break;
+		}
+	}
+	return string;
+}
 void print_huffmann_tree(listCodes **head){
 listCodes *iterator = (*head);
 while (iterator != NULL){
-printf("Character: %c, Code: %s\n",iterator->character, iterator->code);
+printf("Character: %c, Code: %s\n",iterator->character, setEndOfString(iterator->code));
 iterator = iterator->next;
 }
 }
