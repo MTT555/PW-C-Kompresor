@@ -50,31 +50,50 @@ if(comp_level == 8) code = malloc(sizeof(int)*8);
 if(comp_level == 12) code = malloc(sizeof(int)*12);
 
 if(comp_level == 16) code = malloc(sizeof(int)*16);
+listCodes *listC;//lista do przechowywania kodow znakow
+create_huffmann_tree(head, code, comp_level, 0,&listC);
 #ifdef DEBUG
 printf("List of codes:\n");
-print_huffmann_tree(head,code,comp_level,0);
+print_huffmann_tree(&listC);
 
 
 #endif
 }
+void addToTheList1(listCodes **listC, char character,int *code, int length){
+listCodes *new;
+new = malloc(sizeof(count));
+new->character = character;
+new->code = malloc(sizeof(char)*length);
+for (int i = 0; i < length; i++){
+new->code[i] = '0'+code[i];
 
-void print_huffmann_tree(count **head,int *code,int comp_level,int top){
+}
+new->next = (*listC);
+(*listC) = new;
+
+}
+
+void create_huffmann_tree(count **head, int *code, int comp_level, int top,listCodes **listC){
 if ((*head)->left){
 code[top] = 0;
-print_huffmann_tree(&((*head)->left), code, comp_level, top+1);
+create_huffmann_tree(&((*head)->left), code, comp_level, top+1,listC);
 }
 if ((*head)->right){
 code[top] = 1;
-print_huffmann_tree(&((*head)->right), code, comp_level, top+1);
+create_huffmann_tree(&((*head)->right), code, comp_level, top+1,listC);
 
 }
 if ((*head)->character != NULL) { // czyli doszliśmy do liścia
-printf("Character: %c, code: ",(*head)->character);
-for (int i = 0; i < top; i++){
-printf("%d",code[i]);
-}
-printf("\n");
-
+addToTheList1(listC, (*head)->character, code, top);//dodajemy kazdy kod do listy
 }
 
+
+
+}
+void print_huffmann_tree(listCodes **head){
+listCodes *iterator = (*head);
+while (iterator != NULL){
+printf("Character: %c, Code: %s\n",iterator->character, iterator->code);
+iterator = iterator->next;
+}
 }
