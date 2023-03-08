@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	//Nazwa pliku, w ktorym znajdzie sie skomresowany plik jako drugi argument
-	FILE *out = fopen(argv[2], "w");
+	FILE *out = fopen(argv[2], "wb");
 	if(out == NULL) {
 		fprintf(stderr, "Output file could not be opened!\n");
 		return -3;
@@ -107,7 +107,6 @@ int main(int argc, char *argv[]) {
 		}
 
 	}
-	fclose(in);
 
 	sortTheList(&head);//sortuje liste wystapien znakow niemalejaco
 #ifdef DEBUG
@@ -116,14 +115,11 @@ int main(int argc, char *argv[]) {
 	
 	showList(&head);
 #endif
-	fseek(in, 0, SEEK_SET);
-	huffman(in, out, comp_level, cipher, "Politechnika_Warszawska",&head);
+	fseek(in, 0, SEEK_SET); // ustawienie kursora w pliku z powrotem na jego poczatek
 	
-	// char test[] = "aaaa";
-	// printf("%s\n", test);
-	// vigenere(test, 4, "~~~~", 4);
-	// printf("%s\n", test);
+	huffman(in, out, comp_level, cipher, "Politechnika_Warszawska", &head);
 
+	fclose(in);
 	// fclose(out);
 	return 0;
 }

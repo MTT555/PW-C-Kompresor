@@ -4,6 +4,7 @@
 #include "cipher.h"
 #include "utils.h"
 #include "countCharacters.h"
+#include "string.h"
 
 /**
 Funkcja wykonujaca kompresje algorytmem Huffmana
@@ -50,15 +51,17 @@ if(comp_level == 8) code = malloc(sizeof(int)*8);
 if(comp_level == 12) code = malloc(sizeof(int)*12);
 
 if(comp_level == 16) code = malloc(sizeof(int)*16);
-listCodes *listC;//lista do przechowywania kodow znakow
+listCodes *listC = NULL;//lista do przechowywania kodow znakow
 create_huffmann_tree(head, code, comp_level, 0,&listC);
 #ifdef DEBUG
 printf("List of codes:\n");
 print_huffmann_tree(&listC);
 
-
 #endif
+
+writeCompressedToFile(input, output, comp_level, &listC);
 }
+
 void addToTheList1(listCodes **listC, char character,int *code, int length){
 listCodes *new;
 new = malloc(sizeof(count));
@@ -103,4 +106,59 @@ while (iterator != NULL){
 printf("Character: %c, Code: %s\n",iterator->character, setEndOfString(iterator->code));
 iterator = iterator->next;
 }
+}
+
+/**
+Funkcja wykonujaca zapis do pliku skompresowanego tekstu
+    FILE *input - plik wejsciowy z tekstem
+    FILE *output - plik, do ktorego zostanie wykonany zapis
+    int comp_level - poziom kompresji podany w bitach
+    listCodes **head - glowa listy zawierajacej kody dla kazdego symbolu
+*/
+
+void writeCompressedToFile(FILE *input, FILE *output, int comp_level, listCodes **head) {
+    char c;
+    const int BUFSIZE = 2 << (comp_level + 2);
+    int i, j, buf_pos = 0, comp_chars = 0, temp_symbol_code = 0, offset = 0; // buf_pos - aktualna pozycja w buferze
+    short temp_buffer[BUFSIZE]; // zamiana na malloc/realloc?
+    for(i = 0; i < BUFSIZE; i++)
+        temp_buffer[i] = -1;
+    fseek(input, 0, SEEK_SET);
+    listCodes *iterator = NULL;
+    while((c = fgetc(input)) != EOF) {
+        iterator = (*head);
+        while (iterator != NULL) {
+            if(iterator->character == c) {
+                for(i = 0; i < strlen(iterator->code); i++) {
+                    temp_buffer[buf_pos] = (iterator->code[i] == '1' ? 1 : 0);
+                    buf_pos++;
+                }
+                if(buf_pos >= comp_level) {
+                    comp_chars = buf_pos / comp_level; // liczba gotowych do zapisu skompresowanych znakow
+                    for(i = 0; i < comp_chars; i++) {
+                        if(temp_buffer[8 * i] == 1)
+                            temp_symbol_code -= 128;
+                        for(j = 1; j < 8; j++)
+                            temp_symbol_code += temp_buffer[8 * i + j] * (1 << (7 - j));
+                        fprintf(output, "%c", (char)temp_symbol_code);
+#ifdef DEBUG
+                        fprintf(stderr, "Printed symbol: %c (code: %d)\n", (char)temp_symbol_code, temp_symbol_code);
+#endif
+                        temp_symbol_code = 0;
+                    }
+                    offset = buf_pos % comp_level; // offset - jako ilosc pozostalych znakow w tablicy po zapisie
+                    if(offset != 0)
+                        for(i = 0; i < offset; i++)
+                            temp_buffer[i] = temp_buffer[buf_pos - offset + i];
+                    buf_pos = offset;
+                    comp_chars = 0;
+                }
+                break;
+            }
+            iterator = iterator->next;
+        }
+        //fprintf(output, "%c", c);
+    }
+    // for(int k = 0; k < 1000; k++)
+    //     fprintf(stderr, "%d", temp_buffer[k]);
 }

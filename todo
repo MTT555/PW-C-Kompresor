@@ -2,3 +2,6 @@ do zrobienia:
 -zaimplementowac algorytm Huffmana
 -dodac jakies dodatkowe opcje do uruchamiania programu (prawie gotowe)
 -przygotowac specyfikacje funkcjonalna
+-czyszczenie pamieci
+-jak bedzie czas i chęć - podmienić sortowanie bąbelkowe listy na qsort
+-writeCompressedToFile - dodać zapisywanie słownika!
