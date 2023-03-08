@@ -17,5 +17,5 @@ void huffman(FILE *input, FILE *output, int comp_level, bool cipher, char *ciphe
 void print_huffmann_tree(listCodes **listC);
 void create_huffmann_tree(count **head, int *code, int comp_level, int top,listCodes **listC);
 void addToTheList1(listCodes **head, char character,int *code, int length);
-void writeCompressedToFile(FILE *input, FILE *output, int comp_level, listCodes **head);
+void writeCompressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, char *cipher_key, listCodes **head);
 #endif //HUFFMAN_H

@@ -59,7 +59,7 @@ print_huffmann_tree(&listC);
 
 #endif
 
-writeCompressedToFile(input, output, comp_level, &listC);
+writeCompressedToFile(input, output, comp_level, cipher, cipher_key, &listC);
 }
 
 void addToTheList1(listCodes **listC, char character,int *code, int length){
@@ -110,59 +110,74 @@ iterator = iterator->next;
 
 /**
 Funkcja wykonujaca zapis do pliku skompresowanego tekstu
-    FILE *input - plik wejsciowy z tekstem
-    FILE *output - plik, do ktorego zostanie wykonany zapis
-    int comp_level - poziom kompresji podany w bitach
-    listCodes **head - glowa listy zawierajacej kody dla kazdego symbolu
+    Wszystkie argumenty zgodne z opisem zawartym w funkcji void huffman() powyzej 
 */
-
-void writeCompressedToFile(FILE *input, FILE *output, int comp_level, listCodes **head) {
+void writeCompressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, char *cipher_key, listCodes **head) {
     char c;
-    const int BUFSIZE = 2 << (comp_level + 2);
-    int i, j, buf_pos = 0, comp_chars = 0, temp_symbol_code = 0, offset = 0; // buf_pos - aktualna pozycja w buferze
-    short temp_buffer[BUFSIZE]; // zamiana na malloc/realloc?
-    for(i = 0; i < BUFSIZE; i++)
-        temp_buffer[i] = -1;
-    fseek(input, 0, SEEK_SET);
-    listCodes *iterator = NULL;
-    while((c = fgetc(input)) != EOF) {
-        iterator = (*head);
+    const int BUFSIZE = 2 << (comp_level + 2); // wielkosc buforu
+    int i, j, comp_chars = 0, offset = 0;
+    int symbol_code = 0; // zmienna, w ktorej beda "tworzone" kody przekompresowanych symboli
+    int buf_pos = 0; // zmienna przechowujaca aktualna pozycje w buforze
+    int cipher_pos = 0; // zmienna przechowujaca aktualna pozycje w szyfrze
+    unsigned int cipher_len = strlen(cipher_key); // dlugosc szyfru
+    short buffer[BUFSIZE]; // tablica na bufor
+    
+    fseek(input, 0, SEEK_SET); // ustawienie kursora na poczatek inputu
+    listCodes *iterator = NULL; // iterator po liscie kodow
+    
+    while((c = fgetc(input)) != EOF) { 
+        iterator = (*head); // ustawienie iteratora na poczatek przy kazdym nastepnym symbolu
         while (iterator != NULL) {
             if(iterator->character == c) {
+                // jesli znaleziono symbol, to przepisujemy znak po znaku do buforu jednoczesnie przeksztalcajac chary na shorty
                 for(i = 0; i < strlen(iterator->code); i++) {
-                    temp_buffer[buf_pos] = (iterator->code[i] == '1' ? 1 : 0);
+                    buffer[buf_pos] = (iterator->code[i] == '1' ? 1 : 0);
                     buf_pos++;
                 }
+
+                // jezeli w buforze jest wystarczajaco bitow na zlozenie bajtu tj. chara
                 if(buf_pos >= comp_level) {
-                    comp_chars = buf_pos / comp_level; // liczba gotowych do zapisu skompresowanych znakow
+                    comp_chars = buf_pos / comp_level; // liczba gotowych do zapisu znakow
                     for(i = 0; i < comp_chars; i++) {
-                        if(temp_buffer[8 * i] == 1)
-                            temp_symbol_code -= 128;
-                        for(j = 1; j < 8; j++)
-                            temp_symbol_code += temp_buffer[8 * i + j] * (1 << (7 - j));
-                        fprintf(output, "%c", (char)temp_symbol_code);
+                        if(buffer[8 * i] == 1) // pierwszy bit jako bit znaku
+                            symbol_code -= 128; // -128 spowoduje znajdziemy sie w znakach o kodach w zakresie <-128, 0)
+                        for(j = 1; j < 8; j++) // dodanie reszty bitow przemnozonych przez odpowiednie potegi liczby 2
+                            symbol_code += buffer[8 * i + j] * (1 << (7 - j));
+                        if(cipher) { // jesli uzytkownik zdecydowal sie na zaszyfrowanie
+                            symbol_code += cipher_key[cipher_pos]; // szyfrujemy symbol zgodnie z kluczem
+                            if(symbol_code > 127) // jesli przekroczylismy zakres chara tj. <-128, 127>
+                                symbol_code -= 256; // -256, aby powrocic do prawidlowego zakresu
+                            cipher_pos = (cipher_pos + 1) % cipher_len; // przesuniecie o 1 w prawo pozycji w kluczu szyfru
+                        }
+                        fprintf(output, "%c", (char)symbol_code); // drukowanie gotowego znaku do pliku
 #ifdef DEBUG
-                        fprintf(stderr, "Printed symbol: %c (code: %d)\n", (char)temp_symbol_code, temp_symbol_code);
+                        // wyswietlenie zapisanego znaku wraz z jego kodem na stderr
+                        fprintf(stderr, "Printed symbol: %c (code: %d)\n", (char)symbol_code, symbol_code);
 #endif
-                        temp_symbol_code = 0;
+                        symbol_code = 0; // zerowanie zmiennej oznaczajacej kod symbolu
                     }
-                    offset = buf_pos % comp_level; // offset - jako ilosc pozostalych znakow w tablicy po zapisie
-                    if(offset != 0)
-                        for(i = 0; i < offset; i++)
-                            temp_buffer[i] = temp_buffer[buf_pos - offset + i];
-                    buf_pos = offset;
-                    comp_chars = 0;
+                    
+                    /* offset - jako ilosc pozostalych nadmiarowych znakow w tablicy po zapisie,
+                       z ktorych nie bylo mozliwosci utworzenia pelnego symbolu */
+                    offset = buf_pos % comp_level;
+                    if(offset != 0) // jesli nie jest rowny zero
+                        for(i = 0; i < offset; i++) // to przesuwamy znaki znajdujace sie gdzies w srodku tablicy
+                            buffer[i] = buffer[buf_pos - offset + i]; // na jej poczatek
+                    buf_pos = offset; // nadpisanie aktualnej pozycji w buforze na wartosc offsetu
+                    comp_chars = 0; // zerowanie zmiennej oznaczajacej ilosc gotowych do zapisu znakow
                 }
                 break;
             }
             iterator = iterator->next;
         }
     }
+
+    // po przejsciu po calym pliku, tworzymy ostatni "niepelny" znak z pozostalych nadmiarowych zapisanych bitow
     if(buf_pos != 0) {
-        if(temp_buffer[8 * i] == 1)
-            temp_symbol_code -= 128;
+        if(buffer[8 * i] == 1)
+            symbol_code -= 128;
         for(j = 1; j < buf_pos; j++)
-            temp_symbol_code += temp_buffer[8 * i + j] * (1 << (7 - j));
-        fprintf(output, "%c", (char)temp_symbol_code);
+            symbol_code += buffer[8 * i + j] * (1 << (7 - j));
+        fprintf(output, "%c", (char)symbol_code);
     }
 }

@@ -14,6 +14,14 @@ valgrind:
 	cc -o valgrind main.c countCharacters.c cipher.c utils.c huffman.c
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./valgrind tekst out
 
+ala:
+	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c
+	./debug ala.in out
+
+alac:
+	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c
+	./debug ala.in out --c
+
 .PHONY: clean
 
 clean:
