@@ -157,8 +157,12 @@ void writeCompressedToFile(FILE *input, FILE *output, int comp_level, listCodes 
             }
             iterator = iterator->next;
         }
-        //fprintf(output, "%c", c);
     }
-    // for(int k = 0; k < 1000; k++)
-    //     fprintf(stderr, "%d", temp_buffer[k]);
+    if(buf_pos != 0) {
+        if(temp_buffer[8 * i] == 1)
+            temp_symbol_code -= 128;
+        for(j = 1; j < buf_pos; j++)
+            temp_symbol_code += temp_buffer[8 * i + j] * (1 << (7 - j));
+        fprintf(output, "%c", (char)temp_symbol_code);
+    }
 }
