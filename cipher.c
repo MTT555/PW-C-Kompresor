@@ -1,7 +1,7 @@
 #include "cipher.h"
 
 /**
-Funkcja szyfrujaca dany ciag znakow (argument --c)
+Funkcja szyfrujaca dany ciag znakow (argument -c)
     char *text - tekst, ktory chcemy zaszyfrowac
     int size - dlugosc tego tekstu
     const char *key - klucz szyfrujacy

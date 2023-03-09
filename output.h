@@ -17,4 +17,6 @@ typedef union pack {
 
 void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, char *cipher_key, listCodes **head);
 
+void decompressedToFile(FILE *in, FILE *out, char *cipher_key);
+
 #endif //OUTPUT_H

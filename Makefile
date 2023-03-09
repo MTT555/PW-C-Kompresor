@@ -12,6 +12,10 @@ gdbdebug:
 
 valgrind:
 	cc -o valgrind main.c countCharacters.c cipher.c utils.c huffman.c output.c -Wall -pedantic
+	valgrind ./valgrind tekst out
+
+valgrind_full:
+	cc -o valgrind main.c countCharacters.c cipher.c utils.c huffman.c output.c -Wall -pedantic
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./valgrind tekst out
 
 ala:

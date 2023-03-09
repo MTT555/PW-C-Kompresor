@@ -100,28 +100,29 @@ int main(int argc, char *argv[]) {
 	}
 	
 	count *head; //tworze glowe listy w ktorej bede przechowywal zliczenia
-	runCounter(&head);
-
 	char c;
-	//wczytuje i zliczam znak po znaku
-	while((c=fgetc(in)) != EOF) {
 
-		if(checkIfElementIsOnTheList(&head, c) == 1){
-		addToTheList(&head, c);
+	comp = true; // potem to trzeba wywalic
+
+	if(comp) {
+		runCounter(&head);
+
+		//wczytuje i zliczam znak po znaku
+		while((c=fgetc(in)) != EOF) {
+			if(checkIfElementIsOnTheList(&head, c) == 1) {
+				addToTheList(&head, c);
+			}
 		}
 
-	}
-
-	sortTheList(&head);//sortuje liste wystapien znakow niemalejaco
+		sortTheList(&head); //sortuje liste wystapien znakow niemalejaco
 #ifdef DEBUG
-
-	//wypisujemy liste z wystapieniami
-	
-	showList(&head);
+		//wypisujemy liste z wystapieniami
+		showList(&head);
 #endif
-	fseek(in, 0, SEEK_SET); // ustawienie kursora w pliku z powrotem na jego poczatek
-	
-	huffman(in, out, comp_level, cipher, "Politechnika_Warszawska", &head);
+		fseek(in, 0, SEEK_SET); // ustawienie kursora w pliku z powrotem na jego poczatek
+		huffman(in, out, comp_level, cipher, "Politechnika_Warszawska", &head);
+		freeList(head);
+	}
 
 	fclose(in);
 	fclose(out);

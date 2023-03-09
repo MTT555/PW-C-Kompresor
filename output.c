@@ -81,7 +81,7 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
         if(cipher) { // jezeli plik ma zostac zaszyfrowany
             buffer.chars.out += cipher_key[cipher_pos % cipher_len]; // dokonujemy szyfrowania znaku
             cipher_pos++;
-            buffer.chars.buf += cipher_key[cipher_buf % cipher_len]; // dokonujemy szyfrowania znaku
+            buffer.chars.buf += cipher_key[cipher_pos % cipher_len]; // dokonujemy szyfrowania znaku
             cipher_pos++;
         }
         fprintf(output, "%c%c", buffer.chars.out, buffer.chars.buf);
@@ -113,4 +113,15 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
         flags |= 0b00100000;
     fprintf(output, "%c", flags); // wydrukowanie pojedynczego znaku zawierajacego wszystkie flagi
     fseek(output, pos, SEEK_SET); // ustawienie kursora z powrotem na prawidlowa pozycje
+}
+
+/**
+Funkcja wykonujaca zapis do pliku tekstu po dekompresji
+    FILE *input - plik wejsciowy zawierajacy tekst skompresowany
+    FILE *output - plik wyjsciowy, w ktorym zostanie zapisany tekst po dekompresji
+    char *cipher_key - klucz szyfrowania (odszyfrowanie sie nie powiedzie, jezeli bedzie rozny od klucza uzytego podczas kompresji)
+*/
+void decompressedToFile(FILE *in, FILE *out, char *cipher_key) {
+    unsigned int cipher_pos = 0; // zmienna przechowujaca aktualna pozycje w szyfrze
+    unsigned int cipher_len = strlen(cipher_key); // dlugosc szyfru
 }

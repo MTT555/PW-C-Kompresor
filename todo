@@ -1,7 +1,6 @@
 do zrobienia:
--zaimplementowac algorytm Huffmana
--dodac jakies dodatkowe opcje do uruchamiania programu (prawie gotowe)
+-dekompresor!
 -przygotowac specyfikacje funkcjonalna
--czyszczenie pamieci
+-czyszczenie pamieci (ma byc sprawdzane valgrindem)
 -jak bedzie czas i chęć - podmienić sortowanie bąbelkowe listy na qsort
 -writeCompressedToFile - dodać zapisywanie słownika!
