@@ -109,18 +109,29 @@ iterator = iterator->next;
 }
 
 /**
+*/
+typedef union pack {
+    short whole;  // 16-bitowa zmienna do sprawnego wykonywania operacji bitowych na calym union
+    struct {
+        char buf; // znak utworzony z bitow 0-7 sluzacych jako bufer
+        char out; // znak utworzony z bitow 8-15 tworzacych faktyczny znak wyjsciowy
+    } chars;
+} pack_t;
+
+/**
 Funkcja wykonujaca zapis do pliku skompresowanego tekstu
     Wszystkie argumenty zgodne z opisem zawartym w funkcji void huffman() powyzej 
 */
 void writeCompressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, char *cipher_key, listCodes **head) {
     char c;
-    const int BUFSIZE = 2 << (comp_level + 2); // wielkosc buforu
-    int i, j, comp_chars = 0, offset = 0;
-    int symbol_code = 0; // zmienna, w ktorej beda "tworzone" kody przekompresowanych symboli
-    int buf_pos = 0; // zmienna przechowujaca aktualna pozycje w buforze
-    int cipher_pos = 0; // zmienna przechowujaca aktualna pozycje w szyfrze
+    int i, j, ending = 0; // ending - ilosc niezapisanych bitow konczacych plik
+
+    unsigned int cipher_pos = 0; // zmienna przechowujaca aktualna pozycje w szyfrze
     unsigned int cipher_len = strlen(cipher_key); // dlugosc szyfru
-    short buffer[BUFSIZE]; // tablica na bufor
+    
+    pack_t buffer;
+    buffer.whole = 0; // wyzerowanie calosci swiezoutworzonej paczki
+    short pack_pos = 0; // zmienna sluzaca do monitorowania aktualnej pozycji w paczce
     
     fseek(input, 0, SEEK_SET); // ustawienie kursora na poczatek inputu
     listCodes *iterator = NULL; // iterator po liscie kodow
@@ -131,53 +142,37 @@ void writeCompressedToFile(FILE *input, FILE *output, int comp_level, bool ciphe
             if(iterator->character == c) {
                 // jesli znaleziono symbol, to przepisujemy znak po znaku do buforu jednoczesnie przeksztalcajac chary na shorty
                 for(i = 0; i < strlen(iterator->code); i++) {
-                    buffer[buf_pos] = (iterator->code[i] == '1' ? 1 : 0);
-                    buf_pos++;
-                }
-
-                // jezeli w buforze jest wystarczajaco bitow na zlozenie bajtu tj. chara
-                if(buf_pos >= comp_level) {
-                    comp_chars = buf_pos / comp_level; // liczba gotowych do zapisu znakow
-                    for(i = 0; i < comp_chars; i++) {
-                        if(buffer[8 * i] == 1) // pierwszy bit jako bit znaku
-                            symbol_code -= 128; // -128 spowoduje znajdziemy sie w znakach o kodach w zakresie <-128, 0)
-                        for(j = 1; j < 8; j++) // dodanie reszty bitow przemnozonych przez odpowiednie potegi liczby 2
-                            symbol_code += buffer[8 * i + j] * (1 << (7 - j));
-                        if(cipher) { // jesli uzytkownik zdecydowal sie na zaszyfrowanie
-                            symbol_code += cipher_key[cipher_pos]; // szyfrujemy symbol zgodnie z kluczem
-                            if(symbol_code > 127) // jesli przekroczylismy zakres chara tj. <-128, 127>
-                                symbol_code -= 256; // -256, aby powrocic do prawidlowego zakresu
-                            cipher_pos = (cipher_pos + 1) % cipher_len; // przesuniecie o 1 w prawo pozycji w kluczu szyfru
+                    if(pack_pos == 16) { // jezeli bufer jest pelen
+                        if(cipher) { // jezeli plik ma zostac zaszyfrowany
+                            buffer.chars.out += cipher_key[cipher_pos % cipher_len]; // dokonujemy szyfrowania znaku
+                            cipher_pos++;
                         }
-                        fprintf(output, "%c", (char)symbol_code); // drukowanie gotowego znaku do pliku
+                        fprintf(output, "%c", buffer.chars.out); // wydrukuj znak
 #ifdef DEBUG
                         // wyswietlenie zapisanego znaku wraz z jego kodem na stderr
-                        fprintf(stderr, "Printed symbol: %c (code: %d)\n", (char)symbol_code, symbol_code);
+                        fprintf(stderr, "Printed symbol: %c (code: %d)\n", buffer.chars.out, (int)buffer.chars.out);
 #endif
-                        symbol_code = 0; // zerowanie zmiennej oznaczajacej kod symbolu
+                        pack_pos -= 8; // zmniejsz pozycje o 8 bitow
                     }
-                    
-                    /* offset - jako ilosc pozostalych nadmiarowych znakow w tablicy po zapisie,
-                       z ktorych nie bylo mozliwosci utworzenia pelnego symbolu */
-                    offset = buf_pos % comp_level;
-                    if(offset != 0) // jesli nie jest rowny zero
-                        for(i = 0; i < offset; i++) // to przesuwamy znaki znajdujace sie gdzies w srodku tablicy
-                            buffer[i] = buffer[buf_pos - offset + i]; // na jej poczatek
-                    buf_pos = offset; // nadpisanie aktualnej pozycji w buforze na wartosc offsetu
-                    comp_chars = 0; // zerowanie zmiennej oznaczajacej ilosc gotowych do zapisu znakow
+                    buffer.whole <<= 1; // przesuniecie wszystkich liczb o jeden w prawo
+                    buffer.whole += (iterator->code[i] == '1' ? 1 : 0); // nadanie wartosci bitowi powstalemu po przesunieciu
+                    pack_pos++; // aktualizacja pozycji
                 }
                 break;
             }
-            iterator = iterator->next;
+            else
+                iterator = iterator->next;
         }
     }
-
-    // po przejsciu po calym pliku, tworzymy ostatni "niepelny" znak z pozostalych nadmiarowych zapisanych bitow
-    if(buf_pos != 0) {
-        if(buffer[8 * i] == 1)
-            symbol_code -= 128;
-        for(j = 1; j < buf_pos; j++)
-            symbol_code += buffer[8 * i + j] * (1 << (7 - j));
-        fprintf(output, "%c", (char)symbol_code);
+    // po przejsciu po calym pliku, w razie potrzeby tworzymy ostatni "niepelny" znak z pozostalych nadmiarowych zapisanych bitow
+    if(pack_pos != 16) {
+        ending = 16 - pack_pos;
+        buffer.whole <<= ending;
+        fprintf("%c%c", buffer.chars.out, buffer.chars.buf);
+#ifdef DEBUG
+        // wyswietlenie tych znakow wraz z kodami na stderr
+        fprintf(stderr, "Printed symbol: %c (code: %d)\n", buffer.chars.out, (int)buffer.chars.out);
+        fprintf(stderr, "Printed symbol: %c (code: %d)\n", buffer.chars.buf, (int)buffer.chars.buf);
+#endif
     }
 }

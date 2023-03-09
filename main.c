@@ -120,6 +120,6 @@ int main(int argc, char *argv[]) {
 	huffman(in, out, comp_level, cipher, "Politechnika_Warszawska", &head);
 
 	fclose(in);
-	// fclose(out);
+	fclose(out);
 	return 0;
 }
