@@ -1,10 +1,10 @@
 #include <stdio.h>
-
+#include <string.h>
 #include "huffman.h"
 #include "cipher.h"
 #include "utils.h"
 #include "countCharacters.h"
-#include "string.h"
+#include "output.h"
 
 /**
 Funkcja wykonujaca kompresje algorytmem Huffmana
@@ -59,7 +59,7 @@ print_huffmann_tree(&listC);
 
 #endif
 
-writeCompressedToFile(input, output, comp_level, cipher, cipher_key, &listC);
+compressedToFile(input, output, comp_level, cipher, cipher_key, &listC);
 }
 
 void addToTheList1(listCodes **listC, char character,int *code, int length){
@@ -106,73 +106,4 @@ while (iterator != NULL){
 printf("Character: %c, Code: %s\n",iterator->character, setEndOfString(iterator->code));
 iterator = iterator->next;
 }
-}
-
-/**
-*/
-typedef union pack {
-    short whole;  // 16-bitowa zmienna do sprawnego wykonywania operacji bitowych na calym union
-    struct {
-        char buf; // znak utworzony z bitow 0-7 sluzacych jako bufer
-        char out; // znak utworzony z bitow 8-15 tworzacych faktyczny znak wyjsciowy
-    } chars;
-} pack_t;
-
-/**
-Funkcja wykonujaca zapis do pliku skompresowanego tekstu
-    Wszystkie argumenty zgodne z opisem zawartym w funkcji void huffman() powyzej 
-*/
-void writeCompressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, char *cipher_key, listCodes **head) {
-    char c;
-    int i, j, ending = 0; // ending - ilosc niezapisanych bitow konczacych plik
-
-    unsigned int cipher_pos = 0; // zmienna przechowujaca aktualna pozycje w szyfrze
-    unsigned int cipher_len = strlen(cipher_key); // dlugosc szyfru
-    
-    pack_t buffer;
-    buffer.whole = 0; // wyzerowanie calosci swiezoutworzonej paczki
-    short pack_pos = 0; // zmienna sluzaca do monitorowania aktualnej pozycji w paczce
-    
-    fseek(input, 0, SEEK_SET); // ustawienie kursora na poczatek inputu
-    listCodes *iterator = NULL; // iterator po liscie kodow
-    
-    while((c = fgetc(input)) != EOF) { 
-        iterator = (*head); // ustawienie iteratora na poczatek przy kazdym nastepnym symbolu
-        while (iterator != NULL) {
-            if(iterator->character == c) {
-                // jesli znaleziono symbol, to przepisujemy znak po znaku do buforu jednoczesnie przeksztalcajac chary na shorty
-                for(i = 0; i < strlen(iterator->code); i++) {
-                    if(pack_pos == 16) { // jezeli bufer jest pelen
-                        if(cipher) { // jezeli plik ma zostac zaszyfrowany
-                            buffer.chars.out += cipher_key[cipher_pos % cipher_len]; // dokonujemy szyfrowania znaku
-                            cipher_pos++;
-                        }
-                        fprintf(output, "%c", buffer.chars.out); // wydrukuj znak
-#ifdef DEBUG
-                        // wyswietlenie zapisanego znaku wraz z jego kodem na stderr
-                        fprintf(stderr, "Printed symbol: %c (code: %d)\n", buffer.chars.out, (int)buffer.chars.out);
-#endif
-                        pack_pos -= 8; // zmniejsz pozycje o 8 bitow
-                    }
-                    buffer.whole <<= 1; // przesuniecie wszystkich liczb o jeden w prawo
-                    buffer.whole += (iterator->code[i] == '1' ? 1 : 0); // nadanie wartosci bitowi powstalemu po przesunieciu
-                    pack_pos++; // aktualizacja pozycji
-                }
-                break;
-            }
-            else
-                iterator = iterator->next;
-        }
-    }
-    // po przejsciu po calym pliku, w razie potrzeby tworzymy ostatni "niepelny" znak z pozostalych nadmiarowych zapisanych bitow
-    if(pack_pos != 16) {
-        ending = 16 - pack_pos;
-        buffer.whole <<= ending;
-        fprintf("%c%c", buffer.chars.out, buffer.chars.buf);
-#ifdef DEBUG
-        // wyswietlenie tych znakow wraz z kodami na stderr
-        fprintf(stderr, "Printed symbol: %c (code: %d)\n", buffer.chars.out, (int)buffer.chars.out);
-        fprintf(stderr, "Printed symbol: %c (code: %d)\n", buffer.chars.buf, (int)buffer.chars.buf);
-#endif
-    }
 }

@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 		return -3;
 	}
 
-	bool cipher = false, var = false, set_comp_level = false; // zmienne pomocnicze do obslugi argumentow --c i --v
+	bool cipher = false, var = false, set_comp_level = false, comp = false, decomp = false; // zmienne pomocnicze do obslugi argumentow -c -v -x -d
 	int comp_level = 8; // zmienna pomocnicza do obslugi poziomu kompresji, domyslnie kompresja 8-bitowa
 	char compression_mode[7]; // zmienna pomocnicza do przechowywania trybu kompresji
 
@@ -45,11 +45,11 @@ int main(int argc, char *argv[]) {
 	if(argc > 3) {
 		int i;
 		for(i = 3; i < argc; i++)
-			if(strcmp(argv[i], "--c") == 0)
-				cipher = true; // argument --c mowiacy, ze wynik dzialania programu ma zostac dodatkowo zaszyfrowany
-			else if(strcmp(argv[i], "--v") == 0)
-				var = true; // argument --v mowiacy, ze w trakcie dzialania programu maja byc widoczne istotne zmienne
-			else if(strcmp(argv[i], "--00") == 0) { // brak kompresji
+			if(strcmp(argv[i], "-c") == 0)
+				cipher = true; // argument -c mowiacy, ze wynik dzialania programu ma zostac dodatkowo zaszyfrowany
+			else if(strcmp(argv[i], "-v") == 0)
+				var = true; // argument -v mowiacy, ze w trakcie dzialania programu maja byc widoczne istotne zmienne
+			else if(strcmp(argv[i], "-o0") == 0) { // brak kompresji
 				if(set_comp_level) {
 					fprintf(stderr, "%s - Compression level has already been set to \"%s\"! (skipping...)\n", argv[i], compression_mode);
 				}
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 					set_comp_level = true;
 				}
 			}
-			else if(strcmp(argv[i], "--01") == 0) { // kompresja 8-bit
+			else if(strcmp(argv[i], "-o1") == 0) { // kompresja 8-bit
 				if(set_comp_level) {
 					fprintf(stderr, "%s - Compression level has already been set to \"%s\"! (skipping...)\n", argv[i], compression_mode);
 				}
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
 					set_comp_level = true;
 				}
 			}
-			else if(strcmp(argv[i], "--02") == 0) { // kompresja 12-bit
+			else if(strcmp(argv[i], "-o2") == 0) { // kompresja 12-bit
 				if(set_comp_level) {
 					fprintf(stderr, "%s - Compression level has already been set to \"%s\"! (skipping...)\n", argv[i], compression_mode);
 				}
@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
 					set_comp_level = true;
 				}
 			}
-			else if(strcmp(argv[i], "--03") == 0) { // kompresja 16-bit
+			else if(strcmp(argv[i], "-o3") == 0) { // kompresja 16-bit
 				if(set_comp_level) {
 					fprintf(stderr, "%s - Compression level has already been set to \"%s\"! (skipping...)\n", argv[i], compression_mode);
 				}
@@ -89,8 +89,12 @@ int main(int argc, char *argv[]) {
 					set_comp_level = true;
 				}
 			}
-			else if(strcmp(argv[i], "--h") == 0) // wyswietlenie pomocy
+			else if(strcmp(argv[i], "-h") == 0) // wyswietlenie pomocy
 				help(argv[0], stdout);
+			else if(strcmp(argv[i], "-x") == 0) // wymuszenie kompresji
+				comp = true;
+			else if(strcmp(argv[i], "-d") == 0) // wymuszenie dekompresji
+				decomp = true;
 			else // pominiecie niezidentyfikowanych argumentow
 				fprintf(stderr, "%s - Unidentified argument! (skipping...)\n", argv[i]);
 	}
