@@ -64,7 +64,7 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
                             eofile++;
 #ifdef DEBUG
                         // wyswietlenie zapisanego znaku wraz z jego kodem na stderr
-                        fprintf(stderr, "Printed symbol: %c (code: %d)\n", buffer.chars.out, (int)buffer.chars.out);
+                        //fprintf(stderr, "Printed symbol: %c (code: %d)\n", buffer.chars.out, (int)buffer.chars.out);
 #endif
                         pack_pos -= 8; // zmniejsz pozycje o 8 bitow
                     }
