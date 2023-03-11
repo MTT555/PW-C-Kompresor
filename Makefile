@@ -30,6 +30,10 @@ p:
 	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c output.c -Wall -pedantic
 	./debug p.in out
 
+ult_test:
+	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c output.c -Wall -pedantic
+	./debug pan-tadeusz.txt out
+
 alac:
 	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c output.c -Wall -pedantic
 	./debug ala.in out -c

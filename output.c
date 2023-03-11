@@ -22,14 +22,13 @@ Funkcja wykonujaca zapis do pliku skompresowanego tekstu
     pack_t *buffer - union pack uzyty wczesniej do zapisu slownika
     short pack_pos - pozycja ostatniego zajetego bitu w tym packu
 */
-void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, char *cipher_key, listCodes **head, char xor_start_value, pack_t *buffer, short *pack_pos) {
+void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, char *cipher_key, listCodes **head, char *xor, pack_t *buffer, short *pack_pos) {
     char c;
     int i;
     char ending = (char)0; // ilosc niezapisanych bitow konczacych plik
     int end_pos = ftell(output); // zapisanie pozycji koncowej outputu
-    char xor = xor_start_value; // ustawienie poczatkowej wartosci sumy kontrolnej
     unsigned int cipher_len = strlen(cipher_key); // dlugosc szyfru
-    
+
     fseek(input, 0, SEEK_SET); // ustawienie kursora na poczatek inputu
     listCodes *iterator = NULL; // iterator po liscie kodow
 
@@ -51,7 +50,7 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
         while (iterator != NULL) {
             if(iterator->character == c) {
                 for(i = 0; i < strlen(iterator->code); i++)
-                    saveBitIntoPack(output, cipher, cipher_key, buffer, pack_pos, &xor, iterator->code[i] == '1' ? 1 : 0);
+                    saveBitIntoPack(output, cipher, cipher_key, buffer, pack_pos, xor, iterator->code[i] == '1' ? 1 : 0);
                 break;
             }
             else
@@ -73,8 +72,8 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
             cipher_pos++;
         }
         fprintf(output, "%c%c", buffer->chars.out, buffer->chars.buf); // wydrukowanie ostatnich symboli
-        xor ^= buffer->chars.out; // oraz ich uwzglednienie w sumie kontrolnej
-        xor ^= buffer->chars.buf;
+        *xor ^= buffer->chars.out; // oraz ich uwzglednienie w sumie kontrolnej
+        *xor ^= buffer->chars.buf;
 #ifdef DEBUG
         // wyswietlenie tych znakow wraz z kodami na stderr
         fprintf(stderr, "Printing last two symbols:\n"
@@ -110,20 +109,24 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     /// Suma kontrolna xor
     fseek(output, 5, SEEK_SET); // ustawienie kursora pierwszym znaku zapisu slownika
     while((c = fgetc(output)) != EOF)
-        xor ^= c;
+        *xor ^= c;
 #ifdef DEBUG
     // wyswietlenie wyliczonej sumy kontrolnej na stderr
-    fprintf(stderr, "Control sum XOR: %d\n", xor);
+    fprintf(stderr, "Control sum XOR: %d\n", *xor);
 #endif
     fseek(output, 3, SEEK_SET); // ustawienie kursora na znaku X w celu zapisania otrzymanej wartosci
-    fprintf(output, "%c", xor);
+    fprintf(output, "%c", *xor);
 
     // Wyswietlenie wiadomosci koncowej
     printf("File successfully compressed!");
     if(ftell(input) > end_pos)
-        printf(" (file size reduced by %.2f\%)\n", 100 - 100 * ((double)end_pos)/ftell(input));
-    else
+        printf(" (file size reduced by %.2f%%)\n", 100 - 100 * ((double)end_pos)/ftell(input));
+    else {
+#ifdef DEBUG
+        printf(" (file size increased by %.2f%%!!!)\n", 100 * ((double)end_pos)/ftell(input) - 100);
+#endif
         printf("\n");
+    }
 }
 
 /**

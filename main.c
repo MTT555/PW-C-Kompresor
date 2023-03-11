@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
 	/// test sum kontrolnych
 	fclose(out);
 	FILE *tester = fopen("out", "r");
-	fprintf(stderr, "XOR result: %d\n", fileIsGood(tester, 0b10110111));
+	fprintf(stderr, "XOR result: %d\n", fileIsGood(tester, (char)0b10110111));
 	fclose(tester);
 	fclose(in);
 	fclose(out);
