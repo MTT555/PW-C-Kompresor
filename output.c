@@ -7,29 +7,28 @@
 #include "huffman.h"
 #include "output.h"
 
+static unsigned int cipher_pos = 0; // zmienna przechowujaca aktualna pozycje w szyfrze
+static char eofile = (char)0; // ilosc wystapien znaku end of file podczas zapisu
+
 /**
 Funkcja wykonujaca zapis do pliku skompresowanego tekstu
     FILE *input - plik wejsciowy zawierajacy tekst do kompresji
     FILE *output - plik wyjsciowy, w ktorym zostanie zapisany skompresowany tekst
-    int comp_level - poziom kompresji podany w bitach (dla comp_level == 0 - brak kompresji)
+    int comp_level - poziom kompresji podany w bitach (brak obslugi przypadku braku kompresji)
     bool cipher - zmienna mowiaca, czy tekst ma zostac rowniez zaszyfrowany
     char *cipher_key - klucz szyfrowania (nieistotny, gdy cipher == false)
     count **head - glowa listy zawierajaca ilosci wystapien danych znakow
     char xor_start_value - poczatkowa wartosc bajtu do wykonania sumy kontrolnej
+    pack_t *buffer - union pack uzyty wczesniej do zapisu slownika
+    short pack_pos - pozycja ostatniego zajetego bitu w tym packu
 */
-void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, char *cipher_key, listCodes **head, char xor_start_value) {
+void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, char *cipher_key, listCodes **head, char xor_start_value, pack_t *buffer, short *pack_pos) {
     char c;
     int i;
     char ending = (char)0; // ilosc niezapisanych bitow konczacych plik
-    char eofile = (char)0; // ilosc wystapien znaku end of file podczas zapisu
     int end_pos = ftell(output); // zapisanie pozycji koncowej outputu
     char xor = xor_start_value; // ustawienie poczatkowej wartosci sumy kontrolnej
-    unsigned int cipher_pos = 0; // zmienna przechowujaca aktualna pozycje w szyfrze
     unsigned int cipher_len = strlen(cipher_key); // dlugosc szyfru
-    
-    pack_t buffer;
-    buffer.whole = 0; // wyzerowanie calosci swiezoutworzonej paczki
-    short pack_pos = 0; // zmienna sluzaca do monitorowania aktualnej pozycji w paczce
     
     fseek(input, 0, SEEK_SET); // ustawienie kursora na poczatek inputu
     listCodes *iterator = NULL; // iterator po liscie kodow
@@ -51,27 +50,8 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
         iterator = (*head); // ustawienie iteratora na poczatek przy kazdym nastepnym symbolu
         while (iterator != NULL) {
             if(iterator->character == c) {
-                // jesli znaleziono symbol, to przepisujemy znak po znaku do buforu jednoczesnie przeksztalcajac chary na shorty
-                for(i = 0; i < strlen(iterator->code); i++) {
-                    if(pack_pos == 16) { // jezeli bufer jest pelen
-                        if(cipher) { // jezeli plik ma zostac zaszyfrowany
-                            buffer.chars.out += cipher_key[cipher_pos % cipher_len]; // dokonujemy szyfrowania znaku
-                            cipher_pos++;
-                        }
-                        fprintf(output, "%c", buffer.chars.out); // wydrukuj znak
-                        xor ^= buffer.chars.out; // uwzglednienie znaku w sumie kontrolnej 
-                        if(buffer.chars.out == EOF)
-                            eofile++;
-#ifdef DEBUG
-                        // wyswietlenie zapisanego znaku wraz z jego kodem na stderr
-                        //fprintf(stderr, "Printed symbol: %c (code: %d)\n", buffer.chars.out, (int)buffer.chars.out);
-#endif
-                        pack_pos -= 8; // zmniejsz pozycje o 8 bitow
-                    }
-                    buffer.whole <<= 1; // przesuniecie wszystkich liczb o jeden w prawo
-                    buffer.whole += (iterator->code[i] == '1' ? 1 : 0); // nadanie wartosci bitowi powstalemu po przesunieciu
-                    pack_pos++; // aktualizacja pozycji
-                }
+                for(i = 0; i < strlen(iterator->code); i++)
+                    saveBitIntoPack(output, cipher, cipher_key, buffer, pack_pos, &xor, iterator->code[i] == '1' ? 1 : 0);
                 break;
             }
             else
@@ -80,29 +60,30 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     }
 #ifdef DEBUG
     // wyswietlenie ilosci aktualnie wykorzystanych bitow po przejsciu przez caly plik wejsciowy na stderr
-    fprintf(stderr, "Entire input file passed - currently used bits in the pack: %d/16 (unused: %d)\n", pack_pos, 16 - pack_pos);
+    fprintf(stderr, "Entire input file passed - currently used bits in the pack: %d/16 (unused: %d)\n", *pack_pos, 16 - *pack_pos);
 #endif
     // po przejsciu po calym pliku, w razie potrzeby tworzymy ostatni "niepelny" znak z pozostalych nadmiarowych zapisanych bitow
-    if(pack_pos != 16) {
-        ending = (char)(16 - pack_pos);
-        buffer.whole <<= ending;
+    if(*pack_pos != 16) {
+        ending = (char)(16 - *pack_pos);
+        buffer->whole <<= ending;
         if(cipher) { // jezeli plik ma zostac zaszyfrowany
-            buffer.chars.out += cipher_key[cipher_pos % cipher_len]; // dokonujemy szyfrowania znaku
+            buffer->chars.out += cipher_key[cipher_pos % cipher_len]; // dokonujemy szyfrowania znaku
             cipher_pos++;
-            buffer.chars.buf += cipher_key[cipher_pos % cipher_len];
+            buffer->chars.buf += cipher_key[cipher_pos % cipher_len];
             cipher_pos++;
         }
-        fprintf(output, "%c%c", buffer.chars.out, buffer.chars.buf); // wydrukowanie ostatnich symboli
-        xor ^= buffer.chars.out; // oraz ich uwzglednienie w sumie kontrolnej
-        xor ^= buffer.chars.buf;
+        fprintf(output, "%c%c", buffer->chars.out, buffer->chars.buf); // wydrukowanie ostatnich symboli
+        xor ^= buffer->chars.out; // oraz ich uwzglednienie w sumie kontrolnej
+        xor ^= buffer->chars.buf;
 #ifdef DEBUG
         // wyswietlenie tych znakow wraz z kodami na stderr
         fprintf(stderr, "Printing last two symbols:\n"
-                        "Printed symbol: %c (code: %d)\n", buffer.chars.out, (int)buffer.chars.out);
-        fprintf(stderr, "Printed symbol: %c (code: %d)\n", buffer.chars.buf, (int)buffer.chars.buf);
+                        "Printed symbol: %c (code: %d)\n", buffer->chars.out, (int)buffer->chars.out);
+        fprintf(stderr, "Printed symbol: %c (code: %d)\n", buffer->chars.buf, (int)buffer->chars.buf);
         fprintf(stderr, "EOF amount: %d\n", (int)eofile);
 #endif
     }
+    end_pos = ftell(output); // zapisanie pozycji koncowej
 
     /**
     Zapisywanie potrzebnych flag w znaku F na samym poczatku pliku
@@ -136,6 +117,13 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
 #endif
     fseek(output, 3, SEEK_SET); // ustawienie kursora na znaku X w celu zapisania otrzymanej wartosci
     fprintf(output, "%c", xor);
+
+    // Wyswietlenie wiadomosci koncowej
+    printf("File successfully compressed!");
+    if(ftell(input) > end_pos)
+        printf(" (file size reduced by %.2f\%)\n", 100 - 100 * ((double)end_pos)/ftell(input));
+    else
+        printf("\n");
 }
 
 /**
@@ -147,4 +135,35 @@ Funkcja wykonujaca zapis do pliku tekstu po dekompresji
 void decompressedToFile(FILE *in, FILE *out, char *cipher_key) {
     unsigned int cipher_pos = 0; // zmienna przechowujaca aktualna pozycje w szyfrze
     unsigned int cipher_len = strlen(cipher_key); // dlugosc szyfru
+}
+
+/**
+Funkcja wykonujaca bitowy zapis znaku na podstawie union pack
+    FILE *output - plik wyjsciowy
+    bool cipher - zmienna mowiaca, czy tekst ma zostac rowniez zaszyfrowany
+    char *cipher_key - klucz szyfrowania (nieistotny, gdy cipher == false)
+    pack_t *pack - union pack, nak torym wykonujemy operacje bitowe
+    short *pack_pos - pozycja ostatniego zajetego bitu w tym union packu
+    short bit - wartosc bitu, ktora ma zostac nadana
+*/
+void saveBitIntoPack(FILE *output, bool cipher, char *cipher_key, pack_t *buffer, short *pack_pos, char *xor, short bit) {
+    unsigned int cipher_len = strlen(cipher_key);
+    if((*pack_pos) == 16) { // jezeli bufer jest pelen
+        if(cipher) { // jezeli plik ma zostac zaszyfrowany
+            buffer->chars.out += cipher_key[cipher_pos % cipher_len]; // dokonujemy szyfrowania znaku
+            cipher_pos++;
+        }
+        fprintf(output, "%c", buffer->chars.out); // wydrukuj znak
+        (*xor) ^= buffer->chars.out; // uwzglednienie znaku w sumie kontrolnej 
+        if(buffer->chars.out == EOF)
+            eofile++;
+#ifdef DEBUG
+        // wyswietlenie zapisanego znaku wraz z jego kodem na stderr
+        //fprintf(stderr, "Saved to file the according symbol: %c (code: %d)\n", buffer->chars.out, (int)buffer->chars.out);
+#endif
+        *pack_pos -= 8; // zmniejsz pozycje o 8 bitow
+    }
+    buffer->whole <<= 1; // przesuniecie wszystkich liczb o jeden w prawo
+    buffer->whole += bit; // nadanie wartosci bitowi powstalemu po przesunieciu
+    (*pack_pos)++; // aktualizacja pozycji
 }

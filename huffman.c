@@ -8,6 +8,8 @@
 
 // zmienna zapisujaca liczbe przejsc w lewo od ostatniego zapisania slowa slownika do pliku
 static int gone_left = 0;
+static short pack_pos = 0;
+static pack_t pack; // typ pomocniczny do zapisu bitowego z output.h
 
 /**
 Funkcja wykonujaca kompresje algorytmem Huffmana
@@ -22,6 +24,7 @@ void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **hea
 	
 count *nodeptr1, *nodeptr2, *node1, *node2;
 fprintf(output, "XXXXX"); // zajecie pierwszych 5 bajtow outputu na pozniejsze oznaczenia pliku
+pack.whole = 0;
 
 while(1){
 // pobieramy z listy dwa pierwsze elementy o najmniejszej czestosci wystapien
@@ -65,7 +68,7 @@ print_huffmann_tree(&listC);
 
 #endif
 
-compressedToFile(input, output, comp_level, cipher, "Politechnika_Warszawska", &listC, 0b10110111);
+compressedToFile(input, output, comp_level, cipher, "Politechnika_Warszawska", &listC, (char)0b10110111, &pack, &pack_pos);
 }
 
 void addToTheList1(FILE *output, listCodes **listC, char character,int *code, int length){

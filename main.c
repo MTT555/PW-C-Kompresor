@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
 	fclose(out);
 	FILE *tester = fopen("out", "r");
 	fprintf(stderr, "XOR result: %d\n", fileIsGood(tester, 0b10110111));
-
+	fclose(tester);
 	fclose(in);
 	fclose(out);
 	return 0;
