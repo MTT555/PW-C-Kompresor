@@ -9,6 +9,8 @@
 #define BUF_SIZE 256
 
 int main(int argc, char *argv[]) {
+	char c;
+
 	// Wyswietlenie pomocy pliku w wypadku podania jedynie argumentu --h
 	if(argc == 2 && strcmp(argv[1], "-h") == 0) {
 		help(argv[0], stdout);
@@ -17,24 +19,30 @@ int main(int argc, char *argv[]) {
 
 	// Sprawdzenie, czy nazwy plikow na pewno zostaly podane
 	if(argc < 3) {
-		fprintf(stderr, "Too few arguments!\n\n");
+		fprintf(stderr, "%s: Too few arguments!\n\n", argv[0]);
 		help(argv[0], stderr);
 		return -1;
 	}
 
-	//Wczytuje tekst uzytkownika z pliku
-	//Nazwe pliku podajemy jako pierwszy argument wywolania
+	// Wczytuje tekst uzytkownika z pliku
+	// Nazwe pliku podajemy jako pierwszy argument wywolania
 	FILE *in = fopen(argv[1], "r");
 	if(in == NULL) {
-		fprintf(stderr, "Input file could not be opened!\n");
+		fprintf(stderr, "%s: Input file could not be opened!\n", argv[0]);
 		return -2;
 	}
 
-	//Nazwa pliku, w ktorym znajdzie sie skomresowany plik jako drugi argument
+	// Nazwa pliku, w ktorym znajdzie sie skomresowany plik jako drugi argument
 	FILE *out = fopen(argv[2], "w");
 	if(out == NULL) {
-		fprintf(stderr, "Output file could not be opened!\n");
+		fprintf(stderr, "%s: Output file could not be opened!\n", argv[0]);
 		return -3;
+	}
+
+	// Sprawdzenie, czy nie podano pustego pliku
+	if((c = fgetc(in)) == EOF) {
+		fprintf(stderr, "%s: Input file is empty!\n", argv[0]);
+		return -4;
 	}
 
 	bool cipher = false, var = false, set_comp_level = false, comp = false, decomp = false; // zmienne pomocnicze do obslugi argumentow -c -v -x -d
@@ -100,7 +108,6 @@ int main(int argc, char *argv[]) {
 	}
 	
 	count *head; //tworze glowe listy w ktorej bede przechowywal zliczenia
-	char c;
 
 	comp = true; // potem to trzeba wywalic
 
@@ -123,7 +130,7 @@ int main(int argc, char *argv[]) {
 		huffman(in, out, comp_level, cipher, &head);
 		freeList(&head);
 	}
-	
+
 	/// test sum kontrolnych
 	fclose(out);
 	FILE *tester = fopen("out", "r");
