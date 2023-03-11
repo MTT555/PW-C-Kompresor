@@ -22,7 +22,7 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     int i;
     char ending = (char)0; // ilosc niezapisanych bitow konczacych plik
     char eofile = (char)0; // ilosc wystapien znaku end of file podczas zapisu
-
+    int end_pos = ftell(output); // zapisanie pozycji koncowej outputu
     char xor = xor_start_value; // ustawienie poczatkowej wartosci sumy kontrolnej
     unsigned int cipher_pos = 0; // zmienna przechowujaca aktualna pozycje w szyfrze
     unsigned int cipher_len = strlen(cipher_key); // dlugosc szyfru
@@ -42,9 +42,9 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
         E - zapisanie ilosci wystapien znaku EOF przy zapisie
     Ze wzgledu na odrzucenie pomyslu z mozliwie najwiekszym zmniejszaniem pliku pozwalam sobie na tak dlugi kod
     */
+    fseek(output, 0, SEEK_SET);
     fprintf(output, "CTFXE");
-    
-    // @todo dodac zapisywanie slownika here
+    fseek(output, end_pos, SEEK_SET);
 
     /// zapisywanie skompresowanego tekstu
     while((c = fgetc(input)) != EOF) { 

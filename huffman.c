@@ -6,6 +6,9 @@
 #include "countCharacters.h"
 #include "output.h"
 
+// zmienna zapisujaca liczbe przejsc w lewo od ostatniego zapisania slowa slownika do pliku
+static int gone_left = 0;
+
 /**
 Funkcja wykonujaca kompresje algorytmem Huffmana
     FILE *input - plik wejsciowy zawierajacy tekst do kompresji
@@ -18,6 +21,7 @@ Funkcja wykonujaca kompresje algorytmem Huffmana
 void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **head) {
 	
 count *nodeptr1, *nodeptr2, *node1, *node2;
+fprintf(output, "XXXXX"); // zajecie pierwszych 5 bajtow outputu na pozniejsze oznaczenia pliku
 
 while(1){
 // pobieramy z listy dwa pierwsze elementy o najmniejszej czestosci wystapien
@@ -44,15 +48,17 @@ continue;
     nodeptr2->next = nodeptr1;
 
 }
-int *code;//tu przechowujemy poszczegolne kody znakow
+int *code; //tu przechowujemy poszczegolne kody znakow
 //ustawiamy maksymalna ilosc bitow w zaleznosci od zmiennej comp_level
-if(comp_level == 8) code = malloc(sizeof(int)*8);
-
-if(comp_level == 12) code = malloc(sizeof(int)*12);
-
-if(comp_level == 16) code = malloc(sizeof(int)*16);
-listCodes *listC = NULL;//lista do przechowywania kodow znakow
-create_huffmann_tree(head, code, comp_level, 0,&listC);
+if(comp_level == 8)
+    code = malloc(sizeof(int)*8);
+else if(comp_level == 12)
+    code = malloc(sizeof(int)*12);
+else if(comp_level == 16)
+    code = malloc(sizeof(int)*16);
+listCodes *listC = NULL; //lista do przechowywania kodow znakow
+create_huffmann_tree(output, head, code, comp_level, 0, &listC); // tworzenie drzewa Huffmana
+fprintf(output, "11"); // po zapisaniu calego slownika do pliku trzeba wyraznie zaznaczyc jego koniec
 #ifdef DEBUG
 printf("List of codes:\n");
 print_huffmann_tree(&listC);
@@ -62,7 +68,8 @@ print_huffmann_tree(&listC);
 compressedToFile(input, output, comp_level, cipher, "Politechnika_Warszawska", &listC, 0b10110111);
 }
 
-void addToTheList1(listCodes **listC, char character,int *code, int length){
+void addToTheList1(FILE *output, listCodes **listC, char character,int *code, int length){
+int i;
 listCodes *new;
 new = malloc(sizeof(count));
 new->character = character;
@@ -72,21 +79,27 @@ new->code[i] = '0'+code[i];
 }
 new->next = (*listC);
 (*listC) = new;
-
+fprintf(stderr, "addToTheList1: %c, %s\n", new->character, new->code);
+// zapis nowego znaku w slowniku do pliku
+for(i = 0; i < gone_left; i++)
+    fprintf(output, "0");
+gone_left = 0;
+fprintf(output, "10%c", new->character);
 }
 
-void create_huffmann_tree(count **head, int *code, int comp_level, int top,listCodes **listC){
+void create_huffmann_tree(FILE *output, count **head, int *code, int comp_level, int top,listCodes **listC){
 if ((*head)->left){
 code[top] = 0;
-create_huffmann_tree(&((*head)->left), code, comp_level, top+1,listC);
+gone_left++; // zapisujemy przejscie w lewo
+create_huffmann_tree(output, &((*head)->left), code, comp_level, top+1,listC);
 }
 if ((*head)->right){
 code[top] = 1;
-create_huffmann_tree(&((*head)->right), code, comp_level, top+1,listC);
+create_huffmann_tree(output, &((*head)->right), code, comp_level, top+1,listC);
 
 }
 if (!((*head)->left) && !((*head)->right)) // jezeli dostalismy sie w koncu do liscia
-addToTheList1(listC, (*head)->character, code, top);//dodajemy kazdy kod do listy
+addToTheList1(output, listC, (*head)->character, code, top);//dodajemy kazdy kod do listy
 }
 
 char *setEndOfString(char *string){

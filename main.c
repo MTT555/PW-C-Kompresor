@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "%s: Input file is empty!\n", argv[0]);
 		return -4;
 	}
+	fseek(in, 0, SEEK_SET);
 
 	bool cipher = false, var = false, set_comp_level = false, comp = false, decomp = false; // zmienne pomocnicze do obslugi argumentow -c -v -x -d
 	int comp_level = 8; // zmienna pomocnicza do obslugi poziomu kompresji, domyslnie kompresja 8-bitowa
