@@ -10,7 +10,7 @@
 
 int main(int argc, char *argv[]) {
 	// Wyswietlenie pomocy pliku w wypadku podania jedynie argumentu --h
-	if(argc == 2 && strcmp(argv[1], "--h") == 0) {
+	if(argc == 2 && strcmp(argv[1], "-h") == 0) {
 		help(argv[0], stdout);
 		return 0;
 	}
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	//Nazwa pliku, w ktorym znajdzie sie skomresowany plik jako drugi argument
-	FILE *out = fopen(argv[2], "wb");
+	FILE *out = fopen(argv[2], "w");
 	if(out == NULL) {
 		fprintf(stderr, "Output file could not be opened!\n");
 		return -3;
@@ -120,9 +120,14 @@ int main(int argc, char *argv[]) {
 		showList(&head);
 #endif
 		fseek(in, 0, SEEK_SET); // ustawienie kursora w pliku z powrotem na jego poczatek
-		huffman(in, out, comp_level, cipher, "Politechnika_Warszawska", &head);
-		freeList(head);
+		huffman(in, out, comp_level, cipher, &head);
+		freeList(&head);
 	}
+	
+	/// test sum kontrolnych
+	fclose(out);
+	FILE *tester = fopen("out", "r");
+	fprintf(stderr, "XOR result: %d\n", fileIsGood(tester, 0b10110111));
 
 	fclose(in);
 	fclose(out);

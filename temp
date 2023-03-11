@@ -1,0 +1,3 @@
+bool cipher = c & 0b00100000 ? true : false; // czy szyfrowane
+int comp_mode = (c & 0b11000000) >> 6; // tryb kompresji (o0 / o1 / o2 / o3)
+int ending = c & 0b00000111; // ilosc niewykorzystanych bitow koncowych do porzucenia

@@ -77,7 +77,7 @@ void swap(count *ptr1, count *ptr2){
 
 void freeList(count **head) {
 // zwalnianie pamieci zajetej przez liste
-	count *iterator = head, *temp = head;
+	count *iterator = *head, *temp = *head;
 	while(iterator != NULL){
 		iterator = iterator->next;
 		if(temp != NULL)

@@ -8,4 +8,6 @@ typedef enum {
 
 void help(char *program_name, FILE *stream);
 
+bool fileIsGood(FILE *in, char xor_correct_value);
+
 #endif //UTILS_H

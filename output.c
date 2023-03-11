@@ -15,12 +15,15 @@ Funkcja wykonujaca zapis do pliku skompresowanego tekstu
     bool cipher - zmienna mowiaca, czy tekst ma zostac rowniez zaszyfrowany
     char *cipher_key - klucz szyfrowania (nieistotny, gdy cipher == false)
     count **head - glowa listy zawierajaca ilosci wystapien danych znakow
+    char xor_start_value - poczatkowa wartosc bajtu do wykonania sumy kontrolnej
 */
-void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, char *cipher_key, listCodes **head) {
+void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, char *cipher_key, listCodes **head, char xor_start_value) {
     char c;
     int i;
     char ending = (char)0; // ilosc niezapisanych bitow konczacych plik
+    char eofile = (char)0; // ilosc wystapien znaku end of file podczas zapisu
 
+    char xor = xor_start_value; // ustawienie poczatkowej wartosci sumy kontrolnej
     unsigned int cipher_pos = 0; // zmienna przechowujaca aktualna pozycje w szyfrze
     unsigned int cipher_len = strlen(cipher_key); // dlugosc szyfru
     
@@ -33,11 +36,13 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
 
     /**
     Poczatek zapisu do pliku - oznaczenie pliku skompresowanego
-        AC, MT - inicjaly autorow tego kompresora
+        C, T - pierwsze litery nazwisk autorow tego kompresora
         F - 8 bitow zarezerwowane na pozniejsze dopisanie potrzebnych flag
+        X - wynik sumy kontrolnej xor, ktora ma sprawdzac czy plik nie jest uszkodzony przy probie dekompresji
+        E - zapisanie ilosci wystapien znaku EOF przy zapisie
     Ze wzgledu na odrzucenie pomyslu z mozliwie najwiekszym zmniejszaniem pliku pozwalam sobie na tak dlugi kod
     */
-    fprintf(output, "ACFMT");
+    fprintf(output, "CTFXE");
     
     // @todo dodac zapisywanie slownika here
 
@@ -54,6 +59,9 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
                             cipher_pos++;
                         }
                         fprintf(output, "%c", buffer.chars.out); // wydrukuj znak
+                        xor ^= buffer.chars.out; // uwzglednienie znaku w sumie kontrolnej 
+                        if(buffer.chars.out == EOF)
+                            eofile++;
 #ifdef DEBUG
                         // wyswietlenie zapisanego znaku wraz z jego kodem na stderr
                         fprintf(stderr, "Printed symbol: %c (code: %d)\n", buffer.chars.out, (int)buffer.chars.out);
@@ -81,14 +89,18 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
         if(cipher) { // jezeli plik ma zostac zaszyfrowany
             buffer.chars.out += cipher_key[cipher_pos % cipher_len]; // dokonujemy szyfrowania znaku
             cipher_pos++;
-            buffer.chars.buf += cipher_key[cipher_pos % cipher_len]; // dokonujemy szyfrowania znaku
+            buffer.chars.buf += cipher_key[cipher_pos % cipher_len];
             cipher_pos++;
         }
-        fprintf(output, "%c%c", buffer.chars.out, buffer.chars.buf);
+        fprintf(output, "%c%c", buffer.chars.out, buffer.chars.buf); // wydrukowanie ostatnich symboli
+        xor ^= buffer.chars.out; // oraz ich uwzglednienie w sumie kontrolnej
+        xor ^= buffer.chars.buf;
 #ifdef DEBUG
         // wyswietlenie tych znakow wraz z kodami na stderr
-        fprintf(stderr, "Printed symbol: %c (code: %d)\n", buffer.chars.out, (int)buffer.chars.out);
+        fprintf(stderr, "Printing last two symbols:\n"
+                        "Printed symbol: %c (code: %d)\n", buffer.chars.out, (int)buffer.chars.out);
         fprintf(stderr, "Printed symbol: %c (code: %d)\n", buffer.chars.buf, (int)buffer.chars.buf);
+        fprintf(stderr, "EOF amount: %d\n", (int)eofile);
 #endif
     }
 
@@ -100,7 +112,6 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     C - dodatkowe sprawdzenie, czy ten plik jest skompresowany: 11 - tak, cokolwiek innego - nie
     E - ilosc niezapisanych bitow konczacych zapisana binarnie
     */
-    int pos = ftell(output); // zapisanie poprzedniej pozycji
     fseek(output, 2, SEEK_SET); // powrot kursora w pliku do znaku F
     char flags = 0b00011000 | ending; // zapisanie pozycji koncowej do flag oraz informacji, ze plik jest skompresowany
     if(comp_level == 8) // zapis informacji o poziomie kompresji pliku
@@ -112,7 +123,19 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     if(cipher)
         flags |= 0b00100000;
     fprintf(output, "%c", flags); // wydrukowanie pojedynczego znaku zawierajacego wszystkie flagi
-    fseek(output, pos, SEEK_SET); // ustawienie kursora z powrotem na prawidlowa pozycje
+    fseek(output, 4, SEEK_SET); // ustawienie kursora na znaku E
+    fprintf(output, "%c", eofile); // zapisanie ilosci wystapien EOF
+
+    /// Suma kontrolna xor
+    fseek(output, 5, SEEK_SET); // ustawienie kursora pierwszym znaku zapisu slownika
+    while((c = fgetc(output)) != EOF)
+        xor ^= c;
+#ifdef DEBUG
+    // wyswietlenie wyliczonej sumy kontrolnej na stderr
+    fprintf(stderr, "Control sum XOR: %d\n", xor);
+#endif
+    fseek(output, 3, SEEK_SET); // ustawienie kursora na znaku X w celu zapisania otrzymanej wartosci
+    fprintf(output, "%c", xor);
 }
 
 /**

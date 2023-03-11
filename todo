@@ -3,4 +3,7 @@ do zrobienia:
 -przygotowac specyfikacje funkcjonalna
 -czyszczenie pamieci (ma byc sprawdzane valgrindem)
 -jak bedzie czas i chęć - podmienić sortowanie bąbelkowe listy na qsort
+-ulepszyc Makefile
+-dodac CMake
+-dodac readme.md (jak bedzie czas)
 -writeCompressedToFile - dodać zapisywanie słownika!

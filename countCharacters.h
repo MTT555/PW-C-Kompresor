@@ -17,4 +17,5 @@ int checkIfElementIsOnTheList(count **head, char character);
 void showList(count **head);
 void sortTheList(count **head);
 void swap(count *ptr1, count *ptr2);
+void freeList(count **head);
 #endif

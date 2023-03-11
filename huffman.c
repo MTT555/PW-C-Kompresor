@@ -15,7 +15,7 @@ Funkcja wykonujaca kompresje algorytmem Huffmana
     char *cipher_key - klucz szyfrowania (nieistotny, gdy cipher == false)
     count **head - glowa listy zawierajaca ilosci wystapien danych znakow
 */
-void huffman(FILE *input, FILE *output, int comp_level, bool cipher, char *cipher_key, count **head) {
+void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **head) {
 	
 count *nodeptr1, *nodeptr2, *node1, *node2;
 
@@ -59,7 +59,7 @@ print_huffmann_tree(&listC);
 
 #endif
 
-compressedToFile(input, output, comp_level, cipher, cipher_key, &listC);
+compressedToFile(input, output, comp_level, cipher, "Politechnika_Warszawska", &listC, 0b10110111);
 }
 
 void addToTheList1(listCodes **listC, char character,int *code, int length){
