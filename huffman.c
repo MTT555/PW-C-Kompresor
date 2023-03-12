@@ -62,8 +62,9 @@ void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **hea
         code = malloc(sizeof(int)*16);
     listCodes *listC = NULL; //lista do przechowywania kodow znakow
     create_huffmann_tree(output, head, code, cipher, comp_level, 0, &listC); // tworzenie drzewa Huffmana
-    fprintf(output, "11"); // po zapisaniu calego slownika do pliku trzeba wyraznie zaznaczyc jego koniec
-
+    // po zapisaniu calego slownika do pliku trzeba wyraznie zaznaczyc jego koniec
+    saveBitIntoPack(output, cipher, cipher_key, &buffer, &pack_pos, &xor, 1);
+    saveBitIntoPack(output, cipher, cipher_key, &buffer, &pack_pos, &xor, 1);
 #ifdef DEBUG
     printf("List of codes:\n");
     print_huffmann_tree(&listC);
@@ -113,7 +114,7 @@ char *setEndOfString(char *string){
     if(string == NULL)
         return NULL;
     
-    //czasem się zdarzy że będą się wyświetlać dziwne krzaki przy niektórych kodach (szczególnie krótkich)- ten poniższy kod ma temu zapobiec
+    // czasem się zdarzy że będą się wyświetlać dziwne krzaki przy niektórych kodach (szczególnie krótkich) - ten poniższy kod ma temu zapobiec
 	for (int i = 0; i < strlen(string); i++) {
 		if (string[i] != '1' && string[i] != '0') {
 			string[i] = '\0';

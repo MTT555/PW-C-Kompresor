@@ -6,8 +6,8 @@ typedef enum {
     false, true
 } bool;
 
-void help(char *program_name, FILE *stream);
+void help(FILE *stream);
 
-bool fileIsGood(FILE *in, char xor_correct_value);
+int fileIsGood(FILE *in, char xor_correct_value, bool displayMsg);
 
 #endif //UTILS_H

@@ -26,7 +26,7 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     char c;
     int i;
     char ending = (char)0; // ilosc niezapisanych bitow konczacych plik
-    int end_pos = ftell(output); // zapisanie pozycji koncowej outputu
+    long int end_pos = ftell(output); // zapisanie pozycji koncowej outputu
     unsigned int cipher_len = strlen(cipher_key); // dlugosc szyfru
 
     fseek(input, 0, SEEK_SET); // ustawienie kursora na poczatek inputu
@@ -127,6 +127,9 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
 #endif
         printf("\n");
     }
+#ifdef DEBUG
+    fprintf(stderr, "Input: %ld, output: %ld\n", ftell(input), end_pos);
+#endif
 }
 
 /**
