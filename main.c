@@ -45,6 +45,8 @@ int main(int argc, char *argv[]) {
 		return 3;
 	}
 	
+	fseek(in, 0, SEEK_END);
+	int input_eof = ftell(in); // znalezienie konca pliku
 	fseek(in, 0, SEEK_SET);
 
 	bool cipher = false, set_comp_level = false, comp = false, decomp = false; // zmienne pomocnicze do obslugi argumentow -c -v -x -d
@@ -143,8 +145,9 @@ int main(int argc, char *argv[]) {
 		count *head; //tworze glowe listy w ktorej bede przechowywal zliczenia
 		runCounter(&head);
 
-		//wczytuje i zliczam znak po znaku
-		while((c=fgetc(in)) != EOF) {
+		// wczytuje i zliczam znak po znaku
+		for(i = 0 ; i < input_eof; i++) {
+			c = fgetc(in);
 			if(checkIfElementIsOnTheList(&head, c) == 1) {
 				addToTheList(&head, c);
 			}

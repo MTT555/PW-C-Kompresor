@@ -8,7 +8,6 @@
 #include "output.h"
 
 static unsigned int cipher_pos = 0; // zmienna przechowujaca aktualna pozycje w szyfrze
-static char eofile = (char)0; // ilosc wystapien znaku end of file podczas zapisu
 
 /**
 Funkcja wykonujaca zapis do pliku skompresowanego tekstu
@@ -37,11 +36,9 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
         C, T - pierwsze litery nazwisk autorow tego kompresora
         F - 8 bitow zarezerwowane na pozniejsze dopisanie potrzebnych flag
         X - wynik sumy kontrolnej xor, ktora ma sprawdzac czy plik nie jest uszkodzony przy probie dekompresji
-        E - zapisanie ilosci wystapien znaku EOF przy zapisie
-    Ze wzgledu na odrzucenie pomyslu z mozliwie najwiekszym zmniejszaniem pliku pozwalam sobie na tak dlugi kod
     */
     fseek(output, 0, SEEK_SET);
-    fprintf(output, "CTFXE");
+    fprintf(output, "CTFX");
     fseek(output, end_pos, SEEK_SET);
 
     /// zapisywanie skompresowanego tekstu
@@ -62,26 +59,13 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     fprintf(stderr, "Entire input file passed - currently used bits in the pack: %d/16 (unused: %d)\n", *pack_pos, 16 - *pack_pos);
 #endif
     // po przejsciu po calym pliku, w razie potrzeby tworzymy ostatni "niepelny" znak z pozostalych nadmiarowych zapisanych bitow
-    if(*pack_pos != 16) {
+    if (*pack_pos <= 8) // jezeli mamy zapelnione mniej lub rowno 8 bitow
+        ending = (char)(8 - *pack_pos);
+    else if(*pack_pos <= 16 && *pack_pos > 8)
         ending = (char)(16 - *pack_pos);
-        buffer->whole <<= ending;
-        if(cipher) { // jezeli plik ma zostac zaszyfrowany
-            buffer->chars.out += cipher_key[cipher_pos % cipher_len]; // dokonujemy szyfrowania znaku
-            cipher_pos++;
-            buffer->chars.buf += cipher_key[cipher_pos % cipher_len];
-            cipher_pos++;
-        }
-        fprintf(output, "%c%c", buffer->chars.out, buffer->chars.buf); // wydrukowanie ostatnich symboli
-        *xor ^= buffer->chars.out; // oraz ich uwzglednienie w sumie kontrolnej
-        *xor ^= buffer->chars.buf;
-#ifdef DEBUG
-        // wyswietlenie tych znakow wraz z kodami na stderr
-        fprintf(stderr, "Printing last two symbols:\n"
-                        "Printed symbol: %c (code: %d)\n", buffer->chars.out, (int)buffer->chars.out);
-        fprintf(stderr, "Printed symbol: %c (code: %d)\n", buffer->chars.buf, (int)buffer->chars.buf);
-        fprintf(stderr, "EOF amount: %d\n", (int)eofile);
-#endif
-    }
+    for(i = 0; i <= (int)ending + 8; i++) // dopychamy union packa dodatkowymi zerami, aby zapisac ostatni znak do pliku
+        saveBitIntoPack(output, cipher, cipher_key, buffer, pack_pos, xor, 0);
+
     end_pos = ftell(output); // zapisanie pozycji koncowej
 
     /**
@@ -103,13 +87,8 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     if(cipher)
         flags |= 0b00100000;
     fprintf(output, "%c", flags); // wydrukowanie pojedynczego znaku zawierajacego wszystkie flagi
-    fseek(output, 4, SEEK_SET); // ustawienie kursora na znaku E
-    fprintf(output, "%c", eofile); // zapisanie ilosci wystapien EOF
 
     /// Suma kontrolna xor
-    fseek(output, 5, SEEK_SET); // ustawienie kursora pierwszym znaku zapisu slownika
-    while((c = fgetc(output)) != EOF)
-        *xor ^= c;
 #ifdef DEBUG
     // wyswietlenie wyliczonej sumy kontrolnej na stderr
     fprintf(stderr, "Control sum XOR: %d\n", *xor);
@@ -161,11 +140,10 @@ void saveBitIntoPack(FILE *output, bool cipher, char *cipher_key, pack_t *buffer
         }
         fprintf(output, "%c", buffer->chars.out); // wydrukuj znak
         (*xor) ^= buffer->chars.out; // uwzglednienie znaku w sumie kontrolnej 
-        if(buffer->chars.out == EOF)
-            eofile++;
+        fprintf(stderr, "xorek%d\n", *xor);
 #ifdef DEBUG
         // wyswietlenie zapisanego znaku wraz z jego kodem na stderr
-        //fprintf(stderr, "Saved to file the according symbol: %c (code: %d)\n", buffer->chars.out, (int)buffer->chars.out);
+        fprintf(stderr, "Saved to file the according symbol: %c (code: %d)\n", buffer->chars.out, (int)buffer->chars.out);
 #endif
         *pack_pos -= 8; // zmniejsz pozycje o 8 bitow
     }

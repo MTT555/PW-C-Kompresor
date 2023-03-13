@@ -47,7 +47,7 @@ Funkcja sprawdzajaca podany plik pod wzgledem nadawania sie do dekompresji
 2. Sprawdzenie sumy kontrolnej
     FILE *in - plik wejsciowy, ktory ma zostac sprawdzony pod wzgledem poprawnosci
     char xor_correct_value - wartosc startowa, od ktorej byly wykonywane sumy kontrolne podczas procesu kompresji
-    bool displayMsg - wyswietlanie informacji o sprawdzanym pliku na stdout (jesli == true)
+    bool displayMsg - wyswietlanie informacji o sprawdzanym pliku na stdout w przypadku, gdy nie spelnia wymogow do dekompresji (jesli == true)
 Zwraca:
     0 - plik jest prawidlowy, mozna go dekompresowac
     1 - brak inicjalow na poczatku, plik nie pochodzi z kompresji
@@ -56,15 +56,17 @@ Zwraca:
 */
 int fileIsGood(FILE *in, char xor_correct_value, bool displayMsg) {
     /// sprawdzenie poprawnosci oznaczenia na poczatku pliku
+    fseek(in, 0, SEEK_END); // pobranie pozycji koncowej
+    int end_pos = ftell(in);
     fseek(in, 0, SEEK_SET); // ustawienie strumienia pliku na poczatek
     char c;
-    if((c = fgetc(in)) != 'C') {
-        if((c = fgetc(in)) != 'T') {
-            fseek(in, 0, SEEK_SET);
-            if(displayMsg)
-                printf("Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
-            return 1;
-        }   
+    int i;
+
+    if((c = fgetc(in)) != 'C' || (c = fgetc(in)) != 'T') {
+        fseek(in, 0, SEEK_SET);
+        if(displayMsg)
+            printf("Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
+        return 1;
     }
     if(!((c = fgetc(in)) & 0b00011000)) {
         fseek(in, 0, SEEK_SET);
@@ -75,20 +77,12 @@ int fileIsGood(FILE *in, char xor_correct_value, bool displayMsg) {
     
     // po sprawdzeniu oznaczen zapisuje wszystkie potrzebne informacje z bajtu flagowego
     char xor = fgetc(in); // odczytanie wyniku sumy kontrolnej
-    c = fgetc(in);
-
-    // zmienne odpowiedzialna za obsluge wystepowania EOF w skompresowanym pliku
-    int eof_counter = 0;
-    const int eof_limit = (int)c;
 
     /// sprawdzanie sumy kontrolnej xor
-    while(eof_counter <= eof_limit){
+    for(i = 4; i < end_pos; i ++) {
         c = fgetc(in);
         xor ^= c;
-        if(c == EOF)
-            eof_counter++;
     }
-    xor ^= c; // poprawienie wartosci zmiennej po nadmiarowym xorze z EOF
     // ustawienie strumienia z powrotem na poczatek przed zakonczeniem dzialania funkcji   
     fseek(in, 0, SEEK_SET);
 #ifdef DEBUG
