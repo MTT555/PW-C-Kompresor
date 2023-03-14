@@ -6,10 +6,11 @@
 #include "countCharacters.h"
 #include "huffman.h"
 #include "utils.h"
-#define BUF_SIZE 256
+#include "decompress.h"
 
 int main(int argc, char *argv[]) {
 	char c;
+	int i;
 
 	// Wyswietlenie pomocy pliku w wypadku podania jedynie argumentu --h
 	if(argc == 2 && strcmp(argv[1], "-h") == 0) {
@@ -167,8 +168,8 @@ int main(int argc, char *argv[]) {
 #ifdef DEBUG
 		fprintf(stderr, "File check code: %d\n", fileCheck);
 #endif
-		if(!fileCheck) {
-			// kod dekompresji
+		if(!fileCheck) { // jezeli fileCheck zwroci 0
+			decompress(in, out);
 		} else {
 			fclose(in);
 			fclose(out);

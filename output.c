@@ -140,7 +140,6 @@ void saveBitIntoPack(FILE *output, bool cipher, char *cipher_key, pack_t *buffer
         }
         fprintf(output, "%c", buffer->chars.out); // wydrukuj znak
         (*xor) ^= buffer->chars.out; // uwzglednienie znaku w sumie kontrolnej 
-        fprintf(stderr, "xorek%d\n", *xor);
 #ifdef DEBUG
         // wyswietlenie zapisanego znaku wraz z jego kodem na stderr
         fprintf(stderr, "Saved to file the according symbol: %c (code: %d)\n", buffer->chars.out, (int)buffer->chars.out);

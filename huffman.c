@@ -13,7 +13,7 @@ static char cipher_key[] = "Politechnika_Warszawska"; // klucz szyfrowania
 static char xor = (char)0b10110111; // ustawienie poczatkowej wartosci sumy kontrolnej
 static char *road_buffer = NULL; // tymczasowe przechowywanie drogi przed zapisem do pliku
 static int road_pos = 0; // ilosc aktualnie zapisanych bitow na droge
-static char cur_buf_size = 512; // obecna wielkosc bufora, zmieniana, gdy trzeba uzyc realloca
+static int cur_buf_size = 512; // obecna wielkosc bufora, zmieniana, gdy trzeba uzyc realloca
 
 /**
 Funkcja wykonujaca kompresje algorytmem Huffmana
