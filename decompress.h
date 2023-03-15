@@ -2,6 +2,7 @@
 #define DECOMPRESS_H
 
 #include "huffman.h"
+#include "utils.h"
 
 // Zmienna przechowujaca aktualny tryb odczytu pliku do dekompresji
 typedef enum {
@@ -30,5 +31,7 @@ int goDown(dnode_t **head);
 void printList(listCodes **list, FILE *stream);
 
 void addCode(listCodes **list, char character, char *code);
+
+bool compareBuffer(listCodes **list, char *buf, FILE *stream);
 
 #endif // DECOMPRESS_H

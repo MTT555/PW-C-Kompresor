@@ -123,7 +123,11 @@ void analyzeBits(FILE *output, char c, int comp_level, listCodes **list, short e
                 break;
             }
             case bitsToWords: {
-                bits = 8 - ending;
+                buffer[buf_pos++] = '0' + returnBit(c, bits);
+                buffer[buf_pos] = '\0';
+                bits++;
+                if(compareBuffer(list, buffer, output))
+                    buf_pos = 0;
                 break;
             }
         }
@@ -198,7 +202,7 @@ void addCode(listCodes **list, char character, char *code) {
 
 /**
 Funkcja drukujaca odczytany slownik na wybrany strumien
-    listCodes *head - poczatek listy, ktora chcemy wyswietlic
+    listCodes **list - poczatek listy, ktora chcemy wyswietlic
     FILE *stream - strumien, w ktorym ta lista ma zostac wydrukowana
 */
 void printList(listCodes **list, FILE *stream) {
@@ -207,4 +211,24 @@ void printList(listCodes **list, FILE *stream) {
         fprintf(stream, "Character: %c (int value: %d), coded as: %s\n", iterator->character, (int)(iterator->character), iterator->code);
         iterator = iterator->next;
     }
+}
+
+/**
+Funkcja sprawdzajaca, czy aktualny fragment kodu w buforze odpowiada jakiejs literze
+Jezeli tak, to zapisuje ta litere do podanego pliku
+    listCodes **list - poczatek listy, ktora chcemy wyswietlic
+    char *buf - bufor, ktory mozliwe, ze odpowiada jednej z liter
+    FILE *stream - strumien, w ktorym ma zostac wydrukowana litera
+Zwraca true, jezeli jakis znak zostal znaleziony, w przeciwnym wypadku false
+*/
+bool compareBuffer(listCodes **list, char *buf, FILE *stream) {
+    listCodes *iterator = (*list);
+    while (iterator != NULL) {
+        if(strcmp(iterator->code, buf) == 0) {
+            fprintf(stream, "%c", iterator->character);
+            return true;
+        }
+        iterator = iterator->next;
+    }
+    return false;
 }
