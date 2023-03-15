@@ -98,13 +98,16 @@ void analyzeBits(FILE *output, char c, int comp_level, listCodes **list, short e
             case dictWord: {
                 buffer[buf_pos++] = returnBit(c, bits++);
                 buffer[buf_pos++] = returnBit(c, bits++);
-                int result = 0;
+                char result = 0;
                 if(buf_pos == comp_level) {
                     if(comp_level == 8) {
                         for(i = 0; i < 8; i++) {
                             result *= 2;
                             result += buffer[i];
+                            fprintf("%d", result);
                         }
+                        if(result >= 128)
+                            result -= 128;
                         addCode(list, (char)result, code_buf);
                         buf_pos = 0;
                         it = it->prev;

@@ -18,21 +18,9 @@ valgrind_full:
 	cc -o valgrind main.c countCharacters.c cipher.c utils.c huffman.c output.c decompress.c -Wall -pedantic
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./valgrind tekst out
 
-ab:
-	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c output.c decompress.c -Wall -pedantic
-	./debug ab.in out
-
 ala:
 	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c output.c decompress.c -Wall -pedantic
 	./debug ala.in out
-
-p:
-	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c output.c decompress.c -Wall -pedantic
-	./debug p.in out
-
-ult_test:
-	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c output.c decompress.c -Wall -pedantic
-	./debug pan-tadeusz.txt out
 
 alac:
 	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c output.c decompress.c -Wall -pedantic
@@ -45,4 +33,4 @@ test_help:
 .PHONY: clean
 
 clean:
-	-rm program debug gdbdebug valgrind valgrind-out.txt out 2> /dev/null
+	-rm program debug gdbdebug valgrind valgrind-out.txt out? test/a.out

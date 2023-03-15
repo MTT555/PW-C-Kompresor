@@ -146,7 +146,6 @@ char *setEndOfString(char *string){
 
 void print_huffmann_tree(listCodes **head, FILE *stream) {
     listCodes *iterator = (*head);
-    fprintf(stderr, "pp%p ", iterator);
     while (iterator != NULL) {
         fprintf(stream, "Character: %c, Code: %s\n", iterator->character, setEndOfString(iterator->code));
         iterator = iterator->next;
