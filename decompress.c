@@ -6,6 +6,7 @@
 #include "huffman.h"
 
 static char cipher_key[] = "Politechnika_Warszawska"; // klucz szyfrowania
+static int cipher_pos = 0; // pozycja w szyfrze
 static char *buffer = NULL;
 static int buf_pos = 0; // aktualna pozycja w buforze
 static int cur_buf_size = 512; // aktualna wielkosc buforu
@@ -34,9 +35,6 @@ void decompress(FILE *input, FILE *output) {
     fseek(input, 0, SEEK_END);
     int end_pos = ftell(input);
     fseek(input, 0 , SEEK_SET);
-    
-    pack_t pack; // deklaracja union packa
-    pack.whole = 0; // i jego czyszczenie
 
     fseek(input, 2, SEEK_SET); // ustawienie kursora na trzeci znak w celu odczytania flag
     char c = fgetc(input);
@@ -49,9 +47,17 @@ void decompress(FILE *input, FILE *output) {
         "compression level: %d, encrypted: %s, ending bits: %d\n", comp_level, cipher ? "true" : "false", ending);
 #endif
     fseek(input, 4, SEEK_SET);
-    for(i = 4; i < end_pos - 1; i++)
-        analyzeBits(output, fgetc(input), comp_level, &list, 0);
-    analyzeBits(output, fgetc(input), comp_level, &list, ending);
+    int cipher_len = strlen(cipher_key);
+    for(i = 4; i < end_pos; i++) {
+        c = fgetc(input);
+        if(cipher) {
+            c -= cipher_key[cipher_pos % cipher_len];
+            cipher_pos++;
+        }
+        if(i != end_pos - 1)
+            analyzeBits(output, c, comp_level, &list, 0);
+    }
+    analyzeBits(output, c, comp_level, &list, ending);
 
     free(buffer); // czyszczenie pamieci zaraz przed zakonczeniem funkcji
     free(code_buf);

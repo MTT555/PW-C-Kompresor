@@ -31,6 +31,7 @@ test_help:
 	./program -h
 
 .PHONY: clean
+.SILENT: clean
 
 clean:
-	-rm program debug gdbdebug valgrind valgrind-out.txt out? test/a.out
+	-rm program debug gdbdebug valgrind valgrind-out.txt out out? test/a.out 2>/dev/null
