@@ -8,17 +8,17 @@
 
 //lista do przechowywania kodow znakow
 typedef struct codes {
-char character;
-char *code;
-struct codes *next;
+    char character;
+    char *code;
+    struct codes *next;
 } listCodes;
 
 void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **head);
 
-void print_huffmann_tree(listCodes **listC);
+void print_huffmann_tree(listCodes **listC, FILE *stream);
 
 void create_huffmann_tree(FILE *output, count **head, int *code, bool cipher, int comp_level, int top, listCodes **listC);
 
-void addToTheList1(FILE *output, int comp_level, bool cipher, listCodes **head, char character,int *code, int length);
+void addToTheList1(FILE *output, int comp_level, bool cipher, listCodes **head, char character, int *code, int length);
 
 #endif //HUFFMAN_H
