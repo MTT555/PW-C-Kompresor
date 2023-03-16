@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
     if(!(argc == 3 || argc == 4))
         return 1;
     
-	FILE *out = fopen(argv[1], "w");
+	FILE *out = fopen(argv[1], "wb");
     int n = atoi(argv[2]);
     int r = argc > 4 ? atoi(argv[3]) : 128;
     int i;

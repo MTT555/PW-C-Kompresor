@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 
 	// Wczytuje tekst uzytkownika z pliku
 	// Nazwe pliku podajemy jako pierwszy argument wywolania
-	FILE *in = fopen(argv[1], "r");
+	FILE *in = fopen(argv[1], "rb");
 	if(in == NULL) {
 		fprintf(stderr, "%s: Input file could not be opened!\n", argv[0]);
 		return 2;
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 		return 4;
 	}
 	// Nazwa pliku, w ktorym znajdzie sie skomresowany plik jako drugi argument
-	FILE *out = fopen(argv[2], "w");
+	FILE *out = fopen(argv[2], "wb");
 	if(out == NULL) {
 		fclose(in);
 		fprintf(stderr, "%s: Output file could not be opened!\n", argv[0]);
