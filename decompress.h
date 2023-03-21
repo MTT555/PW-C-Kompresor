@@ -30,8 +30,8 @@ int goDown(dnode_t **head);
 
 void printList(listCodes **list, FILE *stream);
 
-void addCode(listCodes **list, char character, char *code);
+void addCode(listCodes **list, int character, char *code);
 
-bool compareBuffer(listCodes **list, char *buf, FILE *stream);
+bool compareBuffer(listCodes **list, char *buf, FILE *stream, int comp_level);
 
 #endif // DECOMPRESS_H

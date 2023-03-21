@@ -14,6 +14,7 @@ static char *code_buf = NULL; // bufor dla kodow znakow
 static int code_buf_pos = 0; // aktualna pozycja w buforze dla kodow
 static mod_t mode = dictRoad; // zmienna przechowujaca aktualny tryb czytania pliku
 static dnode_t *head = NULL, *it = NULL; // pomocnicze drzewo dnode oraz pseudoiterator po nim
+static currentBits = 0, tempCode = 0;
 
 /**
 Funkcja dekompresujaca dany plik pochodzacy z tego kompresora
@@ -113,27 +114,17 @@ void analyzeBits(FILE *output, char c, int comp_level, listCodes **list, short e
             case dictWord: {
                 buffer[buf_pos++] = returnBit(c, bits++);
                 buffer[buf_pos++] = returnBit(c, bits++);
-                char result = 0;
                 if(buf_pos == comp_level) {
-                    if(comp_level == 8) {
-                        for(i = 0; i < 8; i++) {
-                            result *= 2;
-                            result += buffer[i];
-                        }
-                        addCode(list, (char)result, code_buf);
-                        buf_pos = 0;
-                        it = it->prev;
-                        code_buf_pos--;
-                        mode = dictRoad;
-                    } else if(comp_level == 16) { // niedokonczone dla 16-bit
-                        for(i = 0; i < 16; i++) {
-                            result *= 2;
-                            result += buffer[i];
-                        }
-                        fprintf(output, "%c%c", (char)(result / (2 << 8)), (char)result);
-                    } else if(comp_level == 12) {
-                        // dorobic
+                    int result = 0;
+                    for(i = 0; i < comp_level; i++) {
+                        result *= 2;
+                        result += buffer[i];
                     }
+                    addCode(list, result, code_buf);
+                    buf_pos = 0;
+                    it = it->prev;
+                    code_buf_pos--;
+                    mode = dictRoad;
                 }
                 break;
             }
@@ -141,7 +132,7 @@ void analyzeBits(FILE *output, char c, int comp_level, listCodes **list, short e
                 buffer[buf_pos++] = '0' + returnBit(c, bits);
                 buffer[buf_pos] = '\0';
                 bits++;
-                if(compareBuffer(list, buffer, output))
+                if(compareBuffer(list, buffer, output, comp_level))
                     buf_pos = 0;
                 break;
             }
@@ -201,10 +192,10 @@ void freeDnodeTree(dnode_t *head) {
 /**
 Funkcja dodajaca odczytany kod wraz ze znakiem do listy
     listCodes **list - lista, do ktorej chcemy dokonac zapisu
-    char character - znak, ktory chcemy zapisac
+    int character - znak, ktory chcemy zapisac
     char *code - kod tego znaku
 */
-void addCode(listCodes **list, char character, char *code) {
+void addCode(listCodes **list, int character, char *code) {
     int i;
     listCodes *new = NULL;
     new = malloc(sizeof(listCodes));
@@ -223,7 +214,7 @@ Funkcja drukujaca odczytany slownik na wybrany strumien
 void printList(listCodes **list, FILE *stream) {
     listCodes *iterator = (*list);
     while (iterator != NULL) {
-        fprintf(stream, "Character: %c (int value: %d), coded as: %s\n", iterator->character, (int)(iterator->character), iterator->code);
+        fprintf(stream, "Character: %d, coded as: %s\n", iterator->character, iterator->code);
         iterator = iterator->next;
     }
 }
@@ -236,11 +227,32 @@ Jezeli tak, to zapisuje ta litere do podanego pliku
     FILE *stream - strumien, w ktorym ma zostac wydrukowana litera
 Zwraca true, jezeli jakis znak zostal znaleziony, w przeciwnym wypadku false
 */
-bool compareBuffer(listCodes **list, char *buf, FILE *stream) {
+bool compareBuffer(listCodes **list, char *buf, FILE *stream, int comp_level) {
     listCodes *iterator = (*list);
     while (iterator != NULL) {
         if(strcmp(iterator->code, buf) == 0) {
-            fprintf(stream, "%c", iterator->character);
+            if(comp_level == 8)
+                fprintf(stream, "%c", iterator->character);
+            else if(comp_level == 16)
+                fprintf(stream, "%c%c", (char)((iterator->character) / (1 << 8)), (char)(iterator->character));
+            else if(comp_level == 12) {
+                tempCode <<= 12;
+                tempCode += iterator->character;
+                currentBits += 12;
+                if(currentBits == 12) {
+                    int temp = tempCode % 16;
+                    tempCode >>= 4;
+                    fprintf(stderr, "c%d ", tempCode);
+                    fprintf(stream, "%c", (char)(tempCode));
+                    tempCode = temp;
+                    currentBits = 4;
+                } else {
+                    fprintf(stderr, "c%d c%d ", ((tempCode) / (1 << 8)), (tempCode));
+                    fprintf(stream, "%c%c", (char)((tempCode) / (1 << 8)), (char)(tempCode));
+                    tempCode = 0;
+                    currentBits = 0;
+                }
+            }
             return true;
         }
         iterator = iterator->next;

@@ -46,7 +46,7 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     fseek(input, 0, SEEK_END);
     long int inputEOF = ftell(input);
     fseek(input, 0, SEEK_SET);
-    for(i = 0; i <= inputEOF; i++) {
+    for(i = 0; i < inputEOF; i++) {
         if(i != inputEOF)
             c = fgetc(input);
         else if((comp_level == 12 && (currentBits == 8 || currentBits == 4)) || (comp_level == 16 && currentBits == 8))
@@ -173,7 +173,7 @@ void saveBitIntoPack(FILE *output, bool cipher, char *cipher_key, pack_t *buffer
         (*xor) ^= buffer->chars.out; // uwzglednienie znaku w sumie kontrolnej 
 #ifdef DEBUG
         // wyswietlenie zapisanego znaku wraz z jego kodem na stderr
-        //fprintf(stderr, "Saved to file the according symbol: %c (code: %d)\n", buffer->chars.out, (int)buffer->chars.out);
+        fprintf(stderr, "Saved to file the according symbol: %c (code: %d)\n", buffer->chars.out, (int)buffer->chars.out);
 #endif
         *pack_pos -= 8; // zmniejsz pozycje o 8 bitow
     }
