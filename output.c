@@ -97,17 +97,15 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     fprintf(output, "%c", *xor);
 
     // Wyswietlenie wiadomosci koncowej
-    printf("File successfully compressed!");
-    if(ftell(input) > end_pos)
-        printf(" (file size reduced by %.2f%%)\n", 100 - 100 * ((double)end_pos)/ftell(input));
-    else {
+    fprintf(stderr, "File successfully compressed!\n");
 #ifdef DEBUG
-        printf(" (file size increased by %.2f%%!!!)\n", 100 * ((double)end_pos)/ftell(input) - 100);
-#endif
-        printf("\n");
+    if(input != stdin && output != stdout) {
+        if(ftell(input) > end_pos)
+            fprintf(stderr, "File size reduced by %.2f%%\n", 100 - 100 * (double)end_pos/ftell(input));
+        else
+            fprintf(stderr, "File size increased by %.2f%%!!!\n", 100 * (double)end_pos/ftell(input) - 100);
+        fprintf(stderr, "Input: %ld, output: %ld\n", ftell(input), end_pos);
     }
-#ifdef DEBUG
-    fprintf(stderr, "Input: %ld, output: %ld\n", ftell(input), end_pos);
 #endif
 }
 

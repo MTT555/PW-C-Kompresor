@@ -18,37 +18,37 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-	// Sprawdzenie, czy nazwy plikow na pewno zostaly podane
-	if(argc < 3) {
-		fprintf(stderr, "%s: Too few arguments!\n\n", argv[0]);
-		help(stderr);
-		return 1;
-	}
+	// // Sprawdzenie, czy nazwy plikow na pewno zostaly podane
+	// if(argc < 3) {
+	// 	fprintf(stderr, "%s: Too few arguments!\n\n", argv[0]);
+	// 	help(stderr);
+	// 	return 1;
+	// }
 
 	// Wczytuje tekst uzytkownika z pliku
 	// Nazwe pliku podajemy jako pierwszy argument wywolania
-	FILE *in = fopen(argv[1], "rb");
+	FILE *in = argc > 1 ? fopen(argv[1], "rb") : stdin;
 	if(in == NULL) {
 		fprintf(stderr, "%s: Input file could not be opened!\n", argv[0]);
 		return 2;
 	}
 	// Sprawdzenie, czy nie podano pustego pliku
-	if((c = fgetc(in)) == EOF) {
+	fseek(in, 0, SEEK_END);
+	int input_eof = ftell(in); // znalezienie konca pliku
+	fseek(in, 0, SEEK_SET);	
+	if(input_eof == 0) {
 		fclose(in);
 		fprintf(stderr, "%s: Input file is empty!\n", argv[0]);
 		return 4;
 	}
-	// Nazwa pliku, w ktorym znajdzie sie skomresowany plik jako drugi argument
-	FILE *out = fopen(argv[2], "wb");
+
+	// Nazwa pliku, w ktorym znajdzie sie plik wyjsciowy
+	FILE *out = argc > 2 ? fopen(argv[2], "wb") : stdout;
 	if(out == NULL) {
 		fclose(in);
 		fprintf(stderr, "%s: Output file could not be opened!\n", argv[0]);
 		return 3;
 	}
-	
-	fseek(in, 0, SEEK_END);
-	int input_eof = ftell(in); // znalezienie konca pliku
-	fseek(in, 0, SEEK_SET);
 
 	bool cipher = false, set_comp_level = false, comp = false, decomp = false; // zmienne pomocnicze do obslugi argumentow -c -v -x -d
 	bool help_displayed = false; // zmienna zapobiegajaca wielokrotnemu wyswietlaniu helpboxa
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
 		sortTheList(&head); //sortuje liste wystapien znakow niemalejaco
 #ifdef DEBUG
 		//wypisujemy liste z wystapieniami
-		showList(&head);
+		showList(&head, stderr);
 #endif
 		fseek(in, 0, SEEK_SET); // ustawienie kursora w pliku z powrotem na jego poczatek
 		huffman(in, out, comp_level, cipher, &head);

@@ -58,7 +58,16 @@ void decompress(FILE *input, FILE *output) {
             analyzeBits(output, c, comp_level, &list, 0);
     }
     analyzeBits(output, c, comp_level, &list, ending);
-
+    fprintf(stderr, "File successfully decompressed!\n");
+#ifdef DEBUG
+    if(input != stdin && output != stdout) {
+        if(ftell(output) < end_pos)
+            fprintf(stderr, "File size reduced by %.2f%%\n", 100 - 100 * (double)ftell(output)/end_pos);
+        else
+            fprintf(stderr, "File size increased by %.2f%%\n", 100 * (double)ftell(output)/end_pos - 100);
+        fprintf(stderr, "Input: %ld, output: %ld\n", ftell(input), end_pos);
+    }
+#endif
     free(buffer); // czyszczenie pamieci zaraz przed zakonczeniem funkcji
     free(code_buf);
 }
@@ -110,7 +119,6 @@ void analyzeBits(FILE *output, char c, int comp_level, listCodes **list, short e
                         for(i = 0; i < 8; i++) {
                             result *= 2;
                             result += buffer[i];
-                            fprintf("%d", result);
                         }
                         if(result >= 128)
                             result -= 128;

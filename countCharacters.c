@@ -31,12 +31,13 @@ while(iterator != NULL){
 }
 return 1;
 }
-void showList(count **head){
+
+void showList(count **head, FILE *stream){
 
 count *iterator = (*head);
 while (iterator != NULL){
 
-printf("Character: %c, Code: %d, Amount: %d\n",iterator->character, iterator->character,iterator->amount);
+fprintf(stream, "Character: %c, Code: %d, Amount: %d\n",iterator->character, iterator->character,iterator->amount);
 iterator = iterator->next;
 }
 
