@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 
-typedef struct countCharacters{
-    char character;
+typedef struct countCharacters {
+    int character; // int pozwoli na przechowywanie rowniez kodow 12-bit i 16-bit
     int amount;
     struct countCharacters *next;
     struct countCharacters *left; // lewy syn
@@ -13,8 +13,8 @@ typedef struct countCharacters{
 
 
 void runCounter(count **head);
-void addToTheList(count **head, char character);
-int checkIfElementIsOnTheList(count **head, char character);
+void addToTheList(count **head, int character);
+int checkIfElementIsOnTheList(count **head, int character);
 void showList(count **head, FILE *stream);
 void sortTheList(count **head);
 void swap(count *ptr1, count *ptr2);

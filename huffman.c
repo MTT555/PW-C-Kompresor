@@ -79,7 +79,7 @@ void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **hea
     free(road_buffer); // po zapisie do pliku zwalniam pamiec po buforze
 }
 
-void addToTheList1(FILE *output, int comp_level, bool cipher, listCodes **listC, char character, int *code, int length) {
+void addToTheList1(FILE *output, int comp_level, bool cipher, listCodes **listC, int character, int *code, int length) {
     int i;
     listCodes *new = NULL;
     new = malloc(sizeof(listCodes));
@@ -98,7 +98,7 @@ void addToTheList1(FILE *output, int comp_level, bool cipher, listCodes **listC,
     saveBitIntoPack(output, cipher, cipher_key, &buffer, &pack_pos, &xor, 0);
     saveBitIntoPack(output, cipher, cipher_key, &buffer, &pack_pos, &xor, 1);
     for(i = 0; i < comp_level; i++)
-        saveBitIntoPack(output, cipher, cipher_key, &buffer, &pack_pos, &xor, (new->character / (1 << (7 - i))) % 2);
+        saveBitIntoPack(output, cipher, cipher_key, &buffer, &pack_pos, &xor, (new->character / (1 << (comp_level - 1 - i))) % 2);
 }
 
 void create_huffmann_tree(FILE *output, count **head, int *code, bool cipher, int comp_level, int top, listCodes **listC) {
@@ -147,7 +147,7 @@ char *setEndOfString(char *string){
 void print_huffmann_tree(listCodes **head, FILE *stream) {
     listCodes *iterator = (*head);
     while (iterator != NULL) {
-        fprintf(stream, "Character: %c, Code: %s\n", iterator->character, setEndOfString(iterator->code));
+        fprintf(stream, "Character: %d, Code: %s\n", iterator->character, setEndOfString(iterator->code));
         iterator = iterator->next;
     }
 }

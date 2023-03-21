@@ -120,8 +120,6 @@ void analyzeBits(FILE *output, char c, int comp_level, listCodes **list, short e
                             result *= 2;
                             result += buffer[i];
                         }
-                        if(result >= 128)
-                            result -= 128;
                         addCode(list, (char)result, code_buf);
                         buf_pos = 0;
                         it = it->prev;

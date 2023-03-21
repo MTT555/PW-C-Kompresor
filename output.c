@@ -27,6 +27,7 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     char ending = (char)0; // ilosc niezapisanych bitow konczacych plik
     long int end_pos = ftell(output); // zapisanie pozycji koncowej outputu
     unsigned int cipher_len = strlen(cipher_key); // dlugosc szyfru
+    int tempCode = 0, currentBits = 0;
 
     fseek(input, 0, SEEK_SET); // ustawienie kursora na poczatek inputu
     listCodes *iterator = NULL; // iterator po liscie kodow
@@ -42,16 +43,48 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     fseek(output, end_pos, SEEK_SET);
 
     /// zapisywanie skompresowanego tekstu
-    while((c = fgetc(input)) != EOF) { 
-        iterator = (*head); // ustawienie iteratora na poczatek przy kazdym nastepnym symbolu
-        while (iterator != NULL) {
-            if(iterator->character == c) {
-                for(i = 0; i < strlen(iterator->code); i++)
-                    saveBitIntoPack(output, cipher, cipher_key, buffer, pack_pos, xor, iterator->code[i] == '1' ? 1 : 0);
-                break;
+    fseek(input, 0, SEEK_END);
+    long int inputEOF = ftell(input);
+    fseek(input, 0, SEEK_SET);
+    for(i = 0; i <= inputEOF; i++) {
+        if(i != inputEOF)
+            c = fgetc(input);
+        else if((comp_level == 12 && (currentBits == 8 || currentBits == 4)) || (comp_level == 16 && currentBits == 8))
+            c = '\0';
+        else
+            break;
+        
+        currentBits += 8;
+        tempCode <<= 8;
+        tempCode += (int)c;
+        if(currentBits == comp_level) {
+            iterator = (*head);
+            while (iterator != NULL) {
+                if(iterator->character == tempCode) {
+                    for(i = 0; i < strlen(iterator->code); i++)
+                        saveBitIntoPack(output, cipher, cipher_key, buffer, pack_pos, xor, iterator->code[i] == '1' ? 1 : 0);
+                    break;
+                }
+                else
+                    iterator = iterator->next;
             }
-            else
-                iterator = iterator->next;
+            tempCode = 0;
+            currentBits = 0;
+        } else if (currentBits >= comp_level) { // taki przypadek wystapi jedynie w kompresji 12-bit
+            int temp = tempCode % 16;
+            tempCode >>= 4;
+            iterator = (*head); // ustawienie iteratora na poczatek przy kazdym nastepnym symbolu
+            while (iterator != NULL) {
+                if(iterator->character == tempCode) {
+                    for(i = 0; i < strlen(iterator->code); i++)
+                        saveBitIntoPack(output, cipher, cipher_key, buffer, pack_pos, xor, iterator->code[i] == '1' ? 1 : 0);
+                    break;
+                }
+                else
+                    iterator = iterator->next;
+            }
+            tempCode = temp;
+            currentBits = 4;
         }
     }
 #ifdef DEBUG
@@ -140,7 +173,7 @@ void saveBitIntoPack(FILE *output, bool cipher, char *cipher_key, pack_t *buffer
         (*xor) ^= buffer->chars.out; // uwzglednienie znaku w sumie kontrolnej 
 #ifdef DEBUG
         // wyswietlenie zapisanego znaku wraz z jego kodem na stderr
-        fprintf(stderr, "Saved to file the according symbol: %c (code: %d)\n", buffer->chars.out, (int)buffer->chars.out);
+        //fprintf(stderr, "Saved to file the according symbol: %c (code: %d)\n", buffer->chars.out, (int)buffer->chars.out);
 #endif
         *pack_pos -= 8; // zmniejsz pozycje o 8 bitow
     }

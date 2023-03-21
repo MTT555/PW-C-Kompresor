@@ -18,13 +18,6 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-	// // Sprawdzenie, czy nazwy plikow na pewno zostaly podane
-	// if(argc < 3) {
-	// 	fprintf(stderr, "%s: Too few arguments!\n\n", argv[0]);
-	// 	help(stderr);
-	// 	return 1;
-	// }
-
 	// Wczytuje tekst uzytkownika z pliku
 	// Nazwe pliku podajemy jako pierwszy argument wywolania
 	FILE *in = argc > 1 ? fopen(argv[1], "rb") : stdin;
@@ -141,16 +134,32 @@ int main(int argc, char *argv[]) {
 		else
 			decomp = true;
 	}
-
+	
+	int tempCode = 0, currentBits = 0; // tymczasowy kod wczytanego znaku oraz ilosc obecne wczytanych bitow
+	
 	if(comp) { // jezeli ma zostac wykonana kompresja
 		count *head; //tworze glowe listy w ktorej bede przechowywal zliczenia
 		runCounter(&head);
+		
 
 		// wczytuje i zliczam znak po znaku
-		for(i = 0 ; i < input_eof; i++) {
+		for(i = 0; i < input_eof; i++) {
 			c = fgetc(in);
-			if(checkIfElementIsOnTheList(&head, c) == 1) {
-				addToTheList(&head, c);
+			currentBits += 8;
+			tempCode <<= 8;
+			tempCode += (int)c;
+			if(currentBits == comp_level) {
+				if(checkIfElementIsOnTheList(&head, tempCode) == 1)
+					addToTheList(&head, tempCode);
+				tempCode = 0;
+				currentBits = 0;
+			} else if (currentBits >= comp_level) { // taki przypadek wystapi jedynie w kompresji 12-bit
+				int temp = tempCode % 16;
+				tempCode >>= 4;
+				if(checkIfElementIsOnTheList(&head, tempCode) == 1)
+					addToTheList(&head, tempCode);
+				tempCode = temp;
+				currentBits = 4;
 			}
 		}
 

@@ -1,13 +1,13 @@
 #include "countCharacters.h"
 #include <stdlib.h>
 #include <stdio.h>
+
 void runCounter(count **head){
-
-(*head) = malloc(sizeof(count));
-(*head) = NULL;
-
+	(*head) = malloc(sizeof(count));
+	(*head) = NULL;
 }
-void addToTheList(count **head, char character){
+
+void addToTheList(count **head, int character){
 //dodaje znak do listy jezeli jeszcze go nie ma
 count *new;
 new = malloc(sizeof(count));
@@ -18,7 +18,7 @@ new->next = (*head);
 
 }
 
-int checkIfElementIsOnTheList(count **head, char character){
+int checkIfElementIsOnTheList(count **head, int character) {
 //jezeli element jest na liscie, zwroc 0 w przeciwnym razie zwroc 1
 count *iterator = (*head);
 while(iterator != NULL){
@@ -33,16 +33,13 @@ return 1;
 }
 
 void showList(count **head, FILE *stream){
-
-count *iterator = (*head);
-while (iterator != NULL){
-
-fprintf(stream, "Character: %c, Code: %d, Amount: %d\n",iterator->character, iterator->character,iterator->amount);
-iterator = iterator->next;
+	count *iterator = (*head);
+	while (iterator != NULL) {
+		fprintf(stream, "Character: %d, Amount: %d\n", iterator->character, iterator->amount);
+		iterator = iterator->next;
+	}
 }
 
-
-}
 void sortTheList(count **head){
 //sortuje liste niemalejaco algorytmem sortowania babelkowego
 
