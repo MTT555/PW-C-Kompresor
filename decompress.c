@@ -9,7 +9,7 @@ static char cipher_key[] = "Politechnika_Warszawska"; // klucz szyfrowania
 static int cipher_pos = 0; // pozycja w szyfrze
 static char *buffer = NULL;
 static int buf_pos = 0; // aktualna pozycja w buforze
-static int cur_buf_size = 512; // aktualna wielkosc buforu
+static int cur_buf_size = 4096; // aktualna wielkosc buforu
 static char *code_buf = NULL; // bufor dla kodow znakow
 static int code_buf_pos = 0; // aktualna pozycja w buforze dla kodow
 static mod_t mode = dictRoad; // zmienna przechowujaca aktualny tryb czytania pliku
@@ -41,6 +41,7 @@ void decompress(FILE *input, FILE *output) {
     char c = fgetc(input);
     int comp_level = ((c & 0b11000000) >> 6) * 4 + 4; // odczytanie poziomu kompresji
     int cipher = (c & 0b00100000) >> 5; // odczytanie szyfrowania
+    bool endingZero = c & 0b00010000 ? true : false; // sprawdzenie, czy konieczne bedzie odlaczenie koncowego zera
     int ending = c & 0b00000111; // odczytanie ilosci bitow konczacych
 #ifdef DEBUG
     // wyswietlenie odczytanych wartosci na stderr
@@ -56,9 +57,9 @@ void decompress(FILE *input, FILE *output) {
             cipher_pos++;
         }
         if(i != end_pos - 1)
-            analyzeBits(output, c, comp_level, &list, 0);
+            analyzeBits(output, c, comp_level, &list, 0, false);
     }
-    analyzeBits(output, c, comp_level, &list, ending);
+    analyzeBits(output, c, comp_level, &list, ending, true);
     fprintf(stderr, "File successfully decompressed!\n");
 #ifdef DEBUG
     if(input != stdin && output != stdout) {
@@ -66,7 +67,7 @@ void decompress(FILE *input, FILE *output) {
             fprintf(stderr, "File size reduced by %.2f%%\n", 100 - 100 * (double)ftell(output)/end_pos);
         else
             fprintf(stderr, "File size increased by %.2f%%\n", 100 * (double)ftell(output)/end_pos - 100);
-        fprintf(stderr, "Input: %ld, output: %ld\n", ftell(input), end_pos);
+        fprintf(stderr, "Input: %ld, output: %ld\n", end_pos, ftell(output));
     }
 #endif
     free(buffer); // czyszczenie pamieci zaraz przed zakonczeniem funkcji
@@ -78,8 +79,9 @@ Funkcja do analizy kolejnych bitow danego chara z pliku skompresowanego
     char c - znak analizowany
     int comp_level - poziom kompresji podany w bitach (dla comp_level == 0 - brak kompresji)
     short ending - ilosc koncowych bitow do porzucenia w tym znaku (zazwyczaj 0)
+    bool endingZero - zmienna odpowiedzialna za sprawdzanie czy pominac nadmiarowy koncowy znak zerowy podczas zapisu
 */
-void analyzeBits(FILE *output, char c, int comp_level, listCodes **list, short ending) {
+void analyzeBits(FILE *output, char c, int comp_level, listCodes **list, short ending, bool endingZero) {
     int i;
     short bits = 0; // ilosc przeanalizowanych bitow
     short cur_bit = 0; // wartosc obecnie analizowanego bitu
@@ -132,7 +134,7 @@ void analyzeBits(FILE *output, char c, int comp_level, listCodes **list, short e
                 buffer[buf_pos++] = '0' + returnBit(c, bits);
                 buffer[buf_pos] = '\0';
                 bits++;
-                if(compareBuffer(list, buffer, output, comp_level))
+                if(compareBuffer(list, buffer, output, comp_level, endingZero))
                     buf_pos = 0;
                 break;
             }
@@ -227,7 +229,7 @@ Jezeli tak, to zapisuje ta litere do podanego pliku
     FILE *stream - strumien, w ktorym ma zostac wydrukowana litera
 Zwraca true, jezeli jakis znak zostal znaleziony, w przeciwnym wypadku false
 */
-bool compareBuffer(listCodes **list, char *buf, FILE *stream, int comp_level) {
+bool compareBuffer(listCodes **list, char *buf, FILE *stream, int comp_level, bool endingZero) {
     listCodes *iterator = (*list);
     while (iterator != NULL) {
         if(strcmp(iterator->code, buf) == 0) {
@@ -242,13 +244,13 @@ bool compareBuffer(listCodes **list, char *buf, FILE *stream, int comp_level) {
                 if(currentBits == 12) {
                     int temp = tempCode % 16;
                     tempCode >>= 4;
-                    fprintf(stderr, "c%d ", tempCode);
                     fprintf(stream, "%c", (char)(tempCode));
                     tempCode = temp;
                     currentBits = 4;
                 } else {
-                    fprintf(stderr, "c%d c%d ", ((tempCode) / (1 << 8)), (tempCode));
-                    fprintf(stream, "%c%c", (char)((tempCode) / (1 << 8)), (char)(tempCode));
+                    fprintf(stream, "%c", (char)((tempCode) / (1 << 8)));
+                    if(!endingZero)
+                        fprintf(stream, "%c", (char)(tempCode));
                     tempCode = 0;
                     currentBits = 0;
                 }

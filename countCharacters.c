@@ -67,7 +67,7 @@ void swap(count *ptr1, count *ptr2){
 	int temp = ptr1->amount;
 	ptr1->amount = ptr2->amount;
 	ptr2->amount = temp;
-	char temp_c = ptr1->character;
+	int temp_c = ptr1->character;
 	ptr1->character = ptr2->character;
 	ptr2->character = temp_c;
 

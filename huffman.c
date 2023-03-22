@@ -13,7 +13,7 @@ static char cipher_key[] = "Politechnika_Warszawska"; // klucz szyfrowania
 static char xor = (char)0b10110111; // ustawienie poczatkowej wartosci sumy kontrolnej
 static char *road_buffer = NULL; // tymczasowe przechowywanie drogi przed zapisem do pliku
 static int road_pos = 0; // ilosc aktualnie zapisanych bitow na droge
-static int cur_buf_size = 512; // obecna wielkosc bufora, zmieniana, gdy trzeba uzyc realloca
+static int cur_buf_size = 4096; // obecna wielkosc bufora, zmieniana, gdy trzeba uzyc realloca
 
 /**
 Funkcja wykonujaca kompresje algorytmem Huffmana
@@ -57,14 +57,14 @@ void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **hea
         nodeptr2->next = nodeptr1;
     }
 
-    int *code; //tu przechowujemy poszczegolne kody znakow
+    int code[48]; //tu przechowujemy poszczegolne kody znakow
     //ustawiamy maksymalna ilosc bitow w zaleznosci od zmiennej comp_level
-    if(comp_level == 8)
-        code = malloc(sizeof(int)*8);
-    else if(comp_level == 12)
-        code = malloc(sizeof(int)*12);
-    else if(comp_level == 16)
-        code = malloc(sizeof(int)*16);
+    // if(comp_level == 8)
+    //     code = malloc(sizeof(int)*8);
+    // else if(comp_level == 12)
+    //     code = malloc(sizeof(int)*50);
+    // else if(comp_level == 16)
+    //     code = malloc(sizeof(int)*16);
     listCodes *listC = NULL; //lista do przechowywania kodow znakow
     create_huffmann_tree(output, head, code, cipher, comp_level, 0, &listC); // tworzenie drzewa Huffmana
     // po zapisaniu calego slownika do pliku trzeba wyraznie zaznaczyc jego koniec

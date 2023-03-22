@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
 	
 	// Wyswietlenie pomocy pliku w wypadku podania jedynie argumentu --h
 	if(argc == 2 && strcmp(argv[1], "-h") == 0) {
-		help(stdout);
+		help(stderr);
 		return 0;
 	}
 
@@ -27,9 +27,9 @@ int main(int argc, char *argv[]) {
 	}
 	// Sprawdzenie, czy nie podano pustego pliku
 	fseek(in, 0, SEEK_END);
-	int input_eof = ftell(in); // znalezienie konca pliku
+	int inputEOF = ftell(in); // znalezienie konca pliku
 	fseek(in, 0, SEEK_SET);	
-	if(input_eof == 0) {
+	if(inputEOF == 0) {
 		fclose(in);
 		fprintf(stderr, "%s: Input file is empty!\n", argv[0]);
 		return 4;
@@ -55,10 +55,10 @@ int main(int argc, char *argv[]) {
 		for(i = 3; i < argc; i++)
 			if(strcmp(argv[i], "-c") == 0) {
 				cipher = true; // argument -c mowiacy, ze wynik dzialania programu ma zostac dodatkowo zaszyfrowany
-				printf("%s: Output encryption has been enabled!\n", argv[0]);
+				fprintf(stderr, "%s: Output encryption has been enabled!\n", argv[0]);
 			}
 			else if(strcmp(argv[i], "-DDEBUG") == 0)
-				printf("%s: Debug mode has been enabled - program will now display various variables and additional information during runtime in stderr!\n", argv[0]);
+				fprintf(stderr, "%s: Debug mode has been enabled - program will now display various variables and additional information during runtime in stderr!\n", argv[0]);
 			else if(strcmp(argv[i], "-o0") == 0) { // brak kompresji
 				if(set_comp_level) {
 					fprintf(stderr, "%s: %s -> Compression level has already been set to \"%s\"! (ignoring...)\n", argv[0], argv[i], comp_mode);
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 					comp_level = 0;
 					strcpy(comp_mode, "none");
 					set_comp_level = true;
-					printf("%s: Compression mode has been set to %s!\n", argv[0], comp_mode);
+					fprintf(stderr, "%s: Compression mode has been set to %s!\n", argv[0], comp_mode);
 				}
 			}
 			else if(strcmp(argv[i], "-o1") == 0) { // kompresja 8-bit
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
 					comp_level = 8;
 					strcpy(comp_mode, "8-bit");
 					set_comp_level = true;
-					printf("%s: Compression mode has been set to %s!\n", argv[0], comp_mode);
+					fprintf(stderr, "%s: Compression mode has been set to %s!\n", argv[0], comp_mode);
 				}
 			}
 			else if(strcmp(argv[i], "-o2") == 0) { // kompresja 12-bit
@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 					comp_level = 12;
 					strcpy(comp_mode, "12-bit");
 					set_comp_level = true;
-					printf("%s: Compression mode has been set to %s!\n", argv[0], comp_mode);
+					fprintf(stderr, "%s: Compression mode has been set to %s!\n", argv[0], comp_mode);
 				}
 			}
 			else if(strcmp(argv[i], "-o3") == 0) { // kompresja 16-bit
@@ -100,12 +100,12 @@ int main(int argc, char *argv[]) {
 					comp_level = 16;
 					strcpy(comp_mode, "16-bit");
 					set_comp_level = true;
-					printf("%s: Compression mode has been set to %s!\n", argv[0], comp_mode);
+					fprintf(stderr, "%s: Compression mode has been set to %s!\n", argv[0], comp_mode);
 				}
 			}
 			else if(strcmp(argv[i], "-h") == 0) {
 				if(!help_displayed) { // wyswietlenie pomocy
-					help(stdout);
+					help(stderr);
 					help_displayed = true;
 				}
 			}
@@ -143,12 +143,19 @@ int main(int argc, char *argv[]) {
 		
 
 		// wczytuje i zliczam znak po znaku
-		for(i = 0; i < input_eof; i++) {
-			c = fgetc(in);
+		for(i = 0; i <= inputEOF; i++) {
+			if(i != inputEOF)
+				c = fgetc(in);
+			else if((comp_level == 12 && (currentBits == 8 || currentBits == 4)) || (comp_level == 16 && currentBits == 8))
+				c = '\0';
+			else
+            	break;
+			
 			currentBits += 8;
 			tempCode <<= 8;
 			tempCode += (int)c;
 			if(currentBits == comp_level) {
+				fprintf(stderr, "tempcode-%d ", tempCode);
 				if(checkIfElementIsOnTheList(&head, tempCode) == 1)
 					addToTheList(&head, tempCode);
 				tempCode = 0;
@@ -166,7 +173,7 @@ int main(int argc, char *argv[]) {
 		sortTheList(&head); //sortuje liste wystapien znakow niemalejaco
 #ifdef DEBUG
 		//wypisujemy liste z wystapieniami
-		showList(&head, stderr);
+		//showList(&head, stderr);
 #endif
 		fseek(in, 0, SEEK_SET); // ustawienie kursora w pliku z powrotem na jego poczatek
 		huffman(in, out, comp_level, cipher, &head);

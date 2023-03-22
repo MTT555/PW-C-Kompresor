@@ -23,14 +23,15 @@ Funkcja wykonujaca zapis do pliku skompresowanego tekstu
 */
 void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, char *cipher_key, listCodes **head, char *xor, pack_t *buffer, short *pack_pos) {
     char c;
-    int i;
-    char ending = (char)0; // ilosc niezapisanych bitow konczacych plik
+    int i, j;
+    char ending = '\0'; // ilosc niezapisanych bitow konczacych plik
     long int end_pos = ftell(output); // zapisanie pozycji koncowej outputu
     unsigned int cipher_len = strlen(cipher_key); // dlugosc szyfru
     int tempCode = 0, currentBits = 0;
 
     fseek(input, 0, SEEK_SET); // ustawienie kursora na poczatek inputu
     listCodes *iterator = NULL; // iterator po liscie kodow
+    bool endingZero = false;
 
     /**
     Poczatek zapisu do pliku - oznaczenie pliku skompresowanego
@@ -46,11 +47,14 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     fseek(input, 0, SEEK_END);
     long int inputEOF = ftell(input);
     fseek(input, 0, SEEK_SET);
-    for(i = 0; i < inputEOF; i++) {
+    for(i = 0; i <= inputEOF; i++) {
         if(i != inputEOF)
             c = fgetc(input);
-        else if((comp_level == 12 && (currentBits == 8 || currentBits == 4)) || (comp_level == 16 && currentBits == 8))
+        else if((comp_level == 12 && (currentBits == 8 || currentBits == 4)) || (comp_level == 16 && currentBits == 8)) {
             c = '\0';
+            if(!(comp_level == 12 && currentBits == 8))
+                endingZero = true;
+        }
         else
             break;
         
@@ -61,8 +65,8 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
             iterator = (*head);
             while (iterator != NULL) {
                 if(iterator->character == tempCode) {
-                    for(i = 0; i < strlen(iterator->code); i++)
-                        saveBitIntoPack(output, cipher, cipher_key, buffer, pack_pos, xor, iterator->code[i] == '1' ? 1 : 0);
+                    for(j = 0; j < strlen(iterator->code); j++)
+                        saveBitIntoPack(output, cipher, cipher_key, buffer, pack_pos, xor, iterator->code[j] == '1' ? 1 : 0);
                     break;
                 }
                 else
@@ -76,8 +80,8 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
             iterator = (*head); // ustawienie iteratora na poczatek przy kazdym nastepnym symbolu
             while (iterator != NULL) {
                 if(iterator->character == tempCode) {
-                    for(i = 0; i < strlen(iterator->code); i++)
-                        saveBitIntoPack(output, cipher, cipher_key, buffer, pack_pos, xor, iterator->code[i] == '1' ? 1 : 0);
+                    for(j = 0; j < strlen(iterator->code); j++)
+                        saveBitIntoPack(output, cipher, cipher_key, buffer, pack_pos, xor, iterator->code[j] == '1' ? 1 : 0);
                     break;
                 }
                 else
@@ -106,19 +110,22 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     Szablon bitowy: 0bKKSCCEEE
     K - sposob kompresji: 00 - brak, 01 - 8-bit, 10 - 12-bit, 11 - 16-bit
     S - szyfrowanie: 0 - nie, 1 - tak
-    C - dodatkowe sprawdzenie, czy ten plik jest skompresowany: 11 - tak, cokolwiek innego - nie
+    Z - zapisanie informacji, czy konieczne bedzie usuniecie nadmiarowego znaku \0 z konca pliku podczas dekompresji
+    C - dodatkowe sprawdzenie, czy ten plik jest skompresowany: 0 - nie, 1 - tak
     E - ilosc niezapisanych bitow konczacych zapisana binarnie
     */
     fseek(output, 2, SEEK_SET); // powrot kursora w pliku do znaku F
-    char flags = 0b00011000 | ending; // zapisanie pozycji koncowej do flag oraz informacji, ze plik jest skompresowany
+    char flags = (char)0b00001000 | ending; // zapisanie pozycji koncowej do flag oraz informacji, ze plik jest skompresowany
     if(comp_level == 8) // zapis informacji o poziomie kompresji pliku
-        flags |= 0b01000000;
+        flags |= (char)0b01000000;
     else if(comp_level == 12)
-        flags |= 0b10000000;
+        flags |= (char)0b10000000;
     else if(comp_level == 16)
-        flags |= 0b11000000;
+        flags |= (char)0b11000000;
     if(cipher)
-        flags |= 0b00100000;
+        flags |= (char)0b00100000;
+    if(endingZero)
+        flags |= (char)0b00010000;
     fprintf(output, "%c", flags); // wydrukowanie pojedynczego znaku zawierajacego wszystkie flagi
 
     /// Suma kontrolna xor
@@ -140,17 +147,6 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
         fprintf(stderr, "Input: %ld, output: %ld\n", ftell(input), end_pos);
     }
 #endif
-}
-
-/**
-Funkcja wykonujaca zapis do pliku tekstu po dekompresji
-    FILE *input - plik wejsciowy zawierajacy tekst skompresowany
-    FILE *output - plik wyjsciowy, w ktorym zostanie zapisany tekst po dekompresji
-    char *cipher_key - klucz szyfrowania (odszyfrowanie sie nie powiedzie, jezeli bedzie rozny od klucza uzytego podczas kompresji)
-*/
-void decompressedToFile(FILE *in, FILE *out, char *cipher_key) {
-    unsigned int cipher_pos = 0; // zmienna przechowujaca aktualna pozycje w szyfrze
-    unsigned int cipher_len = strlen(cipher_key); // dlugosc szyfru
 }
 
 /**

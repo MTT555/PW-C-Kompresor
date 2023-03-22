@@ -48,7 +48,7 @@ Funkcja sprawdzajaca podany plik pod wzgledem nadawania sie do dekompresji
 2. Sprawdzenie sumy kontrolnej
     FILE *in - plik wejsciowy, ktory ma zostac sprawdzony pod wzgledem poprawnosci
     char xor_correct_value - wartosc startowa, od ktorej byly wykonywane sumy kontrolne podczas procesu kompresji
-    bool displayMsg - wyswietlanie informacji o sprawdzanym pliku na stdout w przypadku, gdy nie spelnia wymogow do dekompresji (jesli == true)
+    bool displayMsg - wyswietlanie informacji o sprawdzanym pliku na stderr w przypadku, gdy nie spelnia wymogow do dekompresji (jesli == true)
 Zwraca:
     0 - plik jest prawidlowy, mozna go dekompresowac
     1 - brak inicjalow na poczatku, plik nie pochodzi z kompresji
@@ -66,13 +66,13 @@ int fileIsGood(FILE *in, char xor_correct_value, bool displayMsg) {
     if((c = fgetc(in)) != 'C' || (c = fgetc(in)) != 'T') {
         fseek(in, 0, SEEK_SET);
         if(displayMsg)
-            printf("Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
+            fprintf(stderr, "Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
         return 1;
     }
-    if(!((c = fgetc(in)) & 0b00011000)) {
+    if(!((c = fgetc(in)) & 0b00001000)) {
         fseek(in, 0, SEEK_SET);
         if(displayMsg)
-            printf("Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
+            fprintf(stderr, "Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
         return 2;
     }
     
@@ -88,13 +88,15 @@ int fileIsGood(FILE *in, char xor_correct_value, bool displayMsg) {
     fseek(in, 0, SEEK_SET);
 #ifdef DEBUG
     // wyswietlenie wyliczonej sumy kontrolnej na stderr
-    fprintf(stderr, "Control sum XOR: %d\n", xor);
+    if(displayMsg)
+        fprintf(stderr, "Control sum XOR: %d\n", xor);
 #endif
 
     // jezeli xory sie zgadzaja, to plik jest prawidlowy
     if(xor == xor_correct_value) {
 #ifdef DEBUG
-        fprintf(stderr, "Provided file can be decompressed! (XOR value: %d)\n", (int)xor);
+        if(displayMsg)
+            fprintf(stderr, "Provided file can be decompressed! (XOR value: %d)\n", (int)xor);
 #endif
         return 0;
     }
