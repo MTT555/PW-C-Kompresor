@@ -67,7 +67,9 @@ int main(int argc, char *argv[]) {
 					comp_level = 0;
 					strcpy(comp_mode, "none");
 					set_comp_level = true;
-					fprintf(stderr, "%s: Compression mode has been set to %s!\n", argv[0], comp_mode);
+					comp = true;
+					strcpy(prog_behaviour, "force compression");
+					fprintf(stderr, "%s: Compression mode has been set to %s and program behaviour has been changed to \"force compression\"!\n", argv[0], comp_mode);
 				}
 			}
 			else if(strcmp(argv[i], "-o1") == 0) { // kompresja 8-bit
@@ -78,7 +80,9 @@ int main(int argc, char *argv[]) {
 					comp_level = 8;
 					strcpy(comp_mode, "8-bit");
 					set_comp_level = true;
-					fprintf(stderr, "%s: Compression mode has been set to %s!\n", argv[0], comp_mode);
+					comp = true;
+					strcpy(prog_behaviour, "force compression");
+					fprintf(stderr, "%s: Compression mode has been set to %s and program behaviour has been changed to \"force compression\"!\n", argv[0], comp_mode);
 				}
 			}
 			else if(strcmp(argv[i], "-o2") == 0) { // kompresja 12-bit
@@ -89,7 +93,9 @@ int main(int argc, char *argv[]) {
 					comp_level = 12;
 					strcpy(comp_mode, "12-bit");
 					set_comp_level = true;
-					fprintf(stderr, "%s: Compression mode has been set to %s!\n", argv[0], comp_mode);
+					comp = true;
+					strcpy(prog_behaviour, "force compression");
+					fprintf(stderr, "%s: Compression mode has been set to %s and program behaviour has been changed to \"force compression\"!\n", argv[0], comp_mode);
 				}
 			}
 			else if(strcmp(argv[i], "-o3") == 0) { // kompresja 16-bit
@@ -100,7 +106,9 @@ int main(int argc, char *argv[]) {
 					comp_level = 16;
 					strcpy(comp_mode, "16-bit");
 					set_comp_level = true;
-					fprintf(stderr, "%s: Compression mode has been set to %s!\n", argv[0], comp_mode);
+					comp = true;
+					strcpy(prog_behaviour, "force compression");
+					fprintf(stderr, "%s: Compression mode has been set to %s and program behaviour has been changed to \"force compression\"!\n", argv[0], comp_mode);
 				}
 			}
 			else if(strcmp(argv[i], "-h") == 0) {
@@ -110,18 +118,20 @@ int main(int argc, char *argv[]) {
 				}
 			}
 			else if(strcmp(argv[i], "-x") == 0) // wymuszenie kompresji
-				if(comp)
+				if(comp || decomp)
 					fprintf(stderr, "%s: %s -> Program behaviour has already been set to: \"%s\"! (ignoring...)\n", argv[0], argv[i], prog_behaviour);
 				else {
 					comp = true;
 					strcpy(prog_behaviour, "force compression");
+					fprintf(stderr, "%s: Program behaviour has been set to \"%s\"!\n", argv[0], prog_behaviour);
 				}
 			else if(strcmp(argv[i], "-d") == 0) // wymuszenie dekompresji
-				if(comp)
+				if(comp || decomp)
 					fprintf(stderr, "%s: %s -> Program behaviour has already been set to: \"%s\"! (ignoring...)\n", argv[0], argv[i], prog_behaviour);
 				else {
 					decomp = true;
 					strcpy(prog_behaviour, "force decompression");
+					fprintf(stderr, "%s: Program behaviour has been set to \"%s\"!\n", argv[0], prog_behaviour);
 				}
 			else // pominiecie niezidentyfikowanych argumentow
 				fprintf(stderr, "%s: %s -> Unknown argument! (ignoring...)\n", argv[0], argv[i]);

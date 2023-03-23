@@ -1,6 +1,6 @@
 compile:
 	cc -o program main.c countCharacters.c cipher.c utils.c huffman.c output.c decompress.c
-	./program tekst out
+	./program ala.in out -d -o3 -c
 
 debug:
 	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c output.c decompress.c -Wall -pedantic

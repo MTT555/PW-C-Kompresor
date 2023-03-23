@@ -23,7 +23,7 @@ void help(FILE *stream) {
                           "-x - force compression\n"
                           "-d - force decompression\n\n"
                           "-DDEBUG - shows various variables during the runtime of the program in stderr\n\n"
-                          "Related to compression level:\n"
+                          "Related to compression level (if provided, program behaviour will be automatically changed to \"force compression\"):\n"
                           "-o0 - input string will not be compressed at all (default)\n"
                           "-o1 - input string will go under 8-bit Huffmann compression\n"
                           "-o2 - input string will go under 12-bit Huffmann compression\n"
