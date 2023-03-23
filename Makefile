@@ -22,7 +22,15 @@ valgrind_full:
 	cc -o valgrind main.c countCharacters.c cipher.c utils.c huffman.c output.c decompress.c -Wall -pedantic
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./valgrind tekst out
 
-ala:
+ala0:
+	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c output.c decompress.c -Wall -pedantic
+	./debug ala.in out -o0
+
+ala0c:
+	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c output.c decompress.c -Wall -pedantic
+	./debug ala.in out -o0 -c
+
+ala1:
 	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c output.c decompress.c -Wall -pedantic
 	./debug ala.in out
 

@@ -40,16 +40,30 @@ void decompress(FILE *input, FILE *output) {
     fseek(input, 2, SEEK_SET); // ustawienie kursora na trzeci znak w celu odczytania flag
     char c = fgetc(input);
     int comp_level = ((c & 0b11000000) >> 6) * 4 + 4; // odczytanie poziomu kompresji
+    if(comp_level == 4)
+        comp_level = 0;
     int cipher = (c & 0b00100000) >> 5; // odczytanie szyfrowania
     bool endingZero = c & 0b00010000 ? true : false; // sprawdzenie, czy konieczne bedzie odlaczenie koncowego zera
     int ending = c & 0b00000111; // odczytanie ilosci bitow konczacych
 #ifdef DEBUG
     // wyswietlenie odczytanych wartosci na stderr
     fprintf(stderr, "The following values have been read: "
-        "compression level: %d, encrypted: %s, ending bits: %d\n", comp_level, cipher ? "true" : "false", ending);
+        "compression level: %d, encrypted: %s, ending bits: %d, reduntant '\\0' symbol: %s\n",
+        comp_level, cipher ? "true" : "false", ending, endingZero ? "true" : "false");
 #endif
     fseek(input, 4, SEEK_SET);
     int cipher_len = strlen(cipher_key);
+
+    // przypadek pliku nieskompresowanego, ale zaszyfrowanego
+    if(comp_level == 0 && cipher) {
+        for(i = 4; i < end_pos; i++) {
+            c = fgetc(input);
+            c -= cipher_key[cipher_pos % cipher_len];
+            cipher_pos++;
+            fprintf(output, "%c", c);
+        }
+        return;
+    }
     for(i = 4; i < end_pos; i++) {
         c = fgetc(input);
         if(cipher) {
@@ -59,7 +73,7 @@ void decompress(FILE *input, FILE *output) {
         if(i != end_pos - 1)
             analyzeBits(output, c, comp_level, &list, 0, false);
     }
-    analyzeBits(output, c, comp_level, &list, ending, true);
+    analyzeBits(output, c, comp_level, &list, ending, endingZero);
     fprintf(stderr, "File successfully decompressed!\n");
 #ifdef DEBUG
     if(input != stdin && output != stdout) {
@@ -134,7 +148,7 @@ void analyzeBits(FILE *output, char c, int comp_level, listCodes **list, short e
                 buffer[buf_pos++] = '0' + returnBit(c, bits);
                 buffer[buf_pos] = '\0';
                 bits++;
-                if(compareBuffer(list, buffer, output, comp_level, endingZero))
+                if(compareBuffer(list, buffer, output, comp_level, bits == 8 - ending ? endingZero : false))
                     buf_pos = 0;
                 break;
             }
@@ -235,8 +249,11 @@ bool compareBuffer(listCodes **list, char *buf, FILE *stream, int comp_level, bo
         if(strcmp(iterator->code, buf) == 0) {
             if(comp_level == 8)
                 fprintf(stream, "%c", iterator->character);
-            else if(comp_level == 16)
-                fprintf(stream, "%c%c", (char)((iterator->character) / (1 << 8)), (char)(iterator->character));
+            else if(comp_level == 16) {
+                fprintf(stream, "%c", (char)((iterator->character) / (1 << 8)));
+                if(!endingZero)
+                    fprintf(stream, "%c", (char)(iterator->character));
+            }
             else if(comp_level == 12) {
                 tempCode <<= 12;
                 tempCode += iterator->character;

@@ -137,47 +137,67 @@ int main(int argc, char *argv[]) {
 	
 	int tempCode = 0, currentBits = 0; // tymczasowy kod wczytanego znaku oraz ilosc obecne wczytanych bitow
 	
+	
 	if(comp) { // jezeli ma zostac wykonana kompresja
-		count *head; //tworze glowe listy w ktorej bede przechowywal zliczenia
-		runCounter(&head);
-		
-
-		// wczytuje i zliczam znak po znaku
-		for(i = 0; i <= inputEOF; i++) {
-			if(i != inputEOF)
+		if(comp_level == 0 && !cipher) {
+			fprintf(stderr, "%s: Due to chosen settings, file has been rewritten to \"%s\" with no changes!\n", argv[0], argc > 2 ? argv[2] : "stdout");
+			for(i = 0; i < inputEOF; i++)
+				fprintf(out, "%c", fgetc(in));
+		} else if(comp_level == 0 && cipher) {
+			char xor = (char)0b10110111;
+			char cipher_key[] = "Politechnika_Warszawska";
+			int cipher_pos = 0;
+			int cipher_len = strlen(cipher_key);
+			fprintf(out, "CT%cX", (char)0b00101000); // zapalone bity szyfrowania i kompresji, zeby dzialala funkcja fileIsGood()
+			for(i = 0; i < inputEOF; i++) {
 				c = fgetc(in);
-			else if((comp_level == 12 && (currentBits == 8 || currentBits == 4)) || (comp_level == 16 && currentBits == 8))
-				c = '\0';
-			else
-            	break;
-			
-			currentBits += 8;
-			tempCode <<= 8;
-			tempCode += (int)c;
-			if(currentBits == comp_level) {
-				fprintf(stderr, "tempcode-%d ", tempCode);
-				if(checkIfElementIsOnTheList(&head, tempCode) == 1)
-					addToTheList(&head, tempCode);
-				tempCode = 0;
-				currentBits = 0;
-			} else if (currentBits >= comp_level) { // taki przypadek wystapi jedynie w kompresji 12-bit
-				int temp = tempCode % 16;
-				tempCode >>= 4;
-				if(checkIfElementIsOnTheList(&head, tempCode) == 1)
-					addToTheList(&head, tempCode);
-				tempCode = temp;
-				currentBits = 4;
+				c += cipher_key[cipher_pos % cipher_len];
+				cipher_pos++;
+				fprintf(out, "%c", c);
+				xor ^= c;
 			}
-		}
+			fseek(out, 3, SEEK_SET);
+			fprintf(out, "%c", xor);
+		} else {
+			count *head; //tworze glowe listy w ktorej bede przechowywal zliczenia
+			runCounter(&head);
+			
+			// wczytuje i zliczam znak po znaku
+			for(i = 0; i <= inputEOF; i++) {
+				if(i != inputEOF)
+					c = fgetc(in);
+				else if((comp_level == 12 && (currentBits == 8 || currentBits == 4)) || (comp_level == 16 && currentBits == 8))
+					c = '\0';
+				else
+					break;
+				
+				currentBits += 8;
+				tempCode <<= 8;
+				tempCode += (int)c;
+				if(currentBits == comp_level) {
+					if(checkIfElementIsOnTheList(&head, tempCode) == 1)
+						addToTheList(&head, tempCode);
+					tempCode = 0;
+					currentBits = 0;
+				} else if (currentBits >= comp_level) { // taki przypadek wystapi jedynie w kompresji 12-bit
+					int temp = tempCode % 16;
+					tempCode >>= 4;
+					if(checkIfElementIsOnTheList(&head, tempCode) == 1)
+						addToTheList(&head, tempCode);
+					tempCode = temp;
+					currentBits = 4;
+				}
+			}
 
-		sortTheList(&head); //sortuje liste wystapien znakow niemalejaco
+			sortTheList(&head); //sortuje liste wystapien znakow niemalejaco
 #ifdef DEBUG
-		//wypisujemy liste z wystapieniami
-		//showList(&head, stderr);
+			//wypisujemy liste z wystapieniami
+			//showList(&head, stderr);
 #endif
-		fseek(in, 0, SEEK_SET); // ustawienie kursora w pliku z powrotem na jego poczatek
-		huffman(in, out, comp_level, cipher, &head);
-		freeList(&head);
+			fseek(in, 0, SEEK_SET); // ustawienie kursora w pliku z powrotem na jego poczatek
+			huffman(in, out, comp_level, cipher, &head);
+			freeList(&head);
+		}
 	}
 	else if(decomp) { // jezeli ma zostac wykonana dekompresja
 		int fileCheck = fileIsGood(in, (char)0b10110111, true);
