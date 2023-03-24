@@ -24,8 +24,8 @@ Funkcja dekompresujaca dany plik pochodzacy z tego kompresora
 void decompress(FILE *input, FILE *output) {
     int i;
     listCodes *list = NULL; // lista na przechowanie odczytanego slownika
-    buffer = malloc(512 * sizeof(char)); // alokacja pamieci na bufor
-    code_buf = malloc(512 * sizeof(char));
+    buffer = malloc(4096 * sizeof(char)); // alokacja pamieci na bufor
+    code_buf = malloc(4096 * sizeof(char));
     head = malloc(sizeof(dnode_t));
     head->prev = NULL;
     head->left = NULL;
@@ -38,7 +38,8 @@ void decompress(FILE *input, FILE *output) {
     fseek(input, 0 , SEEK_SET);
 
     fseek(input, 2, SEEK_SET); // ustawienie kursora na trzeci znak w celu odczytania flag
-    char c = fgetc(input);
+    char c;
+    fread(&c, sizeof(char), 1, input);
     int comp_level = ((c & 0b11000000) >> 6) * 4 + 4; // odczytanie poziomu kompresji
     if(comp_level == 4)
         comp_level = 0;
@@ -57,7 +58,7 @@ void decompress(FILE *input, FILE *output) {
     // przypadek pliku nieskompresowanego, ale zaszyfrowanego
     if(comp_level == 0 && cipher) {
         for(i = 4; i < end_pos; i++) {
-            c = fgetc(input);
+            fread(&c, sizeof(char), 1, input);
             c -= cipher_key[cipher_pos % cipher_len];
             cipher_pos++;
             fprintf(output, "%c", c);
@@ -65,7 +66,7 @@ void decompress(FILE *input, FILE *output) {
         return;
     }
     for(i = 4; i < end_pos; i++) {
-        c = fgetc(input);
+        fread(&c, sizeof(char), 1, input);
         if(cipher) {
             c -= cipher_key[cipher_pos % cipher_len];
             cipher_pos++;
@@ -136,6 +137,7 @@ void analyzeBits(FILE *output, char c, int comp_level, listCodes **list, short e
                         result *= 2;
                         result += buffer[i];
                     }
+                    fprintf(stderr, "%d", result);
                     addCode(list, result, code_buf);
                     buf_pos = 0;
                     it = it->prev;

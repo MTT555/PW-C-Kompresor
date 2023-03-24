@@ -23,7 +23,7 @@ void help(FILE *stream) {
                           "-x - force compression\n"
                           "-d - force decompression\n\n"
                           "-DDEBUG - shows various variables during the runtime of the program in stderr\n\n"
-                          "Related to compression level:\n"
+                          "Related to compression level (if provided, program behaviour will be automatically changed to \"force compression\"):\n"
                           "-o0 - input string will not be compressed at all (default)\n"
                           "-o1 - input string will go under 8-bit Huffmann compression\n"
                           "-o2 - input string will go under 12-bit Huffmann compression\n"
@@ -62,14 +62,23 @@ int fileIsGood(FILE *in, char xor_correct_value, bool displayMsg) {
     fseek(in, 0, SEEK_SET); // ustawienie strumienia pliku na poczatek
     char c;
     int i;
-
-    if((c = fgetc(in)) != 'C' || (c = fgetc(in)) != 'T') {
+    
+    fread(&c, sizeof(char), 1, in);
+    if(c != 'C') {
         fseek(in, 0, SEEK_SET);
         if(displayMsg)
             fprintf(stderr, "Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
         return 1;
     }
-    if(!((c = fgetc(in)) & 0b00001000)) {
+    fread(&c, sizeof(char), 1, in);
+    if(c != 'T') {
+        fseek(in, 0, SEEK_SET);
+        if(displayMsg)
+            fprintf(stderr, "Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
+        return 1;
+    }
+    fread(&c, sizeof(char), 1, in);
+    if(!(c & 0b00001000)) {
         fseek(in, 0, SEEK_SET);
         if(displayMsg)
             fprintf(stderr, "Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
@@ -77,11 +86,12 @@ int fileIsGood(FILE *in, char xor_correct_value, bool displayMsg) {
     }
     
     // po sprawdzeniu oznaczen zapisuje wszystkie potrzebne informacje z bajtu flagowego
-    char xor = fgetc(in); // odczytanie wyniku sumy kontrolnej
+    char xor; // odczytanie wyniku sumy kontrolnej
+    fread(&xor, sizeof(char), 1, in);
 
     /// sprawdzanie sumy kontrolnej xor
     for(i = 4; i < end_pos; i ++) {
-        c = fgetc(in);
+        fread(&c, sizeof(char), 1, in);
         xor ^= c;
     }
     // ustawienie strumienia z powrotem na poczatek przed zakonczeniem dzialania funkcji   
@@ -103,6 +113,6 @@ int fileIsGood(FILE *in, char xor_correct_value, bool displayMsg) {
     
     // jezeli plik uszkodzony
     if(displayMsg)
-        printf("Provided file cannot be decompressed since it is corrupted!\n");
+        fprintf(stderr, "Provided file cannot be decompressed since it is corrupted!\n");
     return 3;
 }

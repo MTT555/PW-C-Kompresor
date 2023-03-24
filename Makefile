@@ -1,10 +1,10 @@
 compile:
 	cc -o program main.c countCharacters.c cipher.c utils.c huffman.c output.c decompress.c
-	./program tekst out
+	./program ala.in out -d -o3 -c
 
 debug:
 	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c output.c decompress.c -Wall -pedantic
-	./debug tekst out
+	./debug tekst out 2>logst
 
 debug2:
 	cc -o debug -DDEBUG main.c countCharacters.c cipher.c utils.c huffman.c output.c decompress.c -Wall -pedantic

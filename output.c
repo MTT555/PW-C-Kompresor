@@ -49,7 +49,7 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     fseek(input, 0, SEEK_SET);
     for(i = 0; i <= inputEOF; i++) {
         if(i != inputEOF)
-            c = fgetc(input);
+            fread(&c, sizeof(char), 1, input);
         else if((comp_level == 12 && (currentBits == 8 || currentBits == 4)) || (comp_level == 16 && currentBits == 8)) {
             c = '\0';
             if(!(comp_level == 12 && currentBits == 8))
