@@ -1,14 +1,10 @@
 compile:
 	cc -o program main.c countCharacters.c utils.c huffman.c output.c decompress.c
-	./program ala.in out -d -o3 -c
+	./program ala.in out
 
 debug:
 	cc -o debug -DDEBUG main.c countCharacters.c utils.c huffman.c output.c decompress.c -Wall -pedantic
-	./debug tekst out 2>logst
-
-debug2:
-	cc -o debug -DDEBUG main.c countCharacters.c utils.c huffman.c output.c decompress.c -Wall -pedantic
-	./debug tekst out -o2
+	./debug tekst out
 
 gdbdebug:
 	cc -o gdbdebug -ggdb -DDEBUG main.c countCharacters.c utils.c huffman.c output.c decompress.c -Wall -pedantic
@@ -41,10 +37,6 @@ ala2:
 ala3:
 	cc -o debug -DDEBUG main.c countCharacters.c utils.c huffman.c output.c decompress.c -Wall -pedantic
 	./debug ala.in out -o3
-
-test_help:
-	cc -o program main.c countCharacters.c utils.c huffman.c output.c decompress.c -Wall -pedantic
-	./program -h
 
 .PHONY: clean
 .SILENT: clean
