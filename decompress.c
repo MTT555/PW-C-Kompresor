@@ -5,12 +5,12 @@
 #include "decompress.h"
 #include "huffman.h"
 
-static char cipher_key[] = "Politechnika_Warszawska"; // klucz szyfrowania
+static unsigned char cipher_key[] = "Politechnika_Warszawska"; // klucz szyfrowania
 static int cipher_pos = 0; // pozycja w szyfrze
-static char *buffer = NULL;
+static unsigned char *buffer = NULL;
 static int buf_pos = 0; // aktualna pozycja w buforze
 static int cur_buf_size = 4096; // aktualna wielkosc buforu
-static char *code_buf = NULL; // bufor dla kodow znakow
+static unsigned char *code_buf = NULL; // bufor dla kodow znakow
 static int code_buf_pos = 0; // aktualna pozycja w buforze dla kodow
 static mod_t mode = dictRoad; // zmienna przechowujaca aktualny tryb czytania pliku
 static dnode_t *head = NULL, *it = NULL; // pomocnicze drzewo dnode oraz pseudoiterator po nim
@@ -24,8 +24,8 @@ Funkcja dekompresujaca dany plik pochodzacy z tego kompresora
 void decompress(FILE *input, FILE *output) {
     int i;
     listCodes *list = NULL; // lista na przechowanie odczytanego slownika
-    buffer = malloc(4096 * sizeof(char)); // alokacja pamieci na bufor
-    code_buf = malloc(4096 * sizeof(char));
+    buffer = malloc(4096 * sizeof(unsigned char)); // alokacja pamieci na bufor
+    code_buf = malloc(4096 * sizeof(unsigned char));
     head = malloc(sizeof(dnode_t));
     head->prev = NULL;
     head->left = NULL;
@@ -38,8 +38,8 @@ void decompress(FILE *input, FILE *output) {
     fseek(input, 0 , SEEK_SET);
 
     fseek(input, 2, SEEK_SET); // ustawienie kursora na trzeci znak w celu odczytania flag
-    char c;
-    fread(&c, sizeof(char), 1, input);
+    unsigned char c;
+    fread(&c, sizeof(unsigned char), 1, input);
     int comp_level = ((c & 0b11000000) >> 6) * 4 + 4; // odczytanie poziomu kompresji
     if(comp_level == 4)
         comp_level = 0;
@@ -58,7 +58,7 @@ void decompress(FILE *input, FILE *output) {
     // przypadek pliku nieskompresowanego, ale zaszyfrowanego
     if(comp_level == 0 && cipher) {
         for(i = 4; i < end_pos; i++) {
-            fread(&c, sizeof(char), 1, input);
+            fread(&c, sizeof(unsigned char), 1, input);
             c -= cipher_key[cipher_pos % cipher_len];
             cipher_pos++;
             fprintf(output, "%c", c);
@@ -66,7 +66,7 @@ void decompress(FILE *input, FILE *output) {
         return;
     }
     for(i = 4; i < end_pos; i++) {
-        fread(&c, sizeof(char), 1, input);
+        fread(&c, sizeof(unsigned char), 1, input);
         if(cipher) {
             c -= cipher_key[cipher_pos % cipher_len];
             cipher_pos++;
@@ -91,12 +91,12 @@ void decompress(FILE *input, FILE *output) {
 /**
 Funkcja do analizy kolejnych bitow danego chara z pliku skompresowanego
     FILE *output - plik wyjsciowy
-    char c - znak analizowany
+    unsigned char c - znak analizowany
     int comp_level - poziom kompresji podany w bitach (dla comp_level == 0 - brak kompresji)
     short ending - ilosc koncowych bitow do porzucenia w tym znaku (zazwyczaj 0)
     bool endingZero - zmienna odpowiedzialna za sprawdzanie czy pominac nadmiarowy koncowy znak zerowy podczas zapisu
 */
-void analyzeBits(FILE *output, char c, int comp_level, listCodes **list, short ending, bool endingZero) {
+void analyzeBits(FILE *output, unsigned char c, int comp_level, listCodes **list, short ending, bool endingZero) {
     int i;
     short bits = 0; // ilosc przeanalizowanych bitow
     short cur_bit = 0; // wartosc obecnie analizowanego bitu
@@ -161,10 +161,10 @@ void analyzeBits(FILE *output, char c, int comp_level, listCodes **list, short e
 
 /**
 Funkcja zwracajaca pozadany bit z danego chara
-    char c - znak
+    unsigned char c - znak
     int x - numer bitu, ktory ma byc zwrocony
 */
-short returnBit(char c, int x) {
+short returnBit(unsigned char c, int x) {
     unsigned char ch = c;
     ch >>= (7 - x);
     return ch % 2;
@@ -211,14 +211,14 @@ void freeDnodeTree(dnode_t *head) {
 Funkcja dodajaca odczytany kod wraz ze znakiem do listy
     listCodes **list - lista, do ktorej chcemy dokonac zapisu
     int character - znak, ktory chcemy zapisac
-    char *code - kod tego znaku
+    unsigned char *code - kod tego znaku
 */
-void addCode(listCodes **list, int character, char *code) {
+void addCode(listCodes **list, int character, unsigned char *code) {
     int i;
     listCodes *new = NULL;
     new = malloc(sizeof(listCodes));
     new->character = character;
-    new->code = malloc(sizeof(char) * (strlen(code) + 1));
+    new->code = malloc(sizeof(unsigned char) * (strlen(code) + 1));
     strcpy(new->code, code);
     new->next = (*list);
     (*list) = new;
@@ -241,20 +241,20 @@ void printList(listCodes **list, FILE *stream) {
 Funkcja sprawdzajaca, czy aktualny fragment kodu w buforze odpowiada jakiejs literze
 Jezeli tak, to zapisuje ta litere do podanego pliku
     listCodes **list - poczatek listy, ktora chcemy wyswietlic
-    char *buf - bufor, ktory mozliwe, ze odpowiada jednej z liter
+    unsigned char *buf - bufor, ktory mozliwe, ze odpowiada jednej z liter
     FILE *stream - strumien, w ktorym ma zostac wydrukowana litera
 Zwraca true, jezeli jakis znak zostal znaleziony, w przeciwnym wypadku false
 */
-bool compareBuffer(listCodes **list, char *buf, FILE *stream, int comp_level, bool endingZero) {
+bool compareBuffer(listCodes **list, unsigned char *buf, FILE *stream, int comp_level, bool endingZero) {
     listCodes *iterator = (*list);
     while (iterator != NULL) {
         if(strcmp(iterator->code, buf) == 0) {
             if(comp_level == 8)
                 fprintf(stream, "%c", iterator->character);
             else if(comp_level == 16) {
-                fprintf(stream, "%c", (char)((iterator->character) / (1 << 8)));
+                fprintf(stream, "%c", (unsigned char)((iterator->character) / (1 << 8)));
                 if(!endingZero)
-                    fprintf(stream, "%c", (char)(iterator->character));
+                    fprintf(stream, "%c", (unsigned char)(iterator->character));
             }
             else if(comp_level == 12) {
                 tempCode <<= 12;
@@ -263,13 +263,13 @@ bool compareBuffer(listCodes **list, char *buf, FILE *stream, int comp_level, bo
                 if(currentBits == 12) {
                     int temp = tempCode % 16;
                     tempCode >>= 4;
-                    fprintf(stream, "%c", (char)(tempCode));
+                    fprintf(stream, "%c", (unsigned char)(tempCode));
                     tempCode = temp;
                     currentBits = 4;
                 } else {
-                    fprintf(stream, "%c", (char)((tempCode) / (1 << 8)));
+                    fprintf(stream, "%c", (unsigned char)((tempCode) / (1 << 8)));
                     if(!endingZero)
-                        fprintf(stream, "%c", (char)(tempCode));
+                        fprintf(stream, "%c", (unsigned char)(tempCode));
                     tempCode = 0;
                     currentBits = 0;
                 }

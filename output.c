@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "cipher.h"
 #include "utils.h"
 #include "countCharacters.h"
 #include "huffman.h"
@@ -15,16 +14,16 @@ Funkcja wykonujaca zapis do pliku skompresowanego tekstu
     FILE *output - plik wyjsciowy, w ktorym zostanie zapisany skompresowany tekst
     int comp_level - poziom kompresji podany w bitach (brak obslugi przypadku braku kompresji)
     bool cipher - zmienna mowiaca, czy tekst ma zostac rowniez zaszyfrowany
-    char *cipher_key - klucz szyfrowania (nieistotny, gdy cipher == false)
+    unsigned char *cipher_key - klucz szyfrowania (nieistotny, gdy cipher == false)
     count **head - glowa listy zawierajaca ilosci wystapien danych znakow
-    char xor_start_value - poczatkowa wartosc bajtu do wykonania sumy kontrolnej
+    unsigned char xor_start_value - poczatkowa wartosc bajtu do wykonania sumy kontrolnej
     pack_t *buffer - union pack uzyty wczesniej do zapisu slownika
     short pack_pos - pozycja ostatniego zajetego bitu w tym packu
 */
-void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, char *cipher_key, listCodes **head, char *xor, pack_t *buffer, short *pack_pos) {
-    char c;
+void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, unsigned char *cipher_key, listCodes **head, unsigned char *xor, pack_t *buffer, short *pack_pos) {
+    unsigned char c;
     int i, j;
-    char ending = '\0'; // ilosc niezapisanych bitow konczacych plik
+    unsigned char ending = '\0'; // ilosc niezapisanych bitow konczacych plik
     long int end_pos = ftell(output); // zapisanie pozycji koncowej outputu
     unsigned int cipher_len = strlen(cipher_key); // dlugosc szyfru
     int tempCode = 0, currentBits = 0;
@@ -49,7 +48,7 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     fseek(input, 0, SEEK_SET);
     for(i = 0; i <= inputEOF; i++) {
         if(i != inputEOF)
-            fread(&c, sizeof(char), 1, input);
+            fread(&c, sizeof(unsigned char), 1, input);
         else if((comp_level == 12 && (currentBits == 8 || currentBits == 4)) || (comp_level == 16 && currentBits == 8)) {
             c = '\0';
             if(!(comp_level == 12 && currentBits == 8))
@@ -97,9 +96,9 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
 #endif
     // po przejsciu po calym pliku, w razie potrzeby tworzymy ostatni "niepelny" znak z pozostalych nadmiarowych zapisanych bitow
     if (*pack_pos <= 8) // jezeli mamy zapelnione mniej lub rowno 8 bitow
-        ending = (char)(8 - *pack_pos);
+        ending = (unsigned char)(8 - *pack_pos);
     else if(*pack_pos <= 16 && *pack_pos > 8)
-        ending = (char)(16 - *pack_pos);
+        ending = (unsigned char)(16 - *pack_pos);
     for(i = 0; i <= (int)ending + 8; i++) // dopychamy union packa dodatkowymi zerami, aby zapisac ostatni znak do pliku
         saveBitIntoPack(output, cipher, cipher_key, buffer, pack_pos, xor, 0);
 
@@ -115,17 +114,17 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
     E - ilosc niezapisanych bitow konczacych zapisana binarnie
     */
     fseek(output, 2, SEEK_SET); // powrot kursora w pliku do znaku F
-    char flags = (char)0b00001000 | ending; // zapisanie pozycji koncowej do flag oraz informacji, ze plik jest skompresowany
+    unsigned char flags = (unsigned char)0b00001000 | ending; // zapisanie pozycji koncowej do flag oraz informacji, ze plik jest skompresowany
     if(comp_level == 8) // zapis informacji o poziomie kompresji pliku
-        flags |= (char)0b01000000;
+        flags |= (unsigned char)0b01000000;
     else if(comp_level == 12)
-        flags |= (char)0b10000000;
+        flags |= (unsigned char)0b10000000;
     else if(comp_level == 16)
-        flags |= (char)0b11000000;
+        flags |= (unsigned char)0b11000000;
     if(cipher)
-        flags |= (char)0b00100000;
+        flags |= (unsigned char)0b00100000;
     if(endingZero)
-        flags |= (char)0b00010000;
+        flags |= (unsigned char)0b00010000;
     fprintf(output, "%c", flags); // wydrukowanie pojedynczego znaku zawierajacego wszystkie flagi
 
     /// Suma kontrolna xor
@@ -153,12 +152,12 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, ch
 Funkcja wykonujaca bitowy zapis znaku na podstawie union pack
     FILE *output - plik wyjsciowy
     bool cipher - zmienna mowiaca, czy tekst ma zostac rowniez zaszyfrowany
-    char *cipher_key - klucz szyfrowania (nieistotny, gdy cipher == false)
+    unsigned char *cipher_key - klucz szyfrowania (nieistotny, gdy cipher == false)
     pack_t *pack - union pack, nak torym wykonujemy operacje bitowe
     short *pack_pos - pozycja ostatniego zajetego bitu w tym union packu
     short bit - wartosc bitu, ktora ma zostac nadana
 */
-void saveBitIntoPack(FILE *output, bool cipher, char *cipher_key, pack_t *buffer, short *pack_pos, char *xor, short bit) {
+void saveBitIntoPack(FILE *output, bool cipher, unsigned char *cipher_key, pack_t *buffer, short *pack_pos, unsigned char *xor, short bit) {
     unsigned int cipher_len = strlen(cipher_key);
     if((*pack_pos) == 16) { // jezeli bufer jest pelen
         if(cipher) { // jezeli plik ma zostac zaszyfrowany

@@ -47,7 +47,7 @@ Funkcja sprawdzajaca podany plik pod wzgledem nadawania sie do dekompresji
 1. Sprawdzenie oznaczenia na poczatku pliku
 2. Sprawdzenie sumy kontrolnej
     FILE *in - plik wejsciowy, ktory ma zostac sprawdzony pod wzgledem poprawnosci
-    char xor_correct_value - wartosc startowa, od ktorej byly wykonywane sumy kontrolne podczas procesu kompresji
+    unsigned char xor_correct_value - wartosc startowa, od ktorej byly wykonywane sumy kontrolne podczas procesu kompresji
     bool displayMsg - wyswietlanie informacji o sprawdzanym pliku na stderr w przypadku, gdy nie spelnia wymogow do dekompresji (jesli == true)
 Zwraca:
     0 - plik jest prawidlowy, mozna go dekompresowac
@@ -55,29 +55,29 @@ Zwraca:
     2 - bity w bajcie flagowym wskazuja na inne pochodzenie niz kompresja
     3 - plik moze pochodzic z kompresji, lecz jest uszkodzony lub niepelny
 */
-int fileIsGood(FILE *in, char xor_correct_value, bool displayMsg) {
+int fileIsGood(FILE *in, unsigned char xor_correct_value, bool displayMsg) {
     /// sprawdzenie poprawnosci oznaczenia na poczatku pliku
     fseek(in, 0, SEEK_END); // pobranie pozycji koncowej
     int end_pos = ftell(in);
     fseek(in, 0, SEEK_SET); // ustawienie strumienia pliku na poczatek
-    char c;
+    unsigned char c;
     int i;
     
-    fread(&c, sizeof(char), 1, in);
+    fread(&c, sizeof(unsigned char), 1, in);
     if(c != 'C') {
         fseek(in, 0, SEEK_SET);
         if(displayMsg)
             fprintf(stderr, "Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
         return 1;
     }
-    fread(&c, sizeof(char), 1, in);
+    fread(&c, sizeof(unsigned char), 1, in);
     if(c != 'T') {
         fseek(in, 0, SEEK_SET);
         if(displayMsg)
             fprintf(stderr, "Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
         return 1;
     }
-    fread(&c, sizeof(char), 1, in);
+    fread(&c, sizeof(unsigned char), 1, in);
     if(!(c & 0b00001000)) {
         fseek(in, 0, SEEK_SET);
         if(displayMsg)
@@ -86,12 +86,12 @@ int fileIsGood(FILE *in, char xor_correct_value, bool displayMsg) {
     }
     
     // po sprawdzeniu oznaczen zapisuje wszystkie potrzebne informacje z bajtu flagowego
-    char xor; // odczytanie wyniku sumy kontrolnej
-    fread(&xor, sizeof(char), 1, in);
+    unsigned char xor; // odczytanie wyniku sumy kontrolnej
+    fread(&xor, sizeof(unsigned char), 1, in);
 
     /// sprawdzanie sumy kontrolnej xor
     for(i = 4; i < end_pos; i ++) {
-        fread(&c, sizeof(char), 1, in);
+        fread(&c, sizeof(unsigned char), 1, in);
         xor ^= c;
     }
     // ustawienie strumienia z powrotem na poczatek przed zakonczeniem dzialania funkcji   

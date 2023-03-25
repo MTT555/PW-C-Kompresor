@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "huffman.h"
-#include "cipher.h"
 #include "utils.h"
 #include "countCharacters.h"
 #include "output.h"
@@ -9,9 +8,9 @@
 // zmienna zapisujaca liczbe przejsc w lewo od ostatniego zapisania slowa slownika do pliku
 static short pack_pos = 0;
 static pack_t buffer; // typ pomocniczny do zapisu bitowego z output.h
-static char cipher_key[] = "Politechnika_Warszawska"; // klucz szyfrowania
-static char xor = (char)0b10110111; // ustawienie poczatkowej wartosci sumy kontrolnej
-static char *road_buffer = NULL; // tymczasowe przechowywanie drogi przed zapisem do pliku
+static unsigned char cipher_key[] = "Politechnika_Warszawska"; // klucz szyfrowania
+static unsigned char xor = (unsigned char)0b10110111; // ustawienie poczatkowej wartosci sumy kontrolnej
+static unsigned char *road_buffer = NULL; // tymczasowe przechowywanie drogi przed zapisem do pliku
 static int road_pos = 0; // ilosc aktualnie zapisanych bitow na droge
 static int cur_buf_size = 4096; // obecna wielkosc bufora, zmieniana, gdy trzeba uzyc realloca
 
@@ -21,13 +20,13 @@ Funkcja wykonujaca kompresje algorytmem Huffmana
     FILE *output - plik wyjsciowy, w ktorym zostanie zapisany skompresowany tekst
     int comp_level - poziom kompresji podany w bitach (dla comp_level == 0 - brak kompresji)
     bool cipher - zmienna mowiaca, czy tekst ma zostac rowniez zaszyfrowany
-    char *cipher_key - klucz szyfrowania (nieistotny, gdy cipher == false)
+    unsigned char *cipher_key - klucz szyfrowania (nieistotny, gdy cipher == false)
     count **head - glowa listy zawierajaca ilosci wystapien danych znakow
 */
 void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **head) {
     count *nodeptr1, *nodeptr2, *node1, *node2;
     fprintf(output, "XXXX"); // zajecie pierwszych 4 bajtow outputu na pozniejsze oznaczenia pliku
-    road_buffer = malloc(512 * sizeof(char)); // alokacja pamieci na bufor dla drogi
+    road_buffer = malloc(512 * sizeof(unsigned char)); // alokacja pamieci na bufor dla drogi
     road_buffer[road_pos++] = 0; // zapelnienie dwoch pierwszych bitow, ktore potem beda za kazdym razem pomijane
     road_buffer[road_pos++] = 0;
     buffer.whole = 0;
@@ -84,7 +83,7 @@ void addToTheList1(FILE *output, int comp_level, bool cipher, listCodes **listC,
     listCodes *new = NULL;
     new = malloc(sizeof(listCodes));
     new->character = character;
-    new->code = malloc(sizeof(char) * length);
+    new->code = malloc(sizeof(unsigned char) * length);
     for(i = 0; i < length; i++)
         new->code[i] = '0'+code[i];
     new->next = (*listC);
@@ -105,7 +104,7 @@ void create_huffmann_tree(FILE *output, count **head, int *code, bool cipher, in
     if ((*head)->left) {
         code[top] = 0;
         if(road_pos == cur_buf_size) {
-            realloc(road_buffer, 2 * cur_buf_size * sizeof(char));
+            realloc(road_buffer, 2 * cur_buf_size * sizeof(unsigned char));
             cur_buf_size *= 2;
         } 
         road_buffer[road_pos++] = '0'; // zapisanie dwoch zer na przejscie w dol
@@ -115,7 +114,7 @@ void create_huffmann_tree(FILE *output, count **head, int *code, bool cipher, in
     if ((*head)->right) {
         code[top] = 1;
         if(road_pos == cur_buf_size){
-            realloc(road_buffer, 2 * cur_buf_size * sizeof(char));
+            realloc(road_buffer, 2 * cur_buf_size * sizeof(unsigned char));
             cur_buf_size *= 2;
         }
         road_buffer[road_pos++] = '0'; // zapisanie dwoch zer na przejscie w dol
@@ -130,7 +129,7 @@ void create_huffmann_tree(FILE *output, count **head, int *code, bool cipher, in
     road_buffer[road_pos++] = '0';
 }
 
-char *setEndOfString(char *string){
+unsigned char *setEndOfString(unsigned char *string){
     if(string == NULL)
         return NULL;
     

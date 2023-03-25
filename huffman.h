@@ -9,7 +9,7 @@
 //lista do przechowywania kodow znakow
 typedef struct codes {
     int character;
-    char *code;
+    unsigned char *code;
     struct codes *next;
 } listCodes;
 

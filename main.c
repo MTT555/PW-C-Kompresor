@@ -2,14 +2,13 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include "cipher.h"
 #include "countCharacters.h"
 #include "huffman.h"
 #include "utils.h"
 #include "decompress.h"
 
 int main(int argc, char *argv[]) {
-	char c;
+	unsigned char c;
 	int i;
 	
 	// Wyswietlenie pomocy pliku w wypadku podania jedynie argumentu --h
@@ -46,8 +45,8 @@ int main(int argc, char *argv[]) {
 	bool cipher = false, set_comp_level = false, comp = false, decomp = false; // zmienne pomocnicze do obslugi argumentow -c -v -x -d
 	bool help_displayed = false; // zmienna zapobiegajaca wielokrotnemu wyswietlaniu helpboxa
 	int comp_level = 8; // zmienna pomocnicza do obslugi poziomu kompresji, domyslnie kompresja 8-bitowa
-	char comp_mode[7]; // zmienna pomocnicza do przechowywania trybu kompresji
-	char prog_behaviour[20]; // zmienna pomocnicza do przechowywania zachowania programu (wymuszenie kompresji/dekompresji)
+	unsigned char comp_mode[7]; // zmienna pomocnicza do przechowywania trybu kompresji
+	unsigned char prog_behaviour[20]; // zmienna pomocnicza do przechowywania zachowania programu (wymuszenie kompresji/dekompresji)
 
 	// Analiza pozostalych argumentow wywolania
 	if(argc > 3) {
@@ -139,7 +138,7 @@ int main(int argc, char *argv[]) {
 
 	// jezeli nie wymuszono zachowania programu, sprawdzamy plik
 	if(!comp && !decomp) {
-		if(fileIsGood(in, (char)0b10110111, false))
+		if(fileIsGood(in, (unsigned char)0b10110111, false))
 			comp = true;
 		else
 			decomp = true;
@@ -152,17 +151,17 @@ int main(int argc, char *argv[]) {
 		if(comp_level == 0 && !cipher) {
 			fprintf(stderr, "%s: Due to chosen settings, file has been rewritten to \"%s\" with no changes!\n", argv[0], argc > 2 ? argv[2] : "stdout");
 			for(i = 0; i < inputEOF; i++) {
-				fread(&c, sizeof(char), 1, in);
+				fread(&c, sizeof(unsigned char), 1, in);
 				fprintf(out, "%c", c);
 			}
 		} else if(comp_level == 0 && cipher) {
-			char xor = (char)0b10110111;
-			char cipher_key[] = "Politechnika_Warszawska";
+			unsigned char xor = (unsigned char)0b10110111;
+			unsigned char cipher_key[] = "Politechnika_Warszawska";
 			int cipher_pos = 0;
 			int cipher_len = strlen(cipher_key);
-			fprintf(out, "CT%cX", (char)0b00101000); // zapalone bity szyfrowania i kompresji, zeby dzialala funkcja fileIsGood()
+			fprintf(out, "CT%cX", (unsigned char)0b00101000); // zapalone bity szyfrowania i kompresji, zeby dzialala funkcja fileIsGood()
 			for(i = 0; i < inputEOF; i++) {
-				fread(&c, sizeof(char), 1, in);
+				fread(&c, sizeof(unsigned char), 1, in);
 				c += cipher_key[cipher_pos % cipher_len];
 				cipher_pos++;
 				fprintf(out, "%c", c);
@@ -177,7 +176,7 @@ int main(int argc, char *argv[]) {
 			// wczytuje i zliczam znak po znaku
 			for(i = 0; i <= inputEOF; i++) {
 				if(i != inputEOF)
-					fread(&c, sizeof(char), 1, in);
+					fread(&c, sizeof(unsigned char), 1, in);
 				else if((comp_level == 12 && (currentBits == 8 || currentBits == 4)) || (comp_level == 16 && currentBits == 8))
 					c = '\0';
 				else
@@ -212,7 +211,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	else if(decomp) { // jezeli ma zostac wykonana dekompresja
-		int fileCheck = fileIsGood(in, (char)0b10110111, true);
+		int fileCheck = fileIsGood(in, (unsigned char)0b10110111, true);
 #ifdef DEBUG
 		fprintf(stderr, "File check code: %d\n", fileCheck);
 #endif
