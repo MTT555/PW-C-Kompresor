@@ -12,12 +12,16 @@ typedef struct countCharacters {
 } count;
 
 
-void runCounter(count **head);
 void addToTheList(count **head, int character);
+
 int checkIfElementIsOnTheList(count **head, int character);
+
 void showList(count **head, FILE *stream);
+
 void sortTheList(count **head);
+
 void swap(count *ptr1, count *ptr2);
+
 void freeList(count **head);
 
 #endif

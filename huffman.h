@@ -21,4 +21,6 @@ void create_huffmann_tree(FILE *output, count **head, int *code, bool cipher, in
 
 void addToTheList1(FILE *output, int comp_level, bool cipher, listCodes **head, int character, int *code, int length);
 
+void freeListCodes(listCodes **listC);
+
 #endif //HUFFMAN_H

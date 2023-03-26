@@ -25,7 +25,6 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, un
     int i, j;
     unsigned char ending = '\0'; // ilosc niezapisanych bitow konczacych plik
     long int end_pos = ftell(output); // zapisanie pozycji koncowej outputu
-    unsigned int cipher_len = strlen(cipher_key); // dlugosc szyfru
     int tempCode = 0, currentBits = 0;
 
     fseek(input, 0, SEEK_SET); // ustawienie kursora na poczatek inputu

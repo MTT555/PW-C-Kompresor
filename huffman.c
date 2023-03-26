@@ -10,9 +10,8 @@ static short pack_pos = 0;
 static pack_t buffer; // typ pomocniczny do zapisu bitowego z output.h
 static unsigned char cipher_key[] = "Politechnika_Warszawska"; // klucz szyfrowania
 static unsigned char xor = (unsigned char)0b10110111; // ustawienie poczatkowej wartosci sumy kontrolnej
-static unsigned char *road_buffer = NULL; // tymczasowe przechowywanie drogi przed zapisem do pliku
+static unsigned char road_buffer[512]; // tymczasowe przechowywanie drogi przed zapisem do pliku
 static int road_pos = 0; // ilosc aktualnie zapisanych bitow na droge
-static int cur_buf_size = 4096; // obecna wielkosc bufora, zmieniana, gdy trzeba uzyc realloca
 
 /**
 Funkcja wykonujaca kompresje algorytmem Huffmana
@@ -26,7 +25,6 @@ Funkcja wykonujaca kompresje algorytmem Huffmana
 void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **head) {
     count *nodeptr1, *nodeptr2, *node1, *node2;
     fprintf(output, "XXXX"); // zajecie pierwszych 4 bajtow outputu na pozniejsze oznaczenia pliku
-    road_buffer = malloc(512 * sizeof(unsigned char)); // alokacja pamieci na bufor dla drogi
     road_buffer[road_pos++] = 0; // zapelnienie dwoch pierwszych bitow, ktore potem beda za kazdym razem pomijane
     road_buffer[road_pos++] = 0;
     buffer.whole = 0;
@@ -56,14 +54,8 @@ void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **hea
         nodeptr2->next = nodeptr1;
     }
 
-    int code[48]; //tu przechowujemy poszczegolne kody znakow
-    //ustawiamy maksymalna ilosc bitow w zaleznosci od zmiennej comp_level
-    // if(comp_level == 8)
-    //     code = malloc(sizeof(int)*8);
-    // else if(comp_level == 12)
-    //     code = malloc(sizeof(int)*50);
-    // else if(comp_level == 16)
-    //     code = malloc(sizeof(int)*16);
+    int *code = malloc((1 << comp_level) * sizeof(int)); //tu przechowujemy poszczegolne kody znakow
+
     listCodes *listC = NULL; //lista do przechowywania kodow znakow
     create_huffmann_tree(output, head, code, cipher, comp_level, 0, &listC); // tworzenie drzewa Huffmana
     // po zapisaniu calego slownika do pliku trzeba wyraznie zaznaczyc jego koniec
@@ -75,7 +67,8 @@ void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **hea
 #endif
 
     compressedToFile(input, output, comp_level, cipher, cipher_key, &listC, &xor, &buffer, &pack_pos);
-    free(road_buffer); // po zapisie do pliku zwalniam pamiec po buforze
+    freeListCodes(&listC);
+    free(code);
 }
 
 void addToTheList1(FILE *output, int comp_level, bool cipher, listCodes **listC, int character, int *code, int length) {
@@ -83,9 +76,10 @@ void addToTheList1(FILE *output, int comp_level, bool cipher, listCodes **listC,
     listCodes *new = NULL;
     new = malloc(sizeof(listCodes));
     new->character = character;
-    new->code = malloc(sizeof(unsigned char) * length);
+    new->code = malloc(sizeof(unsigned char) * (length + 1));
     for(i = 0; i < length; i++)
         new->code[i] = '0'+code[i];
+    new->code[length] = '\0';
     new->next = (*listC);
     (*listC) = new;
 
@@ -103,20 +97,12 @@ void addToTheList1(FILE *output, int comp_level, bool cipher, listCodes **listC,
 void create_huffmann_tree(FILE *output, count **head, int *code, bool cipher, int comp_level, int top, listCodes **listC) {
     if ((*head)->left) {
         code[top] = 0;
-        if(road_pos == cur_buf_size) {
-            realloc(road_buffer, 2 * cur_buf_size * sizeof(unsigned char));
-            cur_buf_size *= 2;
-        } 
         road_buffer[road_pos++] = '0'; // zapisanie dwoch zer na przejscie w dol
         road_buffer[road_pos++] = '0';
         create_huffmann_tree(output, &((*head)->left), code, cipher, comp_level, top + 1, listC);
     }
     if ((*head)->right) {
         code[top] = 1;
-        if(road_pos == cur_buf_size){
-            realloc(road_buffer, 2 * cur_buf_size * sizeof(unsigned char));
-            cur_buf_size *= 2;
-        }
         road_buffer[road_pos++] = '0'; // zapisanie dwoch zer na przejscie w dol
         road_buffer[road_pos++] = '0';
         create_huffmann_tree(output, &((*head)->right), code, cipher, comp_level, top + 1, listC);
@@ -129,24 +115,21 @@ void create_huffmann_tree(FILE *output, count **head, int *code, bool cipher, in
     road_buffer[road_pos++] = '0';
 }
 
-unsigned char *setEndOfString(unsigned char *string){
-    if(string == NULL)
-        return NULL;
-    
-    // czasem się zdarzy że będą się wyświetlać dziwne krzaki przy niektórych kodach (szczególnie krótkich) - ten poniższy kod ma temu zapobiec
-	for (int i = 0; i < strlen(string); i++) {
-		if (string[i] != '1' && string[i] != '0') {
-			string[i] = '\0';
-			break;
-		}
-	}
-	return string;
-}
-
 void print_huffmann_tree(listCodes **head, FILE *stream) {
     listCodes *iterator = (*head);
     while (iterator != NULL) {
-        fprintf(stream, "Character: %d, Code: %s\n", iterator->character, setEndOfString(iterator->code));
+        fprintf(stream, "Character: %d, Code: %s\n", iterator->character, iterator->code);
         iterator = iterator->next;
     }
+}
+
+void freeListCodes(listCodes **head) {
+// zwalnianie pamieci zajetej przez liste kodow
+	listCodes *iterator = *head, *temp;
+	while(iterator != NULL) {
+		temp = iterator;
+		iterator = iterator->next;
+        free(temp->code);
+		free(temp);
+	}
 }

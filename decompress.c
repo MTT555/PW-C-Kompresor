@@ -7,14 +7,14 @@
 
 static unsigned char cipher_key[] = "Politechnika_Warszawska"; // klucz szyfrowania
 static int cipher_pos = 0; // pozycja w szyfrze
-static unsigned char *buffer = NULL;
+static unsigned char buffer[4096];
 static int buf_pos = 0; // aktualna pozycja w buforze
 static int cur_buf_size = 4096; // aktualna wielkosc buforu
-static unsigned char *code_buf = NULL; // bufor dla kodow znakow
+static unsigned char code_buf[4096]; // bufor dla kodow znakow
 static int code_buf_pos = 0; // aktualna pozycja w buforze dla kodow
 static mod_t mode = dictRoad; // zmienna przechowujaca aktualny tryb czytania pliku
 static dnode_t *head = NULL, *it = NULL; // pomocnicze drzewo dnode oraz pseudoiterator po nim
-static currentBits = 0, tempCode = 0;
+static int currentBits = 0, tempCode = 0;
 
 /**
 Funkcja dekompresujaca dany plik pochodzacy z tego kompresora
@@ -24,8 +24,6 @@ Funkcja dekompresujaca dany plik pochodzacy z tego kompresora
 void decompress(FILE *input, FILE *output) {
     int i;
     listCodes *list = NULL; // lista na przechowanie odczytanego slownika
-    buffer = malloc(4096 * sizeof(unsigned char)); // alokacja pamieci na bufor
-    code_buf = malloc(4096 * sizeof(unsigned char));
     head = malloc(sizeof(dnode_t));
     head->prev = NULL;
     head->left = NULL;
@@ -85,9 +83,11 @@ void decompress(FILE *input, FILE *output) {
         fprintf(stderr, "Input: %ld, output: %ld\n", end_pos, ftell(output));
     }
 #endif
-    free(buffer); // czyszczenie pamieci zaraz przed zakonczeniem funkcji
-    free(code_buf);
+    // zwalnianie pamieci
+    freeListCodes(&list);
+    freeDnodeTree(head);
 }
+
 /**
 Funkcja do analizy kolejnych bitow danego chara z pliku skompresowanego
     FILE *output - plik wyjsciowy
@@ -137,7 +137,6 @@ void analyzeBits(FILE *output, unsigned char c, int comp_level, listCodes **list
                         result *= 2;
                         result += buffer[i];
                     }
-                    fprintf(stderr, "%d", result);
                     addCode(list, result, code_buf);
                     buf_pos = 0;
                     it = it->prev;
@@ -156,7 +155,6 @@ void analyzeBits(FILE *output, unsigned char c, int comp_level, listCodes **list
             }
         }
     }
-    //freeDnodeTree(head);
 }
 
 /**
@@ -214,7 +212,6 @@ Funkcja dodajaca odczytany kod wraz ze znakiem do listy
     unsigned char *code - kod tego znaku
 */
 void addCode(listCodes **list, int character, unsigned char *code) {
-    int i;
     listCodes *new = NULL;
     new = malloc(sizeof(listCodes));
     new->character = character;

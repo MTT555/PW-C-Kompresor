@@ -170,8 +170,7 @@ int main(int argc, char *argv[]) {
 			fseek(out, 3, SEEK_SET);
 			fprintf(out, "%c", xor);
 		} else {
-			count *head; //tworze glowe listy w ktorej bede przechowywal zliczenia
-			runCounter(&head);
+			count *head = NULL; //tworze glowe listy w ktorej bede przechowywal zliczenia
 			
 			// wczytuje i zliczam znak po znaku
 			for(i = 0; i <= inputEOF; i++) {
