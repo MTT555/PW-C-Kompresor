@@ -1,6 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
 #include "countCharacters.h"
 #include "huffman.h"
@@ -50,7 +48,6 @@ int main(int argc, char *argv[]) {
 
 	// Analiza pozostalych argumentow wywolania
 	if(argc > 3) {
-		int i;
 		for(i = 3; i < argc; i++)
 			if(strcmp(argv[i], "-c") == 0) {
 				cipher = true; // argument -c mowiacy, ze wynik dzialania programu ma zostac dodatkowo zaszyfrowany
@@ -158,7 +155,7 @@ int main(int argc, char *argv[]) {
 			unsigned char xor = (unsigned char)0b10110111;
 			unsigned char cipher_key[] = "Politechnika_Warszawska";
 			int cipher_pos = 0;
-			int cipher_len = strlen(cipher_key);
+			int cipher_len = (int)strlen(cipher_key);
 			fprintf(out, "CT%cX", (unsigned char)0b00101000); // zapalone bity szyfrowania i kompresji, zeby dzialala funkcja fileIsGood()
 			for(i = 0; i < inputEOF; i++) {
 				fread(&c, sizeof(unsigned char), 1, in);
@@ -206,6 +203,7 @@ int main(int argc, char *argv[]) {
 #endif
 			fseek(in, 0, SEEK_SET); // ustawienie kursora w pliku z powrotem na jego poczatek
 			huffman(in, out, comp_level, cipher, &head);
+			fprintf(stderr, "%p %p", &head, &(head->next));
 			freeList(&head);
 		}
 	}

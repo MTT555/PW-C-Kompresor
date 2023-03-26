@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 
 /**
 Program sluzacy do porownywania, czy plik przed kompresja jest taki sam, jak ten otrzymany po dekompresji 

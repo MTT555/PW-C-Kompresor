@@ -15,7 +15,7 @@ valgrind:
 	valgrind ./valgrind tekst out
 
 valgrind_full:
-	cc -o valgrind main.c countCharacters.c utils.c huffman.c output.c decompress.c -Wall -pedantic
+	cc -o valgrind main.c countCharacters.c utils.c huffman.c output.c decompress.c -Wall -pedantic 2>valogs
 	valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./valgrind tekst out
 
 .PHONY: clean

@@ -9,6 +9,7 @@ void addToTheList(count **head, int character){
 	new->character = character;
 	new->amount = 1;
 	new->next = (*head);
+	fprintf(stderr, "added %c %d ||", new->character, new->amount);
 	(*head) = new;
 }
 
@@ -66,10 +67,16 @@ void swap(count *ptr1, count *ptr2){
 
 void freeList(count **head) {
 // zwalnianie pamieci zajetej przez liste
-	count *iterator = *head, *temp;
-	while(iterator != NULL){
-		temp = iterator;
-		iterator = iterator->next;
-		free(temp);
-	}
+	count **current = &head;
+	fprintf(stderr, "c%p ", current);
+    count **next;
+
+    while (current != NULL) {
+        next = (*current)->next;
+		fprintf(stderr, "freed %c %d || ", (*current)->character, (*current)->next);
+        free(*current);
+        *current = next;
+    }
+
+    *head = NULL; // ustawiamy wskaznik na poczatek listy na NULL
 }
