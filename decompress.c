@@ -37,7 +37,7 @@ void decompress(FILE *input, FILE *output) {
 
     fseek(input, 2, SEEK_SET); // ustawienie kursora na trzeci znak w celu odczytania flag
     unsigned char c;
-    fread(&c, sizeof(unsigned char), 1, input);
+    fread(&c, sizeof(char), 1, input);
     int comp_level = ((c & 0b11000000) >> 6) * 4 + 4; // odczytanie poziomu kompresji
     if(comp_level == 4)
         comp_level = 0;
@@ -56,7 +56,7 @@ void decompress(FILE *input, FILE *output) {
     // przypadek pliku nieskompresowanego, ale zaszyfrowanego
     if(comp_level == 0 && cipher) {
         for(i = 4; i < end_pos; i++) {
-            fread(&c, sizeof(unsigned char), 1, input);
+            fread(&c, sizeof(char), 1, input);
             c -= cipher_key[cipher_pos % cipher_len];
             cipher_pos++;
             fprintf(output, "%c", c);
@@ -64,7 +64,7 @@ void decompress(FILE *input, FILE *output) {
         return;
     }
     for(i = 4; i < end_pos; i++) {
-        fread(&c, sizeof(unsigned char), 1, input);
+        fread(&c, sizeof(char), 1, input);
         if(cipher) {
             c -= cipher_key[cipher_pos % cipher_len];
             cipher_pos++;
@@ -215,7 +215,7 @@ void addCode(listCodes **list, int character, unsigned char *code) {
     listCodes *new = NULL;
     new = malloc(sizeof(listCodes));
     new->character = character;
-    new->code = malloc(sizeof(unsigned char) * (strlen(code) + 1));
+    new->code = malloc(sizeof(char) * (strlen(code) + 1));
     strcpy(new->code, code);
     new->next = (*list);
     (*list) = new;

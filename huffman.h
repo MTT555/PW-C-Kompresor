@@ -13,11 +13,11 @@ typedef struct codes {
     struct codes *next;
 } listCodes;
 
-void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **head);
+void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count_t **head);
 
 void print_huffmann_tree(listCodes **listC, FILE *stream);
 
-void create_huffmann_tree(FILE *output, count **head, int *code, bool cipher, int comp_level, int top, listCodes **listC);
+void create_huffmann_tree(FILE *output, count_t **head, int *code, bool cipher, int comp_level, int top, listCodes **listC);
 
 void addToTheList1(FILE *output, int comp_level, bool cipher, listCodes **head, int character, int *code, int length);
 

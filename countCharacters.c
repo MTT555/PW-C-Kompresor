@@ -2,25 +2,35 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-count *addToTheList(count **head, int character) {
-//dodaje znak do listy jezeli jeszcze go nie ma
-	count *new;
-	new = malloc(sizeof(count));
+/**
+Funkcja dodajaca slowo do listy na jej poczatek (jezeli jeszcze go nie ma)
+	count_t **head - poczatek listy
+	int character - slowo zapisane pod postacia liczby calkowitej
+Zwraca wskaznik liste zawierajaca nowy element
+*/
+count_t *addToTheList(count_t **head, int character) {
+	count_t *new = NULL;
+	new = malloc(sizeof(count_t));
 	new->character = character;
 	new->amount = 1;
 	new->next = (*head);
 	new->left = NULL;
 	new->right = NULL;
-	fprintf(stderr, "added %d %d ||", new->character, new->amount);
 	return new;
 }
 
-int checkIfElementIsOnTheList(count **head, int character) {
-//jezeli element jest na liscie, zwroc 0 w przeciwnym razie zwroc 1
-	count *iterator = (*head);
+/**
+Funkcja sprawdzajaca czy dany element jest juz w liscie
+	count_t **head - poczatek listy
+	int character - slowo zapisane pod postacia liczby calkowitej
+Jezeli jest w liscie, zwieksza licznik wystapien o 1 i zwraca 0
+Jezeli nie znaleziono, zwraca 1
+*/
+int checkIfElementIsOnTheList(count_t **head, int character) {
+	count_t *iterator = (*head);
 	while(iterator != NULL) {
 		if(iterator->character == character) {
-		iterator->amount++;      
+			iterator->amount++;      
 			return 0;
 		}
 		iterator = iterator->next;
@@ -28,22 +38,30 @@ int checkIfElementIsOnTheList(count **head, int character) {
 	return 1;
 }
 
-void showList(count **head, FILE *stream){
-	count *iterator = (*head);
+/**
+Funkcja drukujaca cala liste na wybrany strumien
+	count_t **head - poczatek listy
+	FILE *stream - strumien wyjscia
+*/
+void showList(count_t **head, FILE *stream){
+	count_t *iterator = (*head);
 	while (iterator != NULL) {
 		fprintf(stream, "Character: %d, Amount: %d\n", iterator->character, iterator->amount);
 		iterator = iterator->next;
 	}
 }
 
-void sortTheList(count **head){
-//sortuje liste niemalejaco algorytmem sortowania babelkowego
-	int ifSwapped;
-	count *ptr1;
-	count *ptr2 = NULL;
+/**
+Funkcja sortujaca liste algorytmem sortowania babelkowego
+	count_t **head - poczatek listy
+*/
+void sortTheList(count_t **head){
 	if(*head == NULL)
 		return;
 	
+	int ifSwapped;
+	count_t *ptr1 = NULL, *ptr2 = NULL;
+
 	do {
 		ifSwapped = 0;
 		ptr1 = (*head);
@@ -58,17 +76,25 @@ void sortTheList(count **head){
 	} while(ifSwapped);
 }
 
-void swap(count *ptr1, count *ptr2){
-	int temp = ptr1->amount;
+/**
+Funkcja zamieniajaca ze soba wartosci dwoch danych elementow listy
+	count_t *ptr1, *ptr2 - wskazniki na te elementy
+*/
+void swap(count_t *ptr1, count_t *ptr2) {
+	int temp_a = ptr1->amount;
 	ptr1->amount = ptr2->amount;
-	ptr2->amount = temp;
+	ptr2->amount = temp_a;
 	int temp_c = ptr1->character;
 	ptr1->character = ptr2->character;
 	ptr2->character = temp_c;
 }	
 
-void freeList(count *head) {
-	count *iterator = head, *temp;
+/**
+Funkcja zwalniajaca pamiec z wszystkich elementow listy
+	count_t **head - poczatek listy
+*/
+void freeList(count_t *head) {
+	count_t *iterator = head, *temp;
 	while (iterator != NULL) {
 		temp = iterator;
 		iterator = iterator->next;
@@ -76,7 +102,11 @@ void freeList(count *head) {
 	}
 }
 
-void freeRecursively(count *head) {
+/**
+Funkcja rekurencyjnie zwalniajaca pamiec z wszystkich synow danego elementu
+	count_t *head - dany element
+*/
+void freeRecursively(count_t *head) {
 	if(head != NULL) {
 		if(head->left != NULL) {
 			freeRecursively(head->left);
@@ -88,6 +118,6 @@ void freeRecursively(count *head) {
 		}
 		
 		free(head);
-		head->right = NULL;
+		head = NULL;
 	}
 }

@@ -15,7 +15,7 @@ Funkcja wykonujaca zapis do pliku skompresowanego tekstu
     int comp_level - poziom kompresji podany w bitach (brak obslugi przypadku braku kompresji)
     bool cipher - zmienna mowiaca, czy tekst ma zostac rowniez zaszyfrowany
     unsigned char *cipher_key - klucz szyfrowania (nieistotny, gdy cipher == false)
-    count **head - glowa listy zawierajaca ilosci wystapien danych znakow
+    listCodes **head - glowa listy zawierajaca ilosci wystapien danych znakow
     unsigned char xor_start_value - poczatkowa wartosc bajtu do wykonania sumy kontrolnej
     pack_t *buffer - union pack uzyty wczesniej do zapisu slownika
     short pack_pos - pozycja ostatniego zajetego bitu w tym packu
@@ -47,7 +47,7 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, un
     fseek(input, 0, SEEK_SET);
     for(i = 0; i <= inputEOF; i++) {
         if(i != inputEOF)
-            fread(&c, sizeof(unsigned char), 1, input);
+            fread(&c, sizeof(char), 1, input);
         else if((comp_level == 12 && (currentBits == 8 || currentBits == 4)) || (comp_level == 16 && currentBits == 8)) {
             c = '\0';
             if(!(comp_level == 12 && currentBits == 8))

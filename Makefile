@@ -1,29 +1,15 @@
 compile:
-	cc -o program main.c countCharacters.c utils.c huffman.c output.c decompress.c
-	./program ala.in out
+	cc -o compressor main.c countCharacters.c utils.c huffman.c output.c decompress.c
 
 debug:
-	cc -o debug -DDEBUG main.c countCharacters.c utils.c huffman.c output.c decompress.c -Wall -pedantic
-	./debug tekst out
+	cc -o compressor -DDEBUG main.c countCharacters.c utils.c huffman.c output.c decompress.c -Wall -pedantic
 
-gdbdebug:
-	cc -o gdbdebug -ggdb -DDEBUG main.c countCharacters.c utils.c huffman.c output.c decompress.c -Wall -pedantic
-	gdb gdbdebug tekst out
-
-valgrind:
-	cc -o valgrind main.c countCharacters.c utils.c huffman.c output.c decompress.c -Wall -pedantic
-	valgrind ./valgrind tekst out
-
-valgrind_full:
-	cc -o valgrind main.c countCharacters.c utils.c huffman.c output.c decompress.c -Wall -pedantic 2>valogs
-	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./valgrind 1.in out
-
-valgrind_dfull:
-	cc -o valgrind main.c countCharacters.c utils.c huffman.c output.c decompress.c -Wall -pedantic 2>valogs
-	valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./valgrind out out2 -d
+gen:
+	cc -o generate gen/gen.clean
 
 .PHONY: clean
 .SILENT: clean
 
 clean:
-	-rm program debug gdbdebug valgrind valgrind-out.txt out out? test/a.out 2>/dev/null
+	rm -f compressor generate
+	rm -fdr cmake_build/*

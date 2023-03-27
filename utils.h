@@ -13,10 +13,10 @@ pack_t - typ sluzacy za bufer dla znakow laczacy wlasciwosci shorta tj. liczby c
     char chars.out - znak utworzony z bitow 8-15 tworzacych faktyczny znak wyjsciowy
 */
 typedef union pack {
-    short whole;
+    unsigned short whole;
     struct {
-        char buf;
-        char out;
+        unsigned char buf;
+        unsigned char out;
     } chars;
 } pack_t;
 

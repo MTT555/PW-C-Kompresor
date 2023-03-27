@@ -20,15 +20,15 @@ Funkcja wykonujaca kompresje algorytmem Huffmana
     int comp_level - poziom kompresji podany w bitach (dla comp_level == 0 - brak kompresji)
     bool cipher - zmienna mowiaca, czy tekst ma zostac rowniez zaszyfrowany
     unsigned char *cipher_key - klucz szyfrowania (nieistotny, gdy cipher == false)
-    count **head - glowa listy zawierajaca ilosci wystapien danych znakow
+    count_t **head - glowa listy zawierajaca ilosci wystapien danych znakow
 */
-void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **head) {
-    count *nodeptr1, *nodeptr2, *node1, *node2;
+void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count_t **head) {
+    count_t *nodeptr1 = NULL, *nodeptr2 = NULL, *node1 = NULL, *node2 = NULL;
     fprintf(output, "XXXX"); // zajecie pierwszych 4 bajtow outputu na pozniejsze oznaczenia pliku
     road_buffer[road_pos++] = 0; // zapelnienie dwoch pierwszych bitow, ktore potem beda za kazdym razem pomijane
     road_buffer[road_pos++] = 0;
     buffer.whole = 0;
-    count *head_ptr = (*head);
+    count_t *head_ptr = (*head);
 
     while(1) {
         // pobieramy z listy dwa pierwsze elementy o najmniejszej czestosci wystapien
@@ -38,7 +38,7 @@ void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **hea
             // usuwamy te dwa elementy z listy
             (*head) = node2->next;
         // budujemy nowy wezel zlozony z tych dwoch elementow
-        nodeptr1 = malloc(sizeof(count));
+        nodeptr1 = malloc(sizeof(count_t));
         nodeptr1->left = node1;
         nodeptr1->right = node2;
         nodeptr1->amount = node1->amount + node2->amount; // sumujemy ilosc wystapien tych liter
@@ -78,7 +78,7 @@ void addToTheList1(FILE *output, int comp_level, bool cipher, listCodes **listC,
     listCodes *new = NULL;
     new = malloc(sizeof(listCodes));
     new->character = character;
-    new->code = malloc(sizeof(unsigned char) * (length + 1));
+    new->code = malloc(sizeof(char) * (length + 1));
     for(i = 0; i < length; i++)
         new->code[i] = '0'+code[i];
     new->code[length] = '\0';
@@ -96,7 +96,7 @@ void addToTheList1(FILE *output, int comp_level, bool cipher, listCodes **listC,
         saveBitIntoPack(output, cipher, cipher_key, &buffer, &pack_pos, &xor, (new->character / (1 << (comp_level - 1 - i))) % 2);
 }
 
-void create_huffmann_tree(FILE *output, count **head, int *code, bool cipher, int comp_level, int top, listCodes **listC) {
+void create_huffmann_tree(FILE *output, count_t **head, int *code, bool cipher, int comp_level, int top, listCodes **listC) {
     if ((*head)->left) {
         code[top] = 0;
         road_buffer[road_pos++] = '0'; // zapisanie dwoch zer na przejscie w dol

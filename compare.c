@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
         fread(&c1, sizeof(char), 1, fptr1);
         fread(&c2, sizeof(char), 1, fptr2);
         if(c1 != c2) {
-            fprintf(stderr, "This is crazy! Character: %d, f1: %d, f2: %d\n", i, c1, c2);
+            printf(stderr, "This is crazy! Character: %d, f1: %d, f2: %d\n", i, c1, c2);
             x = 1;
         }
     }

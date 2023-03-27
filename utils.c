@@ -63,21 +63,21 @@ int fileIsGood(FILE *in, unsigned char xor_correct_value, bool displayMsg) {
     unsigned char c;
     int i;
     
-    fread(&c, sizeof(unsigned char), 1, in);
+    fread(&c, sizeof(char), 1, in);
     if(c != 'C') {
         fseek(in, 0, SEEK_SET);
         if(displayMsg)
             fprintf(stderr, "Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
         return 1;
     }
-    fread(&c, sizeof(unsigned char), 1, in);
+    fread(&c, sizeof(char), 1, in);
     if(c != 'T') {
         fseek(in, 0, SEEK_SET);
         if(displayMsg)
             fprintf(stderr, "Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
         return 1;
     }
-    fread(&c, sizeof(unsigned char), 1, in);
+    fread(&c, sizeof(char), 1, in);
     if(!(c & 0b00001000)) {
         fseek(in, 0, SEEK_SET);
         if(displayMsg)
@@ -87,11 +87,11 @@ int fileIsGood(FILE *in, unsigned char xor_correct_value, bool displayMsg) {
     
     // po sprawdzeniu oznaczen zapisuje wszystkie potrzebne informacje z bajtu flagowego
     unsigned char xor; // odczytanie wyniku sumy kontrolnej
-    fread(&xor, sizeof(unsigned char), 1, in);
+    fread(&xor, sizeof(char), 1, in);
 
     /// sprawdzanie sumy kontrolnej xor
     for(i = 4; i < end_pos; i ++) {
-        fread(&c, sizeof(unsigned char), 1, in);
+        fread(&c, sizeof(char), 1, in);
         xor ^= c;
     }
     // ustawienie strumienia z powrotem na poczatek przed zakonczeniem dzialania funkcji   

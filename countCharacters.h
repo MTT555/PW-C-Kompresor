@@ -3,26 +3,26 @@
 
 #include <stdio.h>
 
-typedef struct countCharacters {
+typedef struct countChars {
     int character; // int pozwoli na przechowywanie rowniez kodow 12-bit i 16-bit
     int amount;
-    struct countCharacters *next;
-    struct countCharacters *left; // lewy syn
-    struct countCharacters *right; // prawy syn
-} count;
+    struct countChars *next;
+    struct countChars *left; // lewy syn
+    struct countChars *right; // prawy syn
+} count_t;
 
-count *addToTheList(count **head, int character);
+count_t *addToTheList(count_t **head, int character);
 
-int checkIfElementIsOnTheList(count **head, int character);
+int checkIfElementIsOnTheList(count_t **head, int character);
 
-void showList(count **head, FILE *stream);
+void showList(count_t **head, FILE *stream);
 
-void sortTheList(count **head);
+void sortTheList(count_t **head);
 
-void swap(count *ptr1, count *ptr2);
+void swap(count_t *ptr1, count_t *ptr2);
 
-void freeList(count *head);
+void freeList(count_t *head);
 
-void freeRecursively(count *head);
+void freeRecursively(count_t *head);
 
 #endif

@@ -8,7 +8,7 @@
 int main(int argc, char *argv[]) {
 	unsigned char c;
 	int i;
-	static count *head = NULL;
+	count_t *head = NULL;
 	
 	// Wyswietlenie pomocy pliku w wypadku podania jedynie argumentu --h
 	if(argc == 2 && strcmp(argv[1], "-h") == 0) {
@@ -16,9 +16,14 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
+	if(argc < 3) {
+		fprintf(stderr, "%s: Too few arguments!\n", argv[0]);
+		return 1;
+	}
+
 	// Wczytuje tekst uzytkownika z pliku
 	// Nazwe pliku podajemy jako pierwszy argument wywolania
-	FILE *in = argc > 1 ? fopen(argv[1], "rb") : stdin;
+	FILE *in = strcmp(argv[1], "#stdin") != 0 ? fopen(argv[1], "rb") : stdin;
 	if(in == NULL) {
 		fprintf(stderr, "%s: Input file could not be opened!\n", argv[0]);
 		return 2;
@@ -34,7 +39,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Nazwa pliku, w ktorym znajdzie sie plik wyjsciowy
-	FILE *out = argc > 2 ? fopen(argv[2], "wb") : stdout;
+	FILE *out = strcmp(argv[2], "#stdout") != 0 ? fopen(argv[2], "wb") : stdout;
 	if(out == NULL) {
 		fclose(in);
 		fprintf(stderr, "%s: Output file could not be opened!\n", argv[0]);
@@ -44,8 +49,8 @@ int main(int argc, char *argv[]) {
 	bool cipher = false, set_comp_level = false, comp = false, decomp = false; // zmienne pomocnicze do obslugi argumentow -c -v -x -d
 	bool help_displayed = false; // zmienna zapobiegajaca wielokrotnemu wyswietlaniu helpboxa
 	int comp_level = 8; // zmienna pomocnicza do obslugi poziomu kompresji, domyslnie kompresja 8-bitowa
-	unsigned char comp_mode[7]; // zmienna pomocnicza do przechowywania trybu kompresji
-	unsigned char prog_behaviour[20]; // zmienna pomocnicza do przechowywania zachowania programu (wymuszenie kompresji/dekompresji)
+	char comp_mode[7]; // zmienna pomocnicza do przechowywania trybu kompresji
+	char prog_behaviour[20]; // zmienna pomocnicza do przechowywania zachowania programu (wymuszenie kompresji/dekompresji)
 
 	// Analiza pozostalych argumentow wywolania
 	if(argc > 3) {
@@ -53,10 +58,7 @@ int main(int argc, char *argv[]) {
 			if(strcmp(argv[i], "-c") == 0) {
 				cipher = true; // argument -c mowiacy, ze wynik dzialania programu ma zostac dodatkowo zaszyfrowany
 				fprintf(stderr, "%s: Output encryption has been enabled!\n", argv[0]);
-			}
-			else if(strcmp(argv[i], "-DDEBUG") == 0)
-				fprintf(stderr, "%s: Debug mode has been enabled - program will now display various variables and additional information during runtime in stderr!\n", argv[0]);
-			else if(strcmp(argv[i], "-o0") == 0) { // brak kompresji
+			} else if(strcmp(argv[i], "-o0") == 0) { // brak kompresji
 				if(set_comp_level) {
 					fprintf(stderr, "%s: %s -> Compression level has already been set to \"%s\"! (ignoring...)\n", argv[0], argv[i], comp_mode);
 				}
@@ -68,8 +70,7 @@ int main(int argc, char *argv[]) {
 					strcpy(prog_behaviour, "force compression");
 					fprintf(stderr, "%s: Compression mode has been set to %s and program behaviour has been changed to \"force compression\"!\n", argv[0], comp_mode);
 				}
-			}
-			else if(strcmp(argv[i], "-o1") == 0) { // kompresja 8-bit
+			} else if(strcmp(argv[i], "-o1") == 0) { // kompresja 8-bit
 				if(set_comp_level) {
 					fprintf(stderr, "%s: %s -> Compression level has already been set to \"%s\"! (ignoring...)\n", argv[0], argv[i], comp_mode);
 				}
@@ -81,8 +82,7 @@ int main(int argc, char *argv[]) {
 					strcpy(prog_behaviour, "force compression");
 					fprintf(stderr, "%s: Compression mode has been set to %s and program behaviour has been changed to \"force compression\"!\n", argv[0], comp_mode);
 				}
-			}
-			else if(strcmp(argv[i], "-o2") == 0) { // kompresja 12-bit
+			} else if(strcmp(argv[i], "-o2") == 0) { // kompresja 12-bit
 				if(set_comp_level) {
 					fprintf(stderr, "%s: %s -> Compression level has already been set to \"%s\"! (ignoring...)\n", argv[0], argv[i], comp_mode);
 				}
@@ -94,8 +94,7 @@ int main(int argc, char *argv[]) {
 					strcpy(prog_behaviour, "force compression");
 					fprintf(stderr, "%s: Compression mode has been set to %s and program behaviour has been changed to \"force compression\"!\n", argv[0], comp_mode);
 				}
-			}
-			else if(strcmp(argv[i], "-o3") == 0) { // kompresja 16-bit
+			} else if(strcmp(argv[i], "-o3") == 0) { // kompresja 16-bit
 				if(set_comp_level) {
 					fprintf(stderr, "%s: %s -> Compression level has already been set to \"%s\"! (ignoring...)\n", argv[0], argv[i], comp_mode);
 				}
@@ -107,14 +106,12 @@ int main(int argc, char *argv[]) {
 					strcpy(prog_behaviour, "force compression");
 					fprintf(stderr, "%s: Compression mode has been set to %s and program behaviour has been changed to \"force compression\"!\n", argv[0], comp_mode);
 				}
-			}
-			else if(strcmp(argv[i], "-h") == 0) {
+			} else if(strcmp(argv[i], "-h") == 0) {
 				if(!help_displayed) { // wyswietlenie pomocy
 					help(stderr);
 					help_displayed = true;
 				}
-			}
-			else if(strcmp(argv[i], "-x") == 0) // wymuszenie kompresji
+			} else if(strcmp(argv[i], "-x") == 0) { // wymuszenie kompresji
 				if(comp || decomp)
 					fprintf(stderr, "%s: %s -> Program behaviour has already been set to: \"%s\"! (ignoring...)\n", argv[0], argv[i], prog_behaviour);
 				else {
@@ -122,7 +119,7 @@ int main(int argc, char *argv[]) {
 					strcpy(prog_behaviour, "force compression");
 					fprintf(stderr, "%s: Program behaviour has been set to \"%s\"!\n", argv[0], prog_behaviour);
 				}
-			else if(strcmp(argv[i], "-d") == 0) // wymuszenie dekompresji
+			} else if(strcmp(argv[i], "-d") == 0) { // wymuszenie dekompresji
 				if(comp || decomp)
 					fprintf(stderr, "%s: %s -> Program behaviour has already been set to: \"%s\"! (ignoring...)\n", argv[0], argv[i], prog_behaviour);
 				else {
@@ -130,12 +127,12 @@ int main(int argc, char *argv[]) {
 					strcpy(prog_behaviour, "force decompression");
 					fprintf(stderr, "%s: Program behaviour has been set to \"%s\"!\n", argv[0], prog_behaviour);
 				}
-			else // pominiecie niezidentyfikowanych argumentow
+			} else // pominiecie niezidentyfikowanych argumentow
 				fprintf(stderr, "%s: %s -> Unknown argument! (ignoring...)\n", argv[0], argv[i]);
 	}
 
-	// jezeli nie wymuszono zachowania programu, sprawdzamy plik
-	if(!comp && !decomp) {
+	
+	if(!comp && !decomp) { // jezeli nie wymuszono zachowania programu, sprawdzamy plik
 		if(fileIsGood(in, (unsigned char)0b10110111, false))
 			comp = true;
 		else
@@ -148,7 +145,7 @@ int main(int argc, char *argv[]) {
 		if(comp_level == 0 && !cipher) {
 			fprintf(stderr, "%s: Due to chosen settings, file has been rewritten to \"%s\" with no changes!\n", argv[0], argc > 2 ? argv[2] : "stdout");
 			for(i = 0; i < inputEOF; i++) {
-				fread(&c, sizeof(unsigned char), 1, in);
+				fread(&c, sizeof(char), 1, in);
 				fprintf(out, "%c", c);
 			}
 		} else if(comp_level == 0 && cipher) {
@@ -158,7 +155,7 @@ int main(int argc, char *argv[]) {
 			int cipher_len = (int)strlen(cipher_key);
 			fprintf(out, "CT%cX", (unsigned char)0b00101000); // zapalone bity szyfrowania i kompresji, zeby dzialala funkcja fileIsGood()
 			for(i = 0; i < inputEOF; i++) {
-				fread(&c, sizeof(unsigned char), 1, in);
+				fread(&c, sizeof(char), 1, in);
 				c += cipher_key[cipher_pos % cipher_len];
 				cipher_pos++;
 				fprintf(out, "%c", c);
@@ -170,7 +167,7 @@ int main(int argc, char *argv[]) {
 			// wczytuje i zliczam znak po znaku
 			for(i = 0; i <= inputEOF; i++) {
 				if(i != inputEOF)
-					fread(&c, sizeof(unsigned char), 1, in);
+					fread(&c, sizeof(char), 1, in);
 				else if((comp_level == 12 && (currentBits == 8 || currentBits == 4)) || (comp_level == 16 && currentBits == 8))
 					c = '\0';
 				else
@@ -194,9 +191,9 @@ int main(int argc, char *argv[]) {
 				}
 			}
 
-			sortTheList(&head); //sortuje liste wystapien znakow niemalejaco
+			sortTheList(&head); // sortowanie listy wystapien znakow niemalejaco
 #ifdef DEBUG
-			//wypisujemy liste z wystapieniami
+			// wypisanie listy z wystapieniami
 			showList(&head, stderr);
 #endif
 			fseek(in, 0, SEEK_SET); // ustawienie kursora w pliku z powrotem na jego poczatek
@@ -209,7 +206,7 @@ int main(int argc, char *argv[]) {
 #ifdef DEBUG
 		fprintf(stderr, "File check code: %d\n", fileCheck);
 #endif
-		if(!fileCheck) { // jezeli fileCheck zwroci 0
+		if(!fileCheck) { // dekompresja jedynie, jezeli fileCheck zwrocil 0
 			decompress(in, out);
 		} else {
 			fclose(in);
