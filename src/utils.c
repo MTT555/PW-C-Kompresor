@@ -14,8 +14,9 @@ void help(FILE *stream) {
                           "input_file - location of the file that contains the string that is supposed to be compressed\n"
                           "output_file - location of the file that is supposed to save the result of the program\n"
                           "arguments - arguments that change the settings and behaviour of the program\n\n"
-                          "[input_file] and [output_file] will be accordingly replaced with stdin and stdout streams\n"
-                          "when no file location is provided\n"
+                          "[input_file] and [output_file] fields are mandatory!\n"
+                          "Type \"#stdin\" as [input_file] to set the input stream to stdin\n"
+                          "or \"#stdout\" as [output_file] to set the output stream to stdout\n\n"
                           "[arguments] field is optional and lets you provide more than one argument\n\n"
                           "Possible arguments:\n"
                           "-h - displays this help message\n"
@@ -54,11 +55,20 @@ Zwraca:
     1 - brak inicjalow na poczatku, plik nie pochodzi z kompresji
     2 - bity w bajcie flagowym wskazuja na inne pochodzenie niz kompresja
     3 - plik moze pochodzic z kompresji, lecz jest uszkodzony lub niepelny
+    4 - plik jest zbyt krotki, aby mogl byc wynikiem dzialania tego kompresora
 */
 int fileIsGood(FILE *in, unsigned char xor_correct_value, bool displayMsg) {
     /// sprawdzenie poprawnosci oznaczenia na poczatku pliku
     fseek(in, 0, SEEK_END); // pobranie pozycji koncowej
-    int end_pos = ftell(in);
+    int eof = ftell(in);
+    const char *impossibleOutput = "Provided file cannot be decompressed since it is not a possible output of this compressor!\n";
+
+    if(eof < 4) {
+        fseek(in, 0, SEEK_SET);
+        fprintf(stderr, "%s", displayMsg ? impossibleOutput : "");
+        return 4;
+    }
+
     fseek(in, 0, SEEK_SET); // ustawienie strumienia pliku na poczatek
     unsigned char c;
     int i;
@@ -66,22 +76,19 @@ int fileIsGood(FILE *in, unsigned char xor_correct_value, bool displayMsg) {
     fread(&c, sizeof(char), 1, in);
     if(c != 'C') {
         fseek(in, 0, SEEK_SET);
-        if(displayMsg)
-            fprintf(stderr, "Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
+        fprintf(stderr, "%s", displayMsg ? impossibleOutput : "");
         return 1;
     }
     fread(&c, sizeof(char), 1, in);
     if(c != 'T') {
         fseek(in, 0, SEEK_SET);
-        if(displayMsg)
-            fprintf(stderr, "Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
+        fprintf(stderr, "%s", displayMsg ? impossibleOutput : "");
         return 1;
     }
     fread(&c, sizeof(char), 1, in);
     if(!(c & 0b00001000)) {
         fseek(in, 0, SEEK_SET);
-        if(displayMsg)
-            fprintf(stderr, "Provided file cannot be decompressed since it is not a possible output of this compressor!\n");
+        fprintf(stderr, "%s", displayMsg ? impossibleOutput : "");
         return 2;
     }
     
@@ -90,7 +97,7 @@ int fileIsGood(FILE *in, unsigned char xor_correct_value, bool displayMsg) {
     fread(&xor, sizeof(char), 1, in);
 
     /// sprawdzanie sumy kontrolnej xor
-    for(i = 4; i < end_pos; i ++) {
+    for(i = 4; i < eof; i ++) {
         fread(&c, sizeof(char), 1, in);
         xor ^= c;
     }
@@ -106,7 +113,7 @@ int fileIsGood(FILE *in, unsigned char xor_correct_value, bool displayMsg) {
     if(xor == xor_correct_value) {
 #ifdef DEBUG
         if(displayMsg)
-            fprintf(stderr, "Provided file can be decompressed! (XOR value: %d)\n", (int)xor);
+            fprintf(stderr, "Provided file can be decompressed!\n");
 #endif
         return 0;
     }

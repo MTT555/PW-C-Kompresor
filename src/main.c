@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
 	count_t *head = NULL;
 	
 	// Wyswietlenie pomocy pliku w wypadku podania jedynie argumentu --h
-	if(argc == 2 && strcmp(argv[1], "-h") == 0) {
+	if(argc == 1 || (argc == 2 && strcmp(argv[1], "-h") == 0)) {
 		help(stderr);
 		return 0;
 	}
