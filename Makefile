@@ -16,7 +16,11 @@ valgrind:
 
 valgrind_full:
 	cc -o valgrind main.c countCharacters.c utils.c huffman.c output.c decompress.c -Wall -pedantic 2>valogs
-	valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./valgrind tekst out
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./valgrind 1.in out
+
+valgrind_dfull:
+	cc -o valgrind main.c countCharacters.c utils.c huffman.c output.c decompress.c -Wall -pedantic 2>valogs
+	valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./valgrind out out2 -d
 
 .PHONY: clean
 .SILENT: clean

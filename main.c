@@ -8,6 +8,7 @@
 int main(int argc, char *argv[]) {
 	unsigned char c;
 	int i;
+	static count *head = NULL;
 	
 	// Wyswietlenie pomocy pliku w wypadku podania jedynie argumentu --h
 	if(argc == 2 && strcmp(argv[1], "-h") == 0) {
@@ -142,8 +143,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	int tempCode = 0, currentBits = 0; // tymczasowy kod wczytanego znaku oraz ilosc obecne wczytanych bitow
-	
-	
+
 	if(comp) { // jezeli ma zostac wykonana kompresja
 		if(comp_level == 0 && !cipher) {
 			fprintf(stderr, "%s: Due to chosen settings, file has been rewritten to \"%s\" with no changes!\n", argv[0], argc > 2 ? argv[2] : "stdout");
@@ -167,8 +167,6 @@ int main(int argc, char *argv[]) {
 			fseek(out, 3, SEEK_SET);
 			fprintf(out, "%c", xor);
 		} else {
-			count *head = NULL; //tworze glowe listy w ktorej bede przechowywal zliczenia
-			
 			// wczytuje i zliczam znak po znaku
 			for(i = 0; i <= inputEOF; i++) {
 				if(i != inputEOF)
@@ -183,14 +181,14 @@ int main(int argc, char *argv[]) {
 				tempCode += (int)c;
 				if(currentBits == comp_level) {
 					if(checkIfElementIsOnTheList(&head, tempCode) == 1)
-						addToTheList(&head, tempCode);
+						head = addToTheList(&head, tempCode);
 					tempCode = 0;
 					currentBits = 0;
 				} else if (currentBits >= comp_level) { // taki przypadek wystapi jedynie w kompresji 12-bit
 					int temp = tempCode % 16;
 					tempCode >>= 4;
 					if(checkIfElementIsOnTheList(&head, tempCode) == 1)
-						addToTheList(&head, tempCode);
+						head = addToTheList(&head, tempCode);
 					tempCode = temp;
 					currentBits = 4;
 				}
@@ -199,12 +197,11 @@ int main(int argc, char *argv[]) {
 			sortTheList(&head); //sortuje liste wystapien znakow niemalejaco
 #ifdef DEBUG
 			//wypisujemy liste z wystapieniami
-			//showList(&head, stderr);
+			showList(&head, stderr);
 #endif
 			fseek(in, 0, SEEK_SET); // ustawienie kursora w pliku z powrotem na jego poczatek
 			huffman(in, out, comp_level, cipher, &head);
-			fprintf(stderr, "%p %p", &head, &(head->next));
-			freeList(&head);
+			freeRecursively(head);
 		}
 	}
 	else if(decomp) { // jezeli ma zostac wykonana dekompresja

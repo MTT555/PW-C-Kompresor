@@ -2,22 +2,24 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void addToTheList(count **head, int character){
+count *addToTheList(count **head, int character) {
 //dodaje znak do listy jezeli jeszcze go nie ma
 	count *new;
 	new = malloc(sizeof(count));
 	new->character = character;
 	new->amount = 1;
 	new->next = (*head);
-	fprintf(stderr, "added %c %d ||", new->character, new->amount);
-	(*head) = new;
+	new->left = NULL;
+	new->right = NULL;
+	fprintf(stderr, "added %d %d ||", new->character, new->amount);
+	return new;
 }
 
 int checkIfElementIsOnTheList(count **head, int character) {
 //jezeli element jest na liscie, zwroc 0 w przeciwnym razie zwroc 1
 	count *iterator = (*head);
-	while(iterator != NULL){
-		if(iterator->character == character){
+	while(iterator != NULL) {
+		if(iterator->character == character) {
 		iterator->amount++;      
 			return 0;
 		}
@@ -65,18 +67,27 @@ void swap(count *ptr1, count *ptr2){
 	ptr2->character = temp_c;
 }	
 
-void freeList(count **head) {
-// zwalnianie pamieci zajetej przez liste
-	count **current = &head;
-	fprintf(stderr, "c%p ", current);
-    count **next;
+void freeList(count *head) {
+	count *iterator = head, *temp;
+	while (iterator != NULL) {
+		temp = iterator;
+		iterator = iterator->next;
+		freeRecursively(temp);
+	}
+}
 
-    while (current != NULL) {
-        next = (*current)->next;
-		fprintf(stderr, "freed %c %d || ", (*current)->character, (*current)->next);
-        free(*current);
-        *current = next;
-    }
-
-    *head = NULL; // ustawiamy wskaznik na poczatek listy na NULL
+void freeRecursively(count *head) {
+	if(head != NULL) {
+		if(head->left != NULL) {
+			freeRecursively(head->left);
+			head->left = NULL;
+		}
+		if(head->right != NULL) {
+			freeRecursively(head->right);
+			head->right = NULL;
+		}
+		
+		free(head);
+		head->right = NULL;
+	}
 }

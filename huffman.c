@@ -28,6 +28,7 @@ void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **hea
     road_buffer[road_pos++] = 0; // zapelnienie dwoch pierwszych bitow, ktore potem beda za kazdym razem pomijane
     road_buffer[road_pos++] = 0;
     buffer.whole = 0;
+    count *head_ptr = (*head);
 
     while(1) {
         // pobieramy z listy dwa pierwsze elementy o najmniejszej czestosci wystapien
@@ -67,7 +68,8 @@ void huffman(FILE *input, FILE *output, int comp_level, bool cipher, count **hea
 #endif
 
     compressedToFile(input, output, comp_level, cipher, cipher_key, &listC, &xor, &buffer, &pack_pos);
-    freeListCodes(&listC);
+    freeListCodes(&listC); // nie wiadomo czego nie dziala
+    freeList(head_ptr);
     free(code);
 }
 
@@ -129,7 +131,11 @@ void freeListCodes(listCodes **head) {
 	while(iterator != NULL) {
 		temp = iterator;
 		iterator = iterator->next;
-        free(temp->code);
+        if(temp->code != NULL) {
+            free(temp->code);
+            temp->code = NULL;
+        }
 		free(temp);
+        temp = NULL;
 	}
 }

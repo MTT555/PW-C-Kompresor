@@ -11,8 +11,7 @@ typedef struct countCharacters {
     struct countCharacters *right; // prawy syn
 } count;
 
-
-void addToTheList(count **head, int character);
+count *addToTheList(count **head, int character);
 
 int checkIfElementIsOnTheList(count **head, int character);
 
@@ -22,6 +21,8 @@ void sortTheList(count **head);
 
 void swap(count *ptr1, count *ptr2);
 
-void freeList(count **head);
+void freeList(count *head);
+
+void freeRecursively(count *head);
 
 #endif
