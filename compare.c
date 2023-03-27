@@ -6,7 +6,7 @@ Program sluzacy do porownywania, czy plik przed kompresja jest taki sam, jak ten
 */
 int main(int argc, char **argv) {
     if(argc != 3) {
-        fprintf(stderr, "Nieprawidlowa liczba argumentow! (argc != 3)\n");
+        fprintf(stderr, "Too few/too many arguments! (argc == %d != 3)\n", argc);
         return -1;
     }
     
@@ -14,27 +14,37 @@ int main(int argc, char **argv) {
     FILE *fptr2 = fopen(argv[2], "rb");
 
     if(fptr1 == NULL || fptr2 == NULL) {
-        fprintf(stderr, "Nieudana proba otwarcia pliku!\n");
+        fprintf(stderr, "One of the files could not be opened!\n");
         return -2;
     }
-    
+
     fseek(fptr1, 0, SEEK_END);
     fseek(fptr2, 0, SEEK_END);
-    int i, n = ftell(fptr1) > ftell(fptr2) ? ftell(fptr2) : ftell(fptr1), x = 0;
+
+    int n1 = ftell(fptr1);
+    int n2 = ftell(fptr2);
+    if(n1 != n2) {
+        fclose(fptr1);
+        fclose(fptr2);
+        fprintf(stderr, "Different sizes of input files -> they cannot be the same!\n");
+        return -3;
+    }
+
     fseek(fptr1, 0, SEEK_SET);
     fseek(fptr2, 0, SEEK_SET);
 
     unsigned char c1, c2;
-    for(i = 0; i < n; i++) {
+    int i, ifTheSame = 1;
+    for(i = 0; i < n1; i++) {
         fread(&c1, sizeof(char), 1, fptr1);
         fread(&c2, sizeof(char), 1, fptr2);
         if(c1 != c2) {
-            printf(stderr, "This is crazy! Character: %d, f1: %d, f2: %d\n", i, c1, c2);
-            x = 1;
+            printf("Different chars! CharacterPos: %d, File1: %c (%d), File2: %c (%d)\n", i, c1, (int)c1, c2, (int)c2);
+            ifTheSame = 0;
         }
     }
 
-    if(!x)
+    if(ifTheSame)
         printf("Files are the exact same!\n");
 
     fclose(fptr1);

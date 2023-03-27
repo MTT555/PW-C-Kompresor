@@ -1,18 +1,20 @@
+.PHONY: clean
+.SILENT: clean
+
+all: compressor debug generate compare
+
 compressor:
-	cc -o compressor src/*.c
+	cc -o $@ src/*.c
 
 debug:
 	cc -o compressor -DDEBUG src/*.c -Wall -pedantic
 
 generate:
-	cc -o generate gen/gen.clean
+	cc -o $@ gen/gen.c
 
 compare:
-	cc -o compare compare.c
-
-.PHONY: clean
-.SILENT: clean
+	cc -o $@ compare.c
 
 clean:
-	rm -f compressor generate compare
+	rm -f compressor generate compare debug
 	rm -fdr cmake_build/*
