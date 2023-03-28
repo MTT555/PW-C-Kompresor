@@ -5,7 +5,7 @@
 #include "utils.h"
 #include "decompress.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char **argv) {
 	unsigned char c;
 	int i;
 	count_t *head = NULL;
@@ -16,30 +16,31 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
+	// Sprawdzenie, czy podano zarowno plik wejsciowy, jak i wyjsciowy
 	if(argc < 3) {
 		fprintf(stderr, "%s: Too few arguments!\n", argv[0]);
 		return 1;
 	}
 
-	// Wczytuje tekst uzytkownika z pliku
-	// Nazwe pliku podajemy jako pierwszy argument wywolania
-	FILE *in = strcmp(argv[1], "#stdin") != 0 ? fopen(argv[1], "rb") : stdin;
+	// Nazwa pliku, z ktorego dane beda wczytywane
+	FILE *in = fopen(argv[1], "rb");
 	if(in == NULL) {
 		fprintf(stderr, "%s: Input file could not be opened!\n", argv[0]);
 		return 2;
 	}
-	// Sprawdzenie, czy nie podano pustego pliku
+
+	// Sprawdzenie, czy nie podano pustego pliku wejsciowego
 	fseek(in, 0, SEEK_END);
 	int inputEOF = ftell(in); // znalezienie konca pliku
 	fseek(in, 0, SEEK_SET);	
-	if(inputEOF == 0) {
+	if(!inputEOF) {
 		fclose(in);
 		fprintf(stderr, "%s: Input file is empty!\n", argv[0]);
 		return 4;
 	}
 
 	// Nazwa pliku, w ktorym znajdzie sie plik wyjsciowy
-	FILE *out = strcmp(argv[2], "#stdout") != 0 ? fopen(argv[2], "wb") : stdout;
+	FILE *out = fopen(argv[2], "wb");
 	if(out == NULL) {
 		fclose(in);
 		fprintf(stderr, "%s: Output file could not be opened!\n", argv[0]);

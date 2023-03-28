@@ -7,7 +7,7 @@ compressor:
 	cc -o $@ src/*.c
 
 debug:
-	cc -o compressor -DDEBUG src/*.c -Wall -pedantic
+	cc -o $@ -DDEBUG src/*.c -Wall -pedantic
 
 generate:
 	cc -o $@ gen/gen.c
