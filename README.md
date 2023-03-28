@@ -1,5 +1,5 @@
 # **Kompresor algorytmem Huffmana**
-### Adrian Chmiel, Mateusz Tyl
+### ***Adrian Chmiel, Mateusz Tyl***
 \
 Program w języku C realizujący bezstratną kompresję oraz dekompresję plików wykonaną algorytmem Huffmana. Składa się on z następujących plików:
 * **gen**
