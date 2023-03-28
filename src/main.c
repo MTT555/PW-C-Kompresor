@@ -46,9 +46,9 @@ int main(int argc, char *argv[]) {
 		return 3;
 	}
 
-	bool cipher = false, set_comp_level = false, comp = false, decomp = false; // zmienne pomocnicze do obslugi argumentow -c -v -x -d
+	bool cipher = false, set_compLevel = false, comp = false, decomp = false; // zmienne pomocnicze do obslugi argumentow -c -v -x -d
 	bool help_displayed = false; // zmienna zapobiegajaca wielokrotnemu wyswietlaniu helpboxa
-	int comp_level = 8; // zmienna pomocnicza do obslugi poziomu kompresji, domyslnie kompresja 8-bitowa
+	int compLevel = 8; // zmienna pomocnicza do obslugi poziomu kompresji, domyslnie kompresja 8-bitowa
 	char comp_mode[7]; // zmienna pomocnicza do przechowywania trybu kompresji
 	char prog_behaviour[20]; // zmienna pomocnicza do przechowywania zachowania programu (wymuszenie kompresji/dekompresji)
 
@@ -59,49 +59,49 @@ int main(int argc, char *argv[]) {
 				cipher = true; // argument -c mowiacy, ze wynik dzialania programu ma zostac dodatkowo zaszyfrowany
 				fprintf(stderr, "%s: Output encryption has been enabled!\n", argv[0]);
 			} else if(strcmp(argv[i], "-o0") == 0) { // brak kompresji
-				if(set_comp_level) {
+				if(set_compLevel) {
 					fprintf(stderr, "%s: %s -> Compression level has already been set to \"%s\"! (ignoring...)\n", argv[0], argv[i], comp_mode);
 				}
 				else {
-					comp_level = 0;
+					compLevel = 0;
 					strcpy(comp_mode, "none");
-					set_comp_level = true;
+					set_compLevel = true;
 					comp = true;
 					strcpy(prog_behaviour, "force compression");
 					fprintf(stderr, "%s: Compression mode has been set to %s and program behaviour has been changed to \"force compression\"!\n", argv[0], comp_mode);
 				}
 			} else if(strcmp(argv[i], "-o1") == 0) { // kompresja 8-bit
-				if(set_comp_level) {
+				if(set_compLevel) {
 					fprintf(stderr, "%s: %s -> Compression level has already been set to \"%s\"! (ignoring...)\n", argv[0], argv[i], comp_mode);
 				}
 				else {
-					comp_level = 8;
+					compLevel = 8;
 					strcpy(comp_mode, "8-bit");
-					set_comp_level = true;
+					set_compLevel = true;
 					comp = true;
 					strcpy(prog_behaviour, "force compression");
 					fprintf(stderr, "%s: Compression mode has been set to %s and program behaviour has been changed to \"force compression\"!\n", argv[0], comp_mode);
 				}
 			} else if(strcmp(argv[i], "-o2") == 0) { // kompresja 12-bit
-				if(set_comp_level) {
+				if(set_compLevel) {
 					fprintf(stderr, "%s: %s -> Compression level has already been set to \"%s\"! (ignoring...)\n", argv[0], argv[i], comp_mode);
 				}
 				else {
-					comp_level = 12;
+					compLevel = 12;
 					strcpy(comp_mode, "12-bit");
-					set_comp_level = true;
+					set_compLevel = true;
 					comp = true;
 					strcpy(prog_behaviour, "force compression");
 					fprintf(stderr, "%s: Compression mode has been set to %s and program behaviour has been changed to \"force compression\"!\n", argv[0], comp_mode);
 				}
 			} else if(strcmp(argv[i], "-o3") == 0) { // kompresja 16-bit
-				if(set_comp_level) {
+				if(set_compLevel) {
 					fprintf(stderr, "%s: %s -> Compression level has already been set to \"%s\"! (ignoring...)\n", argv[0], argv[i], comp_mode);
 				}
 				else {
-					comp_level = 16;
+					compLevel = 16;
 					strcpy(comp_mode, "16-bit");
-					set_comp_level = true;
+					set_compLevel = true;
 					comp = true;
 					strcpy(prog_behaviour, "force compression");
 					fprintf(stderr, "%s: Compression mode has been set to %s and program behaviour has been changed to \"force compression\"!\n", argv[0], comp_mode);
@@ -142,13 +142,13 @@ int main(int argc, char *argv[]) {
 	int tempCode = 0, currentBits = 0; // tymczasowy kod wczytanego znaku oraz ilosc obecne wczytanych bitow
 
 	if(comp) { // jezeli ma zostac wykonana kompresja
-		if(comp_level == 0 && !cipher) {
+		if(compLevel == 0 && !cipher) {
 			fprintf(stderr, "%s: Due to chosen settings, file has been rewritten to \"%s\" with no changes!\n", argv[0], argc > 2 ? argv[2] : "stdout");
 			for(i = 0; i < inputEOF; i++) {
 				fread(&c, sizeof(char), 1, in);
 				fprintf(out, "%c", c);
 			}
-		} else if(comp_level == 0 && cipher) {
+		} else if(compLevel == 0 && cipher) {
 			unsigned char xor = (unsigned char)0b10110111;
 			unsigned char cipher_key[] = "Politechnika_Warszawska";
 			int cipher_pos = 0;
@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
 			for(i = 0; i <= inputEOF; i++) {
 				if(i != inputEOF)
 					fread(&c, sizeof(char), 1, in);
-				else if((comp_level == 12 && (currentBits == 8 || currentBits == 4)) || (comp_level == 16 && currentBits == 8))
+				else if((compLevel == 12 && (currentBits == 8 || currentBits == 4)) || (compLevel == 16 && currentBits == 8))
 					c = '\0';
 				else
 					break;
@@ -176,28 +176,28 @@ int main(int argc, char *argv[]) {
 				currentBits += 8;
 				tempCode <<= 8;
 				tempCode += (int)c;
-				if(currentBits == comp_level) {
-					if(checkIfElementIsOnTheList(&head, tempCode) == 1)
+				if(currentBits == compLevel) {
+					if(checkIfOnTheList(&head, tempCode) == 1)
 						head = addToTheList(&head, tempCode);
 					tempCode = 0;
 					currentBits = 0;
-				} else if (currentBits >= comp_level) { // taki przypadek wystapi jedynie w kompresji 12-bit
+				} else if (currentBits >= compLevel) { // taki przypadek wystapi jedynie w kompresji 12-bit
 					int temp = tempCode % 16;
 					tempCode >>= 4;
-					if(checkIfElementIsOnTheList(&head, tempCode) == 1)
+					if(checkIfOnTheList(&head, tempCode) == 1)
 						head = addToTheList(&head, tempCode);
 					tempCode = temp;
 					currentBits = 4;
 				}
 			}
 
-			sortTheList(&head); // sortowanie listy wystapien znakow niemalejaco
+			sortTheCountList(&head); // sortowanie listy wystapien znakow niemalejaco
 #ifdef DEBUG
 			// wypisanie listy z wystapieniami
 			showList(&head, stderr);
 #endif
 			fseek(in, 0, SEEK_SET); // ustawienie kursora w pliku z powrotem na jego poczatek
-			huffman(in, out, comp_level, cipher, &head);
+			huffman(in, out, compLevel, cipher, &head);
 			freeRecursively(head);
 		}
 	}

@@ -20,7 +20,7 @@ typedef struct dnode {
 
 void decompress(FILE *input, FILE *output);
 
-void analyzeBits(FILE *output, unsigned char c, int comp_level, listCodes **list, short ending, bool endingZero);
+void analyzeBits(FILE *output, unsigned char c, int compLevel, listCodes **list, short ending, bool endingZero, dnode_t **iterator);
 
 short returnBit(unsigned char c, int x);
 
@@ -32,6 +32,6 @@ void printList(listCodes **list, FILE *stream);
 
 void addCode(listCodes **list, int character, unsigned char *code);
 
-bool compareBuffer(listCodes **list, unsigned char *buf, FILE *stream, int comp_level, bool endingZero);
+bool compareBuffer(listCodes **list, unsigned char *buf, FILE *stream, int compLevel, bool endingZero);
 
 #endif // DECOMPRESS_H

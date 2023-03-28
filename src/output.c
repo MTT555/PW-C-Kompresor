@@ -12,7 +12,7 @@ static unsigned int cipher_pos = 0; // zmienna przechowujaca aktualna pozycje w 
 Funkcja wykonujaca zapis do pliku skompresowanego tekstu
     FILE *input - plik wejsciowy zawierajacy tekst do kompresji
     FILE *output - plik wyjsciowy, w ktorym zostanie zapisany skompresowany tekst
-    int comp_level - poziom kompresji podany w bitach (brak obslugi przypadku braku kompresji)
+    int compLevel - poziom kompresji podany w bitach (brak obslugi przypadku braku kompresji)
     bool cipher - zmienna mowiaca, czy tekst ma zostac rowniez zaszyfrowany
     unsigned char *cipher_key - klucz szyfrowania (nieistotny, gdy cipher == false)
     listCodes **head - glowa listy zawierajaca ilosci wystapien danych znakow
@@ -20,7 +20,7 @@ Funkcja wykonujaca zapis do pliku skompresowanego tekstu
     pack_t *buffer - union pack uzyty wczesniej do zapisu slownika
     short pack_pos - pozycja ostatniego zajetego bitu w tym packu
 */
-void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, unsigned char *cipher_key, listCodes **head, unsigned char *xor, pack_t *buffer, short *pack_pos) {
+void compressedToFile(FILE *input, FILE *output, int compLevel, bool cipher, unsigned char *cipher_key, listCodes **head, unsigned char *xor, pack_t *buffer, short *pack_pos) {
     unsigned char c;
     int i, j;
     unsigned char ending = '\0'; // ilosc niezapisanych bitow konczacych plik
@@ -48,9 +48,9 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, un
     for(i = 0; i <= inputEOF; i++) {
         if(i != inputEOF)
             fread(&c, sizeof(char), 1, input);
-        else if((comp_level == 12 && (currentBits == 8 || currentBits == 4)) || (comp_level == 16 && currentBits == 8)) {
+        else if((compLevel == 12 && (currentBits == 8 || currentBits == 4)) || (compLevel == 16 && currentBits == 8)) {
             c = '\0';
-            if(!(comp_level == 12 && currentBits == 8))
+            if(!(compLevel == 12 && currentBits == 8))
                 endingZero = true;
         }
         else
@@ -59,7 +59,7 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, un
         currentBits += 8;
         tempCode <<= 8;
         tempCode += (int)c;
-        if(currentBits == comp_level) {
+        if(currentBits == compLevel) {
             iterator = (*head);
             while (iterator != NULL) {
                 if(iterator->character == tempCode) {
@@ -72,7 +72,7 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, un
             }
             tempCode = 0;
             currentBits = 0;
-        } else if (currentBits >= comp_level) { // taki przypadek wystapi jedynie w kompresji 12-bit
+        } else if (currentBits >= compLevel) { // taki przypadek wystapi jedynie w kompresji 12-bit
             int temp = tempCode % 16;
             tempCode >>= 4;
             iterator = (*head); // ustawienie iteratora na poczatek przy kazdym nastepnym symbolu
@@ -114,11 +114,11 @@ void compressedToFile(FILE *input, FILE *output, int comp_level, bool cipher, un
     */
     fseek(output, 2, SEEK_SET); // powrot kursora w pliku do znaku F
     unsigned char flags = (unsigned char)0b00001000 | ending; // zapisanie pozycji koncowej do flag oraz informacji, ze plik jest skompresowany
-    if(comp_level == 8) // zapis informacji o poziomie kompresji pliku
+    if(compLevel == 8) // zapis informacji o poziomie kompresji pliku
         flags |= (unsigned char)0b01000000;
-    else if(comp_level == 12)
+    else if(compLevel == 12)
         flags |= (unsigned char)0b10000000;
-    else if(comp_level == 16)
+    else if(compLevel == 16)
         flags |= (unsigned char)0b11000000;
     if(cipher)
         flags |= (unsigned char)0b00100000;

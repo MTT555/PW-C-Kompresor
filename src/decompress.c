@@ -5,15 +5,15 @@
 #include "decompress.h"
 #include "huffman.h"
 
-static unsigned char cipher_key[] = "Politechnika_Warszawska"; // klucz szyfrowania
-static int cipher_pos = 0; // pozycja w szyfrze
+static unsigned char cipher_key[] = CIPHER; // klucz szyfrowania
+static int cipherPos = 0; // pozycja w szyfrze
 static unsigned char buffer[4096];
 static int buf_pos = 0; // aktualna pozycja w buforze
 static int cur_buf_size = 4096; // aktualna wielkosc buforu
 static unsigned char code_buf[4096]; // bufor dla kodow znakow
 static int code_buf_pos = 0; // aktualna pozycja w buforze dla kodow
 static mod_t mode = dictRoad; // zmienna przechowujaca aktualny tryb czytania pliku
-static dnode_t *head = NULL, *it = NULL; // pomocnicze drzewo dnode oraz pseudoiterator po nim
+static dnode_t *head = NULL; // pomocnicze drzewo dnode
 static int currentBits = 0, tempCode = 0;
 
 /**
@@ -22,65 +22,60 @@ Funkcja dekompresujaca dany plik pochodzacy z tego kompresora
     FILE *output - plik wyjsciowy
 */
 void decompress(FILE *input, FILE *output) {
-    int i;
+    int i, cipherLength = (int)strlen((char *)cipher_key);
+    unsigned char c;
     listCodes *list = NULL; // lista na przechowanie odczytanego slownika
     head = malloc(sizeof(dnode_t));
     head->prev = NULL;
     head->left = NULL;
     head->right = NULL;
-    it = head;
+    dnode_t *iterator = head; // ustawienie pseudoiteratora po drzewie
 
-    // odczytanie, gdzie jest koniec pliku
-    fseek(input, 0, SEEK_END);
-    int end_pos = ftell(input);
-    fseek(input, 0 , SEEK_SET);
-
+    fseek(input, 0, SEEK_END); // odczytanie, gdzie jest koniec pliku
+    int inputEOF = ftell(input);
     fseek(input, 2, SEEK_SET); // ustawienie kursora na trzeci znak w celu odczytania flag
-    unsigned char c;
     fread(&c, sizeof(char), 1, input);
-    int comp_level = ((c & 0b11000000) >> 6) * 4 + 4; // odczytanie poziomu kompresji
-    if(comp_level == 4)
-        comp_level = 0;
-    int cipher = (c & 0b00100000) >> 5; // odczytanie szyfrowania
-    bool endingZero = c & 0b00010000 ? true : false; // sprawdzenie, czy konieczne bedzie odlaczenie koncowego zera
-    int ending = c & 0b00000111; // odczytanie ilosci bitow konczacych
+    int compLevel = (c & 192) >> 6 ? 4 * (((c & 192) >> 6) + 1) : 0; // odczytanie poziomu kompresji (192 == 0b11000000)
+    bool cipher = c & 32 ? true : false; // odczytanie szyfrowania (32 == 0b00100000)
+    bool reduntantZero = c & 16 ? true : false; // sprawdzenie, czy konieczne bedzie odlaczenie nadmiarowego koncowego znaku '\0' (16 == 0b00010000)
+    int reduntantBits = c & 7; // odczytanie ilosci bitow konczacych (7 == 0b00000111)
+    fseek(input, 4, SEEK_SET);
 #ifdef DEBUG
     // wyswietlenie odczytanych wartosci na stderr
     fprintf(stderr, "The following values have been read: "
-        "compression level: %d, encrypted: %s, ending bits: %d, reduntant '\\0' symbol: %s\n",
-        comp_level, cipher ? "true" : "false", ending, endingZero ? "true" : "false");
+        "compression level: %d, encrypted: %s, reduntant ending bits: %d, reduntant '\\0' symbol: %s\n",
+        compLevel, cipher ? "true" : "false", reduntantBits, reduntantZero ? "true" : "false");
 #endif
-    fseek(input, 4, SEEK_SET);
-    int cipher_len = strlen(cipher_key);
 
     // przypadek pliku nieskompresowanego, ale zaszyfrowanego
-    if(comp_level == 0 && cipher) {
-        for(i = 4; i < end_pos; i++) {
+    if(compLevel == 0 && cipher) {
+        for(i = 4; i < inputEOF; i++) {
             fread(&c, sizeof(char), 1, input);
-            c -= cipher_key[cipher_pos % cipher_len];
-            cipher_pos++;
+            c -= cipher_key[cipherPos % cipherLength];
+            cipherPos++;
             fprintf(output, "%c", c);
         }
         return;
     }
-    for(i = 4; i < end_pos; i++) {
+    for(i = 4; i < inputEOF; i++) {
         fread(&c, sizeof(char), 1, input);
         if(cipher) {
-            c -= cipher_key[cipher_pos % cipher_len];
-            cipher_pos++;
+            c -= cipher_key[cipherPos % cipherLength];
+            cipherPos++;
         }
-        if(i != end_pos - 1)
-            analyzeBits(output, c, comp_level, &list, 0, false);
+        if(i != inputEOF - 1)
+            analyzeBits(output, c, compLevel, &list, 0, false, &iterator);
     }
-    analyzeBits(output, c, comp_level, &list, ending, endingZero);
+    analyzeBits(output, c, compLevel, &list, reduntantBits, reduntantZero, &iterator);
     fprintf(stderr, "File successfully decompressed!\n");
+    int outputEOF = ftell(output);
 #ifdef DEBUG
     if(input != stdin && output != stdout) {
-        if(ftell(output) < end_pos)
-            fprintf(stderr, "File size reduced by %.2f%%\n", 100 - 100 * (double)ftell(output)/end_pos);
+        if(ftell(output) < inputEOF)
+            fprintf(stderr, "File size reduced by %.2f%%\n", 100 - 100 * (double)outputEOF / inputEOF);
         else
-            fprintf(stderr, "File size increased by %.2f%%\n", 100 * (double)ftell(output)/end_pos - 100);
-        fprintf(stderr, "Input: %ld, output: %ld\n", end_pos, ftell(output));
+            fprintf(stderr, "File size increased by %.2f%%\n", 100 * (double)outputEOF / inputEOF - 100);
+        fprintf(stderr, "Input: %ld, output: %ld\n", inputEOF, outputEOF);
     }
 #endif
     // zwalnianie pamieci
@@ -92,16 +87,17 @@ void decompress(FILE *input, FILE *output) {
 Funkcja do analizy kolejnych bitow danego chara z pliku skompresowanego
     FILE *output - plik wyjsciowy
     unsigned char c - znak analizowany
-    int comp_level - poziom kompresji podany w bitach (dla comp_level == 0 - brak kompresji)
-    short ending - ilosc koncowych bitow do porzucenia w tym znaku (zazwyczaj 0)
-    bool endingZero - zmienna odpowiedzialna za sprawdzanie czy pominac nadmiarowy koncowy znak zerowy podczas zapisu
+    int compLevel - poziom kompresji podany w bitach (dla compLevel == 0 - brak kompresji)
+    short reduntantBits - ilosc koncowych bitow do porzucenia w tym znaku 
+    bool reduntantZero - zmienna odpowiedzialna za sprawdzanie czy pominac nadmiarowy koncowy znak zerowy podczas zapisu (zazwyczaj false)
+    dnode_t *iterator - pseudoiterator po pomocniczym drzewie dnode_t
 */
-void analyzeBits(FILE *output, unsigned char c, int comp_level, listCodes **list, short ending, bool endingZero) {
+void analyzeBits(FILE *output, unsigned char c, int compLevel, listCodes **list, short reduntantBits, bool reduntantZero, dnode_t **iterator) {
     int i;
     short bits = 0; // ilosc przeanalizowanych bitow
     short cur_bit = 0; // wartosc obecnie analizowanego bitu
     short cur_code = 0; // obecny kod przejscia w sciezce
-    while (bits != 8 - ending) {
+    while (bits != 8 - reduntantBits) {
         switch(mode) {
             case dictRoad: {
                 cur_code = 2 * returnBit(c, bits) + returnBit(c, bits + 1);
@@ -115,15 +111,15 @@ void analyzeBits(FILE *output, unsigned char c, int comp_level, listCodes **list
                     printList(list, stderr);
 #endif
                 } else if(cur_code == 2) {
-                    it = it->prev;
+                    *iterator = (*iterator)->prev;
                     code_buf_pos--; // wyjscie o jeden w gore
                 } else if(cur_code == 1) {
-                    code_buf[code_buf_pos] = '0' + goDown(&it); // przejscie o jeden w dol
+                    code_buf[code_buf_pos] = '0' + goDown(iterator); // przejscie o jeden w dol
                     code_buf_pos++;
                     code_buf[code_buf_pos] = '\0';
                     mode = dictWord;
                 } else if(cur_code == 0) {
-                    code_buf[code_buf_pos] = '0' + goDown(&it); // przejscie o jeden w dol
+                    code_buf[code_buf_pos] = '0' + goDown(iterator); // przejscie o jeden w dol
                     code_buf_pos++;
                 }
                 break;
@@ -131,15 +127,15 @@ void analyzeBits(FILE *output, unsigned char c, int comp_level, listCodes **list
             case dictWord: {
                 buffer[buf_pos++] = returnBit(c, bits++);
                 buffer[buf_pos++] = returnBit(c, bits++);
-                if(buf_pos == comp_level) {
+                if(buf_pos == compLevel) {
                     int result = 0;
-                    for(i = 0; i < comp_level; i++) {
+                    for(i = 0; i < compLevel; i++) {
                         result *= 2;
                         result += buffer[i];
                     }
                     addCode(list, result, code_buf);
                     buf_pos = 0;
-                    it = it->prev;
+                    *iterator = (*iterator)->prev;
                     code_buf_pos--;
                     mode = dictRoad;
                 }
@@ -149,7 +145,7 @@ void analyzeBits(FILE *output, unsigned char c, int comp_level, listCodes **list
                 buffer[buf_pos++] = '0' + returnBit(c, bits);
                 buffer[buf_pos] = '\0';
                 bits++;
-                if(compareBuffer(list, buffer, output, comp_level, bits == 8 - ending ? endingZero : false))
+                if(compareBuffer(list, buffer, output, compLevel, bits == 8 - reduntantBits ? reduntantZero : false))
                     buf_pos = 0;
                 break;
             }
@@ -242,18 +238,18 @@ Jezeli tak, to zapisuje ta litere do podanego pliku
     FILE *stream - strumien, w ktorym ma zostac wydrukowana litera
 Zwraca true, jezeli jakis znak zostal znaleziony, w przeciwnym wypadku false
 */
-bool compareBuffer(listCodes **list, unsigned char *buf, FILE *stream, int comp_level, bool endingZero) {
+bool compareBuffer(listCodes **list, unsigned char *buf, FILE *stream, int compLevel, bool reduntantZero) {
     listCodes *iterator = (*list);
     while (iterator != NULL) {
         if(strcmp(iterator->code, buf) == 0) {
-            if(comp_level == 8)
+            if(compLevel == 8)
                 fprintf(stream, "%c", iterator->character);
-            else if(comp_level == 16) {
+            else if(compLevel == 16) {
                 fprintf(stream, "%c", (unsigned char)((iterator->character) / (1 << 8)));
-                if(!endingZero)
+                if(!reduntantZero)
                     fprintf(stream, "%c", (unsigned char)(iterator->character));
             }
-            else if(comp_level == 12) {
+            else if(compLevel == 12) {
                 tempCode <<= 12;
                 tempCode += iterator->character;
                 currentBits += 12;
@@ -265,7 +261,7 @@ bool compareBuffer(listCodes **list, unsigned char *buf, FILE *stream, int comp_
                     currentBits = 4;
                 } else {
                     fprintf(stream, "%c", (unsigned char)((tempCode) / (1 << 8)));
-                    if(!endingZero)
+                    if(!reduntantZero)
                         fprintf(stream, "%c", (unsigned char)(tempCode));
                     tempCode = 0;
                     currentBits = 0;

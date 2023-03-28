@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#define CIPHER "Politechnika_Warszawska"
+
 // Definicja zmiennej bool
 typedef enum {
     false, true

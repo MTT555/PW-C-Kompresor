@@ -26,7 +26,7 @@ Funkcja sprawdzajaca czy dany element jest juz w liscie
 Jezeli jest w liscie, zwieksza licznik wystapien o 1 i zwraca 0
 Jezeli nie znaleziono, zwraca 1
 */
-int checkIfElementIsOnTheList(count_t **head, int character) {
+int checkIfOnTheList(count_t **head, int character) {
 	count_t *iterator = (*head);
 	while(iterator != NULL) {
 		if(iterator->character == character) {
@@ -55,8 +55,8 @@ void showList(count_t **head, FILE *stream){
 Funkcja sortujaca liste algorytmem sortowania babelkowego
 	count_t **head - poczatek listy
 */
-void sortTheList(count_t **head){
-	if(*head == NULL)
+void sortTheCountList(count_t **head){
+	if(*head == NULL) // jezeli lista jest pusta, konczymy dzialanie funkcji
 		return;
 	
 	int ifSwapped;

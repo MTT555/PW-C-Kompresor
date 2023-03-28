@@ -14,6 +14,7 @@ add_executable(compressor src/main.c
     src/huffman.c src/huffman.h
     src/output.c src/output.h
     src/utils.c src/utils.h
+    src/list.c src/list.h
 )
 
 add_executable(debug src/main.c
@@ -22,5 +23,6 @@ add_executable(debug src/main.c
     src/huffman.c src/huffman.h
     src/output.c src/output.h
     src/utils.c src/utils.h
+    src/list.c src/list.h
 )
 target_compile_definitions(debug PRIVATE -DDEBUG)

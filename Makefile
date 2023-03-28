@@ -1,7 +1,7 @@
 .PHONY: clean
 .SILENT: clean
 
-all: compressor debug generate compare
+all: compressor generate compare
 
 compressor:
 	cc -o $@ src/*.c
