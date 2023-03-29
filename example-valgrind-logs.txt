@@ -1,0 +1,749 @@
+==15848== Memcheck, a memory error detector
+==15848== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==15848== Using Valgrind-3.15.0-608cb11914-20190413 and LibVEX; rerun with -h for copyright info
+==15848== Command: ./valgrind test/1.in out
+==15848== Parent PID: 15847
+==15848== 
+--15848-- 
+--15848-- Valgrind options:
+--15848--    --leak-check=full
+--15848--    --show-leak-kinds=all
+--15848--    --track-origins=yes
+--15848--    --verbose
+--15848--    --log-file=valgrind-out.txt
+--15848-- Contents of /proc/version:
+--15848--   Linux version 5.3.18-lp152.106-default (geeko@buildhost) (gcc version 7.5.0 (SUSE Linux)) #1 SMP Mon Nov 22 08:38:17 UTC 2021 (52078fe)
+--15848-- 
+--15848-- Arch and hwcaps: AMD64, LittleEndian, amd64-cx16-lzcnt-rdtscp-sse3-ssse3-avx-avx2-rdrand
+--15848-- Page sizes: currently 4096, max supported 4096
+--15848-- Valgrind library directory: /usr/lib64/valgrind
+--15848-- Reading syms from /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind
+--15848-- Reading syms from /lib64/ld-2.26.so
+--15848-- Reading syms from /usr/lib64/valgrind/memcheck-amd64-linux
+--15848--    object doesn't have a symbol table
+--15848--    object doesn't have a dynamic symbol table
+--15848-- Scheduler: using generic scheduler lock implementation.
+--15848-- Reading suppressions file: /usr/lib64/valgrind/default.supp
+==15848== embedded gdbserver: reading from /tmp/vgdb-pipe-from-vgdb-to-15848-by-student-on-localhost
+==15848== embedded gdbserver: writing to   /tmp/vgdb-pipe-to-vgdb-from-15848-by-student-on-localhost
+==15848== embedded gdbserver: shared mem   /tmp/vgdb-pipe-shared-mem-vgdb-15848-by-student-on-localhost
+==15848== 
+==15848== TO CONTROL THIS PROCESS USING vgdb (which you probably
+==15848== don't want to do, unless you know exactly what you're doing,
+==15848== or are doing some strange experiment):
+==15848==   /usr/lib64/valgrind/../../bin/vgdb --pid=15848 ...command...
+==15848== 
+==15848== TO DEBUG THIS PROCESS USING GDB: start GDB like this
+==15848==   /path/to/gdb ./valgrind
+==15848== and then give GDB the following command
+==15848==   target remote | /usr/lib64/valgrind/../../bin/vgdb --pid=15848
+==15848== --pid is optional if only one valgrind process is running
+==15848== 
+--15848-- REDIR: 0x401d420 (ld-linux-x86-64.so.2:strlen) redirected to 0x581dc99e (???)
+--15848-- REDIR: 0x401d200 (ld-linux-x86-64.so.2:index) redirected to 0x581dc9b8 (???)
+--15848-- Reading syms from /usr/lib64/valgrind/vgpreload_core-amd64-linux.so
+--15848--    object doesn't have a symbol table
+--15848-- Reading syms from /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so
+--15848--    object doesn't have a symbol table
+==15848== WARNING: new redirection conflicts with existing -- ignoring it
+--15848--     old: 0x0401d420 (strlen              ) R-> (0000.0) 0x581dc99e ???
+--15848--     new: 0x0401d420 (strlen              ) R-> (2007.0) 0x04c31960 strlen
+--15848-- REDIR: 0x401b490 (ld-linux-x86-64.so.2:strcmp) redirected to 0x4c32a90 (strcmp)
+--15848-- REDIR: 0x401d960 (ld-linux-x86-64.so.2:mempcpy) redirected to 0x4c367c0 (mempcpy)
+--15848-- Reading syms from /lib64/libc-2.26.so
+--15848-- REDIR: 0x4ec7700 (libc.so.6:memmove) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec6930 (libc.so.6:strncpy) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec79e0 (libc.so.6:strcasecmp) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec6380 (libc.so.6:strcat) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec6960 (libc.so.6:rindex) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec8fb0 (libc.so.6:rawmemchr) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ee2560 (libc.so.6:wmemchr) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec7870 (libc.so.6:mempcpy) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec76a0 (libc.so.6:bcmp) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec68f0 (libc.so.6:strncmp) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec63f0 (libc.so.6:strcmp) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec77d0 (libc.so.6:memset) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ee1260 (libc.so.6:wcschr) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec6890 (libc.so.6:strnlen) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec6460 (libc.so.6:strcspn) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec7a30 (libc.so.6:strncasecmp) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec6430 (libc.so.6:strcpy) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec7b70 (libc.so.6:memcpy@@GLIBC_2.14) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ee37c0 (libc.so.6:wcsnlen) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec6990 (libc.so.6:strpbrk) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec63b0 (libc.so.6:index) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec6860 (libc.so.6:strlen) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ecd8b0 (libc.so.6:memrchr) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec7a80 (libc.so.6:strcasecmp_l) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec7670 (libc.so.6:memchr) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ee2020 (libc.so.6:wcslen) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec6c40 (libc.so.6:strspn) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec79b0 (libc.so.6:stpncpy) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec7980 (libc.so.6:stpcpy) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec8fe0 (libc.so.6:strchrnul) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4ec7ad0 (libc.so.6:strncasecmp_l) redirected to 0x4a286b0 (_vgnU_ifunc_wrapper)
+--15848-- REDIR: 0x4f98510 (libc.so.6:__strrchr_avx2) redirected to 0x4c312e0 (rindex)
+--15848-- REDIR: 0x4ec2d70 (libc.so.6:malloc) redirected to 0x4c2e270 (malloc)
+--15848-- REDIR: 0x4ec7120 (libc.so.6:__GI_strstr) redirected to 0x4c36a30 (__strstr_sse2)
+--15848-- REDIR: 0x4f98c20 (libc.so.6:__memcpy_avx_unaligned_erms) redirected to 0x4c357a0 (memmove)
+--15848-- REDIR: 0x4f986e0 (libc.so.6:__strlen_avx2) redirected to 0x4c318a0 (strlen)
+--15848-- REDIR: 0x4f98320 (libc.so.6:__strchrnul_avx2) redirected to 0x4c362f0 (strchrnul)
+--15848-- REDIR: 0x4f98c00 (libc.so.6:__mempcpy_avx_unaligned_erms) redirected to 0x4c36400 (mempcpy)
+--15848-- REDIR: 0x4ec32f0 (libc.so.6:free) redirected to 0x4c2f4a0 (free)
+==15848== Invalid read of size 8
+==15848==    at 0x400F68: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fd030 is 16 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid read of size 8
+==15848==    at 0x400F91: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fd038 is 24 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid free() / delete / delete[] / realloc()
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fd020 is 0 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid read of size 8
+==15848==    at 0x400F68: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcfd0 is 16 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid read of size 8
+==15848==    at 0x400F91: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcfd8 is 24 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid free() / delete / delete[] / realloc()
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcfc0 is 0 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid read of size 8
+==15848==    at 0x400F68: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcf70 is 16 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid read of size 8
+==15848==    at 0x400F91: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcf78 is 24 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid free() / delete / delete[] / realloc()
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcf60 is 0 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid read of size 8
+==15848==    at 0x400F68: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcf10 is 16 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid read of size 8
+==15848==    at 0x400F91: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcf18 is 24 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid free() / delete / delete[] / realloc()
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcf00 is 0 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid read of size 8
+==15848==    at 0x400F68: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C19: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x52042b0 is 16 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x40194D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid read of size 8
+==15848==    at 0x400F91: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C19: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x52042b8 is 24 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x40194D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid free() / delete / delete[] / realloc()
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C19: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x52042a0 is 0 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x40194D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid read of size 8
+==15848==    at 0x400F68: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C19: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x5204310 is 16 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x40194D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid read of size 8
+==15848==    at 0x400F91: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C19: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x5204318 is 24 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x40194D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== Invalid free() / delete / delete[] / realloc()
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C19: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x5204300 is 0 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x40194D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== HEAP SUMMARY:
+==15848==     in use at exit: 0 bytes in 0 blocks
+==15848==   total heap usage: 976 allocs, 1,459 frees, 35,495 bytes allocated
+==15848== 
+==15848== All heap blocks were freed -- no leaks are possible
+==15848== 
+==15848== ERROR SUMMARY: 1449 errors from 18 contexts (suppressed: 0 from 0)
+==15848== 
+==15848== 1 errors in context 1 of 18:
+==15848== Invalid free() / delete / delete[] / realloc()
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C19: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x5204300 is 0 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x40194D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 1 errors in context 2 of 18:
+==15848== Invalid read of size 8
+==15848==    at 0x400F91: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C19: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x5204318 is 24 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x40194D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 1 errors in context 3 of 18:
+==15848== Invalid read of size 8
+==15848==    at 0x400F68: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C19: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x5204310 is 16 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x40194D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 1 errors in context 4 of 18:
+==15848== Invalid free() / delete / delete[] / realloc()
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C19: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x52042a0 is 0 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x40194D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 1 errors in context 5 of 18:
+==15848== Invalid read of size 8
+==15848==    at 0x400F91: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C19: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x52042b8 is 24 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x40194D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 1 errors in context 6 of 18:
+==15848== Invalid read of size 8
+==15848==    at 0x400F68: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C19: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x52042b0 is 16 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x40194D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 1 errors in context 7 of 18:
+==15848== Invalid free() / delete / delete[] / realloc()
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcfc0 is 0 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 1 errors in context 8 of 18:
+==15848== Invalid read of size 8
+==15848==    at 0x400F91: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcfd8 is 24 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 1 errors in context 9 of 18:
+==15848== Invalid read of size 8
+==15848==    at 0x400F68: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcfd0 is 16 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 1 errors in context 10 of 18:
+==15848== Invalid free() / delete / delete[] / realloc()
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fd020 is 0 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 1 errors in context 11 of 18:
+==15848== Invalid read of size 8
+==15848==    at 0x400F91: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fd038 is 24 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 1 errors in context 12 of 18:
+==15848== Invalid read of size 8
+==15848==    at 0x400F68: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fd030 is 16 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 239 errors in context 13 of 18:
+==15848== Invalid free() / delete / delete[] / realloc()
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcf00 is 0 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 239 errors in context 14 of 18:
+==15848== Invalid read of size 8
+==15848==    at 0x400F91: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcf18 is 24 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 239 errors in context 15 of 18:
+==15848== Invalid read of size 8
+==15848==    at 0x400F68: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F80: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcf10 is 16 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 240 errors in context 16 of 18:
+==15848== Invalid free() / delete / delete[] / realloc()
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcf60 is 0 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 240 errors in context 17 of 18:
+==15848== Invalid read of size 8
+==15848==    at 0x400F91: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcf78 is 24 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== 
+==15848== 240 errors in context 18 of 18:
+==15848== Invalid read of size 8
+==15848==    at 0x400F68: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400FA9: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Address 0x51fcf70 is 16 bytes inside a block of size 32 free'd
+==15848==    at 0x4C2F50B: free (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400FC1: freeRecursively (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x400F46: freeList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x401B2D: huffman (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402C0D: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==  Block was alloc'd at
+==15848==    at 0x4C2E2DF: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15848==    by 0x400D34: addToTheList (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848==    by 0x402B3F: main (in /home/student/Pulpit/Huffman/PW-C-Kompresor/valgrind)
+==15848== 
+==15848== ERROR SUMMARY: 1449 errors from 18 contexts (suppressed: 0 from 0)

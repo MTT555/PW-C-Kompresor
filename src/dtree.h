@@ -7,15 +7,15 @@ Wyjasnienie nazewnictwa:
     dnode - wezel tego drzewa
 */
 
-// Zmienna sluzaca do obslugi budowania pseudodrzewa na podstawie slownika zapisanego w pliku
+/* Zmienna sluzaca do obslugi budowania pseudodrzewa na podstawie slownika zapisanego w pliku */
 typedef struct dnode {
-    struct dnode *prev; // wskazuje na ojca
-    struct dnode *left; // wskazuje na lewego syna
-    struct dnode *right; // wskazuje na prawego syna
+    struct dnode *prev; /* ojciec */
+    struct dnode *left; /* lewy syn */
+    struct dnode *right; /* prawy syn */
 } dnode_t;
 
 int goDown(dnode_t **head);
 
 void freeDTree(dnode_t *head);
 
-#endif // DTREE_H
+#endif

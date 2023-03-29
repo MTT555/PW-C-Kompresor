@@ -1,6 +1,6 @@
-#include "countCharacters.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "countCharacters.h"
 
 /**
 Funkcja dodajaca slowo do listy na jej poczatek (jezeli jeszcze go nie ma)
@@ -43,7 +43,7 @@ Funkcja drukujaca cala liste na wybrany strumien
 	count_t **head - poczatek listy
 	FILE *stream - strumien wyjscia
 */
-void showList(count_t **head, FILE *stream){
+void showList(count_t **head, FILE *stream) {
 	count_t *iterator = (*head);
 	while (iterator != NULL) {
 		fprintf(stream, "Character: %d, Amount: %d\n", iterator->character, iterator->amount);
@@ -55,12 +55,12 @@ void showList(count_t **head, FILE *stream){
 Funkcja sortujaca liste algorytmem sortowania babelkowego
 	count_t **head - poczatek listy
 */
-void sortTheCountList(count_t **head){
-	if(*head == NULL) // jezeli lista jest pusta, konczymy dzialanie funkcji
-		return;
-	
+void sortTheCountList(count_t **head) {
 	int ifSwapped;
 	count_t *ptr1 = NULL, *ptr2 = NULL;
+	
+	if(*head == NULL) /* jezeli lista jest pusta, konczymy dzialanie funkcji */
+		return;
 
 	do {
 		ifSwapped = 0;
@@ -82,9 +82,9 @@ Funkcja zamieniajaca ze soba wartosci dwoch danych elementow listy
 */
 void swap(count_t *ptr1, count_t *ptr2) {
 	int temp_a = ptr1->amount;
+	int temp_c = ptr1->character;
 	ptr1->amount = ptr2->amount;
 	ptr2->amount = temp_a;
-	int temp_c = ptr1->character;
 	ptr1->character = ptr2->character;
 	ptr2->character = temp_c;
 }	

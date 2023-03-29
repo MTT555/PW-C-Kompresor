@@ -4,13 +4,15 @@
 #include "huffman.h"
 #include "utils.h"
 #include "dtree.h"
+#include "utils.h"
+#include "list.h"
 
 void decompress(FILE *input, FILE *output);
 
-void printList(listCodes **list, FILE *stream);
+void printList(listCodes_t **list, FILE *stream);
 
-void addCode(listCodes **list, int character, unsigned char *code);
+void addCode(listCodes_t **list, int character, uchar *code);
 
-bool compareBuffer(listCodes **list, unsigned char *buf, FILE *stream, int compLevel, bool endingZero, int *currentBits, int *tempCode);
+bool compareBuffer(listCodes_t **list, uchar *buf, FILE *stream, int compLevel, bool endingZero, int *currentBits, int *tempCode);
 
-#endif // DECOMPRESS_H
+#endif

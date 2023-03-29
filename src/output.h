@@ -1,10 +1,13 @@
 #ifndef OUTPUT_H
 #define OUTPUT_H
 
-void compressedToFile(FILE *input, FILE *output, int compLevel, bool cipher, unsigned char *cipher_key, listCodes **head, unsigned char *xor, pack_t *buffer, short *pack_pos);
+#include "utils.h"
+#include "list.h"
 
-void decompressedToFile(FILE *in, FILE *out, unsigned char *cipher_key);
+void compressedToFile(FILE *input, FILE *output, int compLevel, bool cipher, uchar *cipher_key, listCodes_t **head, uchar *xor, pack_t *buffer, short *pack_pos);
 
-void saveBitIntoPack(FILE *output, bool cipher, unsigned char *cipher_key, pack_t *buffer, short *pack_pos, unsigned char *xor, short bit);
+void decompressedToFile(FILE *in, FILE *out, uchar *cipher_key);
 
-#endif //OUTPUT_H
+void saveBitIntoPack(FILE *output, bool cipher, uchar *cipher_key, pack_t *buffer, short *pack_pos, uchar *xor, short bit);
+
+#endif

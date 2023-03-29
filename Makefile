@@ -1,13 +1,13 @@
 .PHONY: clean
 .SILENT: clean
 
-all: compressor generate compare
+all: compressor debug generate compare
 
 compressor:
-	cc -o $@ src/*.c
+	cc -o $@ src/*.c -ansi -Wall -pedantic
 
 debug:
-	cc -o $@ -DDEBUG src/*.c -Wall -pedantic
+	cc -o $@ -DDEBUG src/*.c
 
 generate:
 	cc -o $@ gen/gen.c
@@ -15,6 +15,11 @@ generate:
 compare:
 	cc -o $@ compare.c
 
+valgrind:
+	cc -o valgrind src/*.c -Wall -pedantic -ansi -DDEBUG
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./valgrind test/1.in out >valogs 2>logs
+
 clean:
 	rm -f compressor generate compare debug
 	rm -fdr cmake_build/*
+	rm -f valgrind

@@ -2,8 +2,11 @@
 #define UTILS_H
 
 #define CIPHER "Politechnika_Warszawska"
+#define uchar unsigned char
+#define XOR 183
+/* (183 = 0b10110111) */
 
-// Definicja zmiennej bool
+/* Definicja zmiennej bool */
 typedef enum {
     false, true
 } bool;
@@ -17,13 +20,13 @@ pack_t - typ sluzacy za bufer dla znakow laczacy wlasciwosci shorta tj. liczby c
 typedef union pack {
     unsigned short whole;
     struct {
-        unsigned char buf;
-        unsigned char out;
+        uchar buf;
+        uchar out;
     } chars;
 } pack_t;
 
 void help(FILE *stream);
 
-int fileIsGood(FILE *in, unsigned char xor_correct_value, bool displayMsg);
+int fileIsGood(FILE *in, uchar xor_correct_value, bool displayMsg);
 
-#endif //UTILS_H
+#endif

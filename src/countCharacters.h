@@ -3,13 +3,13 @@
 
 #include <stdio.h>
 
-// Typ sluzacy do przechowywania ilosci wystapien poszczegolnych znakow
+/* Typ sluzacy do przechowywania ilosci wystapien poszczegolnych znakow */
 typedef struct countChars {
-    int character; // int pozwoli na przechowywanie rowniez slow 12-bit i 16-bit
-    int amount; // ilosc wystapien
-    struct countChars *next; // nastepny element
-    struct countChars *left; // lewy syn
-    struct countChars *right; // prawy syn
+    int character; /* int pozwoli na przechowywanie rowniez slow 12-bit i 16-bit */
+    int amount; /* ilosc wystapien */
+    struct countChars *next; /* nastepny element */
+    struct countChars *left; /* lewy syn */
+    struct countChars *right; /* prawy syn */
 } count_t;
 
 count_t *addToTheList(count_t **head, int character);
