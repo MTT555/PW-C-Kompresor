@@ -13,9 +13,13 @@ int main(int argc, char **argv) {
     if(!(argc == 3 || argc == 4))
         return 1;
     
-    char fileName[256] = "../test/";
+    char fileName[256] = "test/";
     strcat(fileName, argv[1]);
 	FILE *out = fopen(fileName, "wb");
+
+    if(out == NULL)
+        return 2;
+
     int n = atoi(argv[2]);
     int r = argc > 3 ? atoi(argv[3]) : 128;
     int seed = argc > 4 ? atoi(argv[4]) : time(NULL);

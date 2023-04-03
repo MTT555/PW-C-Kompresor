@@ -94,12 +94,18 @@ Funkcja zwalniajaca pamiec z wszystkich elementow listy
 	count_t **head - poczatek listy
 */
 void freeList(count_t *head) {
-	count_t *iterator = head, *temp;
+	int i, n = 0;
+	count_t **toFree = malloc(65535 * sizeof(count_t)); /*uzaleznic od compLevel*/
+	count_t *iterator = head;
 	while (iterator != NULL) {
-		temp = iterator;
+		toFree[n] = iterator;
 		iterator = iterator->next;
-		freeRecursively(temp);
+		n++;
 	}
+	for(i = 0; i < n; i++) {
+		freeRecursively(toFree[i]);
+	}
+	free(toFree);
 }
 
 /**
@@ -109,15 +115,17 @@ Funkcja rekurencyjnie zwalniajaca pamiec z wszystkich synow danego elementu
 void freeRecursively(count_t *head) {
 	if(head != NULL) {
 		if(head->left != NULL) {
-			freeRecursively(head->left);
+			free(head->left);
 			head->left = NULL;
 		}
 		if(head->right != NULL) {
-			freeRecursively(head->right);
+			free(head->right);
 			head->right = NULL;
 		}
 		
-		free(head);
-		head = NULL;
+		/* if(head != NULL) {
+		// 	free(head);
+		// 	head = NULL;
+		// } */
 	}
 }

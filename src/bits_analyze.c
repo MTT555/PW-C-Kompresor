@@ -29,7 +29,7 @@ void analyzeBits(FILE *output, uchar c, int compLevel, listCodes_t **list,
 short redundantBits, bool redundantZero, dnode_t **iterator, mod_t *mode,
 uchar *buffer, int *curBufSize, uchar *codeBuf, int *curCodeBufSize, 
 int *bufPos, int *codeBufPos, int *currentBits, int *tempCode) {
-    int i; /* do iteracji po petlach */
+    int i;
     short bits = 0; /* ilosc przeanalizowanych bitow */
     short currentCode = 0; /* obecny kod przejscia w sciezce */
     while (bits != 8 - redundantBits) {

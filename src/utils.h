@@ -27,6 +27,8 @@ typedef union pack {
 
 void help(FILE *stream);
 
+void analyzeArgs(int argc, char **argv, bool *cipher, bool *comp, bool *decomp, int *compLevel);
+
 int fileIsGood(FILE *in, uchar xor_correct_value, bool displayMsg);
 
 #endif

@@ -9,8 +9,10 @@
 
 void huffman(FILE *input, FILE *output, int compLevel, bool cipher, count_t **head);
 
-void createHuffmanTree(FILE *output, count_t **head, int *code, bool cipher, int compLevel, int top, listCodes_t **listC);
+void createHuffmanTree(FILE *output, count_t **head, int *code, bool cipher, int compLevel, uchar *xor,
+    int top, listCodes_t **listC, pack_t *buffer, int *packPos, uchar *cipherKey, int *cipherPos, uchar *roadBuffer, int *roadPos);
 
-void addToTheList1(FILE *output, int compLevel, bool cipher, listCodes_t **head, int character, int *code, int length);
+void addToTheListCodes(FILE *output, int compLevel, bool cipher, listCodes_t **listC, pack_t *buffer, int *packPos,
+    int character, int *code, int length, uchar *xor, uchar *cipherKey, int *cipherPos, uchar *roadBuffer, int *roadPos);
 
 #endif

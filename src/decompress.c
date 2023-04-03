@@ -88,7 +88,7 @@ void decompress(FILE *input, FILE *output) {
         fprintf(stderr, "File size reduced by %.2f%%!\n", 100 - 100 * (double)outputEOF / inputEOF);
     else
         fprintf(stderr, "File size increased by %.2f%%!\n", 100 * (double)outputEOF / inputEOF - 100);
-    fprintf(stderr, "Input: %ld, output: %ld\n", inputEOF, outputEOF);
+    fprintf(stderr, "Input: %d, output: %d\n", inputEOF, outputEOF);
 #endif
 
     /* Zwalnianie pamieci */
