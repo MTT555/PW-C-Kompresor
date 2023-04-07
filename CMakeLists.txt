@@ -17,6 +17,8 @@ add_executable(compressor src/main.c
     src/list.c src/list.h
     src/dtree.c src/dtree.h
     src/bits_analyze.c src/bits_analyze.h
+    src/alloc.c src/alloc.h
+    src/noCompress.c src/noCompress.h
 )
 
 add_executable(debug src/main.c
@@ -28,5 +30,7 @@ add_executable(debug src/main.c
     src/list.c src/list.h
     src/dtree.c src/dtree.h
     src/bits_analyze.c src/bits_analyze.h
+    src/alloc.c src/alloc.h
+    src/noCompress.c src/noCompress.h
 )
 target_compile_definitions(debug PRIVATE -DDEBUG)

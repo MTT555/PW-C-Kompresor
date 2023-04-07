@@ -9,12 +9,15 @@
 void compressedToFile(FILE *input, FILE *output, int compLevel, bool cipher, uchar *cipherKey, listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
     /* Deklaracja potrzebnych zmiennych */
     uchar c;
-    int i, j, inputEOF, outputEOF;
+    int i, j, inputEOF;
     int tempCode = 0, currentBits = 0; /* zmienne przechowujace tymczasowy kod znaku oraz ilosc obecnie odczytanych bitow */
     int cipherPos = 0; /* zmienna przechowujaca aktualna pozycje w szyfrze */
     uchar flags, ending = '\0'; /* ilosc niezapisanych bitow konczacych plik */
     listCodes_t *iterator = NULL; /* iterator po liscie kodow */
     bool endingZero = false;
+#ifdef DEBUG
+    int outputEOF;
+#endif
     
     /* Zapisanie pozycji koncowych pliku wejsciowego oraz wyjsciowego */
     fseek(input, 0, SEEK_END);
@@ -78,9 +81,9 @@ void compressedToFile(FILE *input, FILE *output, int compLevel, bool cipher, uch
         ending = (uchar)(16 - *packPos);
     for(i = 0; i <= (int)ending + 8; i++) /* dopychamy union packa dodatkowymi zerami, aby zapisac ostatni znak do pliku */
         saveBitIntoPack(output, cipher, cipherKey, &cipherPos, buffer, packPos, xor, 0);
-
+#ifdef DEBUG
     outputEOF = ftell(output); /* zapisanie pozycji koncowej */
-
+#endif
     /**
     Zapisywanie potrzebnych flag w znaku F na samym poczatku pliku
     Szablon bitowy: 0bKKSZCEEE

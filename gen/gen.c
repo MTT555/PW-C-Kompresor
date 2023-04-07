@@ -10,17 +10,19 @@ Instrukcja, jak uzywac
 */
 
 int main(int argc, char **argv) {
-    int n, r, seed;
+    int i, n, r, seed;
     FILE *out;
-    char fileName[256] = "test/";
+    char fileName[256] = "../test/";
     
-    if(!(argc == 3 || argc == 4))
-        return 1;
+    if(!(argc == 4 || argc == 5)) {
+        fprintf(stderr, "Too few/too many arguments! (argc == %d != 2)\n", argc);
+        return -1;
+    }
     
     strcat(fileName, argv[1]);
     out = fopen(fileName, "wb");
     if(out == NULL) {
-        fprintf(stderr, "File could not be opened!");
+        fprintf(stderr, "File could not be opened!\n");
         return -2;
     }
 

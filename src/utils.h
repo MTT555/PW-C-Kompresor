@@ -1,7 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#define CIPHER "Politechnika_Warszawska"
 #define uchar unsigned char
 #define XOR 183
 /* (183 = 0b10110111) */
@@ -20,6 +19,14 @@ typedef union pack {
     } chars;
 } pack_t;
 
+/* settings_t - typ sluzacy za przechowywanie ustawien nadanych przez argumenty wejscia */
+typedef struct {
+    bool comp, decomp; /* zmienne mowiace o wymuszeniu kompresji lub dekompresji */
+    int compLevel; /* zmienna mowiaca o poziomie kompresji */
+    bool cipher; /* zmienna mowiaca o tym, czy szyfrujemy dany program */
+    uchar cipherKey[4096]; /* klucz szyfrowania */
+} settings_t;
+
 /**
 Funkcja wyswietlajaca pomoc zawierajaca instrukcje do prawidlowej obslugi programu
     FILE *stream - strumien outputu, zazwyczaj stdout lub stderr
@@ -32,7 +39,7 @@ Funkcja sluzaca do analizy argumentow podanych przez uzytkownika na wejsciu
     char **argv - zawartosc tych argumentow
     bool *cipher, *comp, *decomp, int *compLevel - wartosci tych zmiennych przekazemy przez pointery do main
 */
-void analyzeArgs(int argc, char **argv, bool *cipher, bool *comp, bool *decomp, int *compLevel);
+void analyzeArgs(int argc, char **argv, settings_t *s);
 
 /**
 Funkcja sprawdzajaca podany plik pod wzgledem nadawania sie do dekompresji

@@ -8,13 +8,15 @@ Program w języku C realizujący bezstratną kompresję oraz dekompresję plikó
     > `./generate <outputFile> <charactersAmount> <charactersRange> <seed>` 
   * **testo3.c** -> odpowiedzialny za wygenerowanie testu testo3.in zawierającego wszystkie możliwe znaki/słowa dla wszystkich możliwych poziomów kompresji
 * **src**
+  * **alloc.\*** -> zawiera funkcje służące do bezpiecznej alokacji pamięci
   * **bits_analyze.\*** -> zawiera funkcje służące do analizy kolejnych bitów zawartych kolejnych znakach przy dekompresji
   * **countCharacters.\*** -> zawiera funkcje odpowiedzialne za zliczanie wystąpień wszystkich znaków w pliku wejściowym
   * **decompress.\*** -> zawiera funkcje odpowiedzialne za dekompresję
   * **dtree.\*** -> zawiera typ pomocniczego pseudodrzewa do dekompresji oraz związane z nim funkcje
   * **huffman.\*** -> zawiera funkcje realizujące algorytm Huffmana
-  * **list.\*** -> zawiera implementacje listy liniowej
+  * **list.\*** -> zawiera implementację listy liniowej
   * **main.c** -> odpowiada za sprawdzanie danych wejściowych oraz sterowanie całym programem
+  * **noCompress.\*** -> zawiera funkcje obsługujące plik w wypadku, gdy nie zachodzi żadna kompresja
   * **output.\*** -> zawiera funkcje realizujące zapis skompresowanego pliku
   * **utils.\*** -> zawiera pomocnicze typy oraz funkcje
 * **test** -> katalog zawierający przykładowe testy

@@ -4,16 +4,16 @@
 all: compressor debug generate compare
 
 compressor:
-	cc -o $@ src/*.c
+	cc -o $@ src/*.c -ansi -pedantic -Wall
 
 debug:
 	cc -o $@ -DDEBUG src/*.c -ansi -pedantic -Wall
 
 generate:
-	cc -o $@ gen/gen.c
+	cc -o $@ gen/gen.c -ansi -pedantic -Wall
 
 compare:
-	cc -o $@ compare.c
+	cc -o $@ compare.c -ansi -pedantic -Wall
 
 valgrind:
 	cc -o valgrind src/*.c -Wall -pedantic -DDEBUG

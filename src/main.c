@@ -5,14 +5,22 @@
 #include "utils.h"
 #include "decompress.h"
 #include "list.h"
+#include "alloc.h"
+#include "noCompress.h"
 
 int main(int argc, char **argv) {
+	/* Deklaracja zmiennych */
 	uchar c;
-	int i, inputEOF;
+	int i, inputEOF, fileCheck;
 	count_t *head = NULL;
 	FILE *in, *out;
-	bool cipher = false, comp = false, decomp = false; /* zmienne pomocnicze do obslugi argumentow -c -v -x -d */
-	int compLevel = 8; /* zmienna pomocnicza do obslugi poziomu kompresji, domyslnie kompresja 8-bitowa */
+	int tempCode = 0, currentBits = 0; /* tymczasowy kod wczytanego znaku oraz ilosc obecne wczytanych bitow (dla kompresji 12- i 16-bit) */
+	
+	settings_t s;
+	s.comp = false; /* domyslnie wylaczone wymuszenie kompresji i dekompresji */
+	s.decomp = false;
+	s.cipher = false; /* domyslnie szyfrowanie wylaczone */
+	s.compLevel = 8; /* domyslna kompresja 8-bit */
 	
 	/* Wyswietlenie pomocy pliku w wypadku podania jedynie argumentu --h */
 	if(argc == 1 || (argc == 2 && strcmp(argv[1], "-h") == 0)) {
@@ -52,45 +60,33 @@ int main(int argc, char **argv) {
 	}
 
 	/* Analiza pozostalych argumentow wywolania */
-	analyzeArgs(argc, argv, &cipher, &comp, &decomp, &compLevel);
+	analyzeArgs(argc, argv, &s);
 	
-	if(!comp && !decomp) { /* jezeli nie wymuszono zachowania programu, sprawdzamy plik */
-		if(fileIsGood(in, (uchar)183, false)) /* (183 = 0b10110111) */
-			comp = true;
-		else
-			decomp = true;
-	}
-	
-	int tempCode = 0, currentBits = 0; /* tymczasowy kod wczytanego znaku oraz ilosc obecne wczytanych bitow */
+#ifdef DEBUG
+	/* Wydrukowanie debug info na stderr */
+	fprintf(stderr, "The following settings have been chosen:\n");
+	fprintf(stderr, "Force compression: %s, force decompression: %s, compLevel: %d, cipher: %s\n",
+		s.comp ? "true" : "false", s.decomp ? "true" : "false", s.compLevel, s.cipher ? "true" : "false");
+	if(s.cipher)
+		fprintf(stderr, "Cipher key: %s\n", s.cipherKey);
+#endif
 
-	if(comp) { /* jezeli ma zostac wykonana kompresja */
-		if(compLevel == 0 && !cipher) {
-			fprintf(stderr, "%s: Due to chosen settings, file has been rewritten to \"%s\" with no changes!\n", argv[0], argc > 2 ? argv[2] : "stdout");
-			for(i = 0; i < inputEOF; i++) {
-				fread(&c, sizeof(char), 1, in);
-				fwrite(&c, sizeof(char), 1, out);
-			}
-		} else if(compLevel == 0 && cipher) {
-			uchar xor = (uchar)183; /* (183 = 0b10110111) */
-			uchar cipher_key[] = "Politechnika_Warszawska";
-			int cipher_pos = 0;
-			int cipher_len = (int)strlen((char *)cipher_key);
-			fprintf(out, "CT%cX", (uchar)40); /* zapalone bity szyfrowania i kompresji (40 == 0b00101000) */
-			for(i = 0; i < inputEOF; i++) {
-				fread(&c, sizeof(char), 1, in);
-				c += cipher_key[cipher_pos % cipher_len];
-				cipher_pos++;
-				fwrite(&c, sizeof(char), 1, out);
-				xor ^= c;
-			}
-			fseek(out, 3, SEEK_SET);
-			fwrite(&xor, sizeof(char), 1, out);
-		} else {
+	if(!s.comp && !s.decomp) { /* jezeli nie wymuszono zachowania programu, sprawdzamy plik */
+		if(fileIsGood(in, (uchar)183, false)) /* (183 = 0b10110111) */
+			s.comp = true;
+		else
+			s.decomp = true;
+	}
+
+	if(s.comp) { /* jezeli ma zostac wykonana kompresja */
+		if(s.compLevel == 0)
+			rewriteFile(in, out, inputEOF, s);
+		else {
 			/* wczytuje i zliczam znak po znaku */
 			for(i = 0; i <= inputEOF; i++) {
 				if(i != inputEOF)
 					fread(&c, sizeof(char), 1, in);
-				else if((compLevel == 12 && (currentBits == 8 || currentBits == 4)) || (compLevel == 16 && currentBits == 8))
+				else if((s.compLevel == 12 && (currentBits == 8 || currentBits == 4)) || (s.compLevel == 16 && currentBits == 8))
 					c = '\0';
 				else
 					break;
@@ -98,12 +94,12 @@ int main(int argc, char **argv) {
 				currentBits += 8;
 				tempCode <<= 8;
 				tempCode += (int)c;
-				if(currentBits == compLevel) {
+				if(currentBits == s.compLevel) {
 					if(checkIfOnTheList(&head, tempCode) == 1)
 						head = addToTheList(&head, tempCode);
 					tempCode = 0;
 					currentBits = 0;
-				} else if (currentBits >= compLevel) { /* taki przypadek wystapi jedynie w kompresji 12-bit */
+				} else if (currentBits >= s.compLevel) { /* taki przypadek wystapi jedynie w kompresji 12-bit */
 					int temp = tempCode % 16;
 					tempCode >>= 4;
 					if(checkIfOnTheList(&head, tempCode) == 1)
@@ -119,13 +115,13 @@ int main(int argc, char **argv) {
 			showList(&head, stderr);
 #endif
 			fseek(in, 0, SEEK_SET); /* ustawienie kursora w pliku z powrotem na jego poczatek */
-			huffman(in, out, compLevel, cipher, &head);
+			huffman(in, out, s.compLevel, s.cipher, &head);
 			freeRecursively(head);
 			free(head);
 		}
 	}
-	else if(decomp) { /* jezeli ma zostac wykonana dekompresja */
-		int fileCheck = fileIsGood(in, (uchar)183, true); /* (183 = 0b10110111) */
+	else if(s.decomp) { /* jezeli ma zostac wykonana dekompresja */
+		fileCheck = fileIsGood(in, (uchar)183, true); /* (183 = 0b10110111) */
 #ifdef DEBUG
 		fprintf(stderr, "File check code: %d\n", fileCheck);
 #endif

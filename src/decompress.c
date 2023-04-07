@@ -17,7 +17,7 @@ void decompress(FILE *input, FILE *output) {
     /* Deklaracja wszystkich zmiennych statycznych i nadanie im odpowiednich wartosci poczatkowych */
     int i; /* iteracje po petlach */
     uchar c; /* do odczytywania kolejnych znakow */
-    uchar cipher_key[] = CIPHER; /* klucz szyfrowania definiowany w cipher.h */
+    uchar *cipher_key = (uchar *)"Politechnika_Warszawska"; /* klucz szyfrowania definiowany w cipher.h */
     int cipherPos = 0; /* aktualna pozycja w szyfrze */
     int cipherLength = (int)strlen((char *)cipher_key);
     mod_t currentMode = dictRoad; /* zmienna przechowujaca aktualny tryb czytania pliku */
@@ -26,9 +26,12 @@ void decompress(FILE *input, FILE *output) {
     int tempCode = 0; /* aktualny kod odczytanego symbolu (w ramach wsparcia dla dekompresji 12-bit) */
     int curBufSize = 8192; /* aktualna wielkosc buforu na odczytane bity */
     int curCodeBufSize = 8192; /* aktualna wielkosc buforu dla kodow przejsc po drzewie */
-    int inputEOF, outputEOF; /* zmienne zawierajace pozycje koncowe pliku wejsciowego i wyjsciowego */
     int compLevel, redundantBits; /* zmienne mowiace o poziomie kompresji i ilosci nadmiarowych bitow konczacych */
     bool cipher, redundantZero; /* zmienne do odczytywanie szyfrowania i koniecznosci odlaczenia koncowego nadmiarowego zera */
+    int inputEOF; /* zmienne zawierajace pozycje koncowe pliku wejsciowego i wyjsciowego */
+#ifdef DEBUG
+    int outputEOF;
+#endif
 
     /* Deklaracja wszystkich zmiennych dynamicznych, odpowiednia alokacja pamieci i inicjacja */
     listCodes_t *list = NULL; /* lista na przechowanie odczytanego slownika */
@@ -82,8 +85,8 @@ void decompress(FILE *input, FILE *output) {
     
     /* Komunikat koncowy */
     fprintf(stderr, "File successfully decompressed!\n");
-    outputEOF = ftell(output);
 #ifdef DEBUG
+    outputEOF = ftell(output);
     if(outputEOF < inputEOF)
         fprintf(stderr, "File size reduced by %.2f%%!\n", 100 - 100 * (double)outputEOF / inputEOF);
     else

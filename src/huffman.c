@@ -11,7 +11,7 @@ void huffman(FILE *input, FILE *output, int compLevel, bool cipher, count_t **he
     uchar xor = (uchar)183; /* ustawienie poczatkowej wartosci sumy kontrolnej (183 = 0b10110111) */
     pack_t buffer; /* typ pomocniczny do zapisu bitowego z output.h */
     int packPos = 0; /* zmienna zapisujaca przejscia po drzewie od ostatniego zapisu znaku */
-    uchar *cipherKey = CIPHER; /* klucz szyfrowania */
+    uchar *cipherKey = (uchar *)"Politechnika_Warszawska"; /* klucz szyfrowania */
     int cipherPos = 0; /* aktualna pozycja w tym szyfrze */
     count_t *nodeptr1 = NULL, *nodeptr2 = NULL, *node1 = NULL, *node2 = NULL;
     int *code = malloc((1 << (compLevel + 1)) * sizeof(int)); /* tu przechowujemy poszczegolne kody znakow */
