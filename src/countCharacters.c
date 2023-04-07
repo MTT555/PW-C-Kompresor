@@ -2,12 +2,6 @@
 #include <stdio.h>
 #include "countCharacters.h"
 
-/**
-Funkcja dodajaca slowo do listy na jej poczatek (jezeli jeszcze go nie ma)
-	count_t **head - poczatek listy
-	int character - slowo zapisane pod postacia liczby calkowitej
-Zwraca wskaznik liste zawierajaca nowy element
-*/
 count_t *addToTheList(count_t **head, int character) {
 	count_t *new = NULL;
 	new = malloc(sizeof(count_t));
@@ -19,13 +13,6 @@ count_t *addToTheList(count_t **head, int character) {
 	return new;
 }
 
-/**
-Funkcja sprawdzajaca czy dany element jest juz w liscie
-	count_t **head - poczatek listy
-	int character - slowo zapisane pod postacia liczby calkowitej
-Jezeli jest w liscie, zwieksza licznik wystapien o 1 i zwraca 0
-Jezeli nie znaleziono, zwraca 1
-*/
 int checkIfOnTheList(count_t **head, int character) {
 	count_t *iterator = (*head);
 	while(iterator != NULL) {
@@ -38,11 +25,6 @@ int checkIfOnTheList(count_t **head, int character) {
 	return 1;
 }
 
-/**
-Funkcja drukujaca cala liste na wybrany strumien
-	count_t **head - poczatek listy
-	FILE *stream - strumien wyjscia
-*/
 void showList(count_t **head, FILE *stream) {
 	count_t *iterator = (*head);
 	while (iterator != NULL) {
@@ -51,10 +33,6 @@ void showList(count_t **head, FILE *stream) {
 	}
 }
 
-/**
-Funkcja sortujaca liste algorytmem sortowania babelkowego
-	count_t **head - poczatek listy
-*/
 void sortTheCountList(count_t **head) {
 	int ifSwapped;
 	count_t *ptr1 = NULL, *ptr2 = NULL;
@@ -76,10 +54,6 @@ void sortTheCountList(count_t **head) {
 	} while(ifSwapped);
 }
 
-/**
-Funkcja zamieniajaca ze soba wartosci dwoch danych elementow listy
-	count_t *ptr1, *ptr2 - wskazniki na te elementy
-*/
 void swap(count_t *ptr1, count_t *ptr2) {
 	int temp_a = ptr1->amount;
 	int temp_c = ptr1->character;
@@ -122,10 +96,5 @@ void freeRecursively(count_t *head) {
 			free(head->right);
 			head->right = NULL;
 		}
-		
-		/* if(head != NULL) {
-		// 	free(head);
-		// 	head = NULL;
-		// } */
 	}
 }

@@ -1,12 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "list.h"
 
-/**
-Funkcja drukujaca odczytany slownik na wybrany strumien
-    listCodes_t **list - poczatek listy, ktora chcemy wyswietlic
-    FILE *stream - strumien, w ktorym ta lista ma zostac wydrukowana
-*/
+void addToListCodes(listCodes_t **list, int character, uchar *code) {
+    listCodes_t *new = NULL;
+    new = malloc(sizeof(listCodes_t));
+    new->character = character;
+    new->code = malloc(sizeof(char) * (strlen((char *)code) + 1));
+    strcpy((char *)new->code, (char *)code);
+    new->next = (*list);
+    (*list) = new;
+}
+
 void printListCodes(listCodes_t **list, FILE *stream) {
     listCodes_t *iterator = (*list);
     while (iterator != NULL) {
@@ -16,7 +22,6 @@ void printListCodes(listCodes_t **list, FILE *stream) {
 }
 
 void freeListCodes(listCodes_t **head) {
-/* zwalnianie pamieci zajetej przez liste kodow */
 	listCodes_t *iterator = *head, *temp;
 	while(iterator != NULL) {
 		temp = iterator;

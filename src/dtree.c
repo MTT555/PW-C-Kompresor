@@ -2,13 +2,6 @@
 #include <stdlib.h>
 #include "dtree.h"
 
-/**
-Funkcja wykonujaca przejscie w dol w drzewie dnode
-    dnode_t *head - punkt wzgledem ktorego chcemy wykonac przejscie
-Zwraca:
-    0 - wykonano przejscie w dol w lewo
-    1 - wykonano przejscie w dol w prawo
-*/
 int goDown(dnode_t **head) {
     if((*head)->left == NULL) {
         (*head)->left = malloc(sizeof(dnode_t));
@@ -27,10 +20,6 @@ int goDown(dnode_t **head) {
     }
 }
 
-/**
-Funkcja czyszczaca pamiec po dtree
-    dnode_t *head - korzen drzewa dnode
-*/
 void freeDTree(dnode_t *head) {
     if(head->left != NULL)
         freeDTree(head->left);

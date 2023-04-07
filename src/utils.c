@@ -3,10 +3,6 @@
 #include <string.h>
 #include "utils.h"
 
-/**
-Funkcja wyswietlajaca pomoc zawierajaca instrukcje do prawidlowej obslugi programu
-    FILE *stream - strumien outputu, zazwyczaj stdout lub stderr
-*/
 void help(FILE *stream) {
     char help_message1[] = "\n---------------------------------- HUFFMAN COMPRESSOR HELPBOX ----------------------------------\n\n"
                            "Compressor & decompressor made by Adrian Chmiel & Mateusz Tyl\n\n"
@@ -41,12 +37,6 @@ void help(FILE *stream) {
     fprintf(stream, "%s%s%s%s", help_message1, help_message2, help_message3, help_message4);
 }
 
-/**
-Funkcja sluzaca do analizy argumentow podanych przez uzytkownika na wejsciu
-    int argc - ilosc argumentow
-    char **argv - zawartosc tych argumentow
-    bool *cipher, *comp, *decomp, int *compLevel - wartosci tych zmiennych przekazemy przez pointery do main
-*/
 void analyzeArgs(int argc, char **argv, bool *cipher, bool *comp, bool *decomp, int *compLevel) {
     int i;
     bool help_displayed = false, setCompLevel = false; /* zmienna zapobiegajaca wielokrotnemu wyswietlaniu helpboxa oraz wielokrotnemu zmienianiu stopnia kompresji */
@@ -132,22 +122,7 @@ void analyzeArgs(int argc, char **argv, bool *cipher, bool *comp, bool *decomp, 
 	}
 }
 
-/**
-Funkcja sprawdzajaca podany plik pod wzgledem nadawania sie do dekompresji
-1. Sprawdzenie oznaczenia na poczatku pliku
-2. Sprawdzenie sumy kontrolnej
-    FILE *in - plik wejsciowy, ktory ma zostac sprawdzony pod wzgledem poprawnosci
-    uchar xorCorrectValue - wartosc startowa, od ktorej byly wykonywane sumy kontrolne podczas procesu kompresji
-    bool displayMsg - wyswietlanie informacji o sprawdzanym pliku na stderr w przypadku, gdy nie spelnia wymogow do dekompresji (jesli == true)
-Zwraca:
-    0 - plik jest prawidlowy, mozna go dekompresowac
-    1 - brak inicjalow na poczatku, plik nie pochodzi z kompresji
-    2 - bity w bajcie flagowym wskazuja na inne pochodzenie niz kompresja
-    3 - plik moze pochodzic z kompresji, lecz jest uszkodzony lub niepelny
-    4 - plik jest zbyt krotki, aby mogl byc wynikiem dzialania tego kompresora
-*/
 int fileIsGood(FILE *in, uchar xorCorrectValue, bool displayMsg) {
-    /* Deklaracja potrzebnych zmiennych */
     uchar c, xor; /* zmienna do odczytania wyniku sumy kontrolnej */
     int i, eof; /* zmienna do sprawdzenia pozycji koncowej */
     const char *impossibleOutput = "Provided file cannot be decompressed since it is not a possible output of this compressor!\n";

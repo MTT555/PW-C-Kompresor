@@ -6,15 +6,6 @@
 #include "list.h"
 #include "output.h"
 
-/**
-Funkcja wykonujaca kompresje algorytmem Huffmana
-    FILE *input - plik wejsciowy zawierajacy tekst do kompresji
-    FILE *output - plik wyjsciowy, w ktorym zostanie zapisany skompresowany tekst
-    int compLevel - poziom kompresji podany w bitach (dla compLevel == 0 - brak kompresji)
-    bool cipher - zmienna mowiaca, czy tekst ma zostac rowniez zaszyfrowany
-    uchar *cipherKey - klucz szyfrowania (nieistotny, gdy cipher == false)
-    count_t **head - glowa listy zawierajaca ilosci wystapien danych znakow
-*/
 void huffman(FILE *input, FILE *output, int compLevel, bool cipher, count_t **head) {
     char *xxxx = "CTFX"; 
     uchar xor = (uchar)183; /* ustawienie poczatkowej wartosci sumy kontrolnej (183 = 0b10110111) */

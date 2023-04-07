@@ -14,8 +14,19 @@ typedef struct dnode {
     struct dnode *right; /* prawy syn */
 } dnode_t;
 
+/**
+Funkcja wykonujaca przejscie w dol w drzewie dnode
+    dnode_t *head - punkt wzgledem ktorego chcemy wykonac przejscie
+Zwraca:
+    0 - wykonano przejscie w dol w lewo
+    1 - wykonano przejscie w dol w prawo
+*/
 int goDown(dnode_t **head);
 
+/**
+Funkcja czyszczaca pamiec po dtree
+    dnode_t *head - korzen drzewa dnode
+*/
 void freeDTree(dnode_t *head);
 
 #endif

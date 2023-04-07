@@ -10,22 +10,25 @@ Instrukcja, jak uzywac
 */
 
 int main(int argc, char **argv) {
+    int n, r, seed;
+    FILE *out;
+    char fileName[256] = "test/";
+    
     if(!(argc == 3 || argc == 4))
         return 1;
     
-    char fileName[256] = "test/";
     strcat(fileName, argv[1]);
-	FILE *out = fopen(fileName, "wb");
+    out = fopen(fileName, "wb");
+    if(out == NULL) {
+        fprintf(stderr, "File could not be opened!");
+        return -2;
+    }
 
-    if(out == NULL)
-        return 2;
-
-    int n = atoi(argv[2]);
-    int r = argc > 3 ? atoi(argv[3]) : 128;
-    int seed = argc > 4 ? atoi(argv[4]) : time(NULL);
+    n = atoi(argv[2]);
+    r = argc > 3 ? atoi(argv[3]) : 128;
+    seed = argc > 4 ? atoi(argv[4]) : time(NULL);
     srand(seed);
 
-    int i;
     for(i = 0; i < n; i++)
         fprintf(out, "%c", (unsigned char)(rand() % r));
     fclose(out);

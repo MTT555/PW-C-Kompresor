@@ -99,22 +99,6 @@ void decompress(FILE *input, FILE *output) {
 }
 
 /**
-Funkcja dodajaca odczytany kod wraz ze znakiem do listy
-    listCodes_t **list - lista, do ktorej chcemy dokonac zapisu
-    int character - znak, ktory chcemy zapisac
-    uchar *code - kod tego znaku
-*/
-void addCode(listCodes_t **list, int character, uchar *code) {
-    listCodes_t *new = NULL;
-    new = malloc(sizeof(listCodes_t));
-    new->character = character;
-    new->code = malloc(sizeof(char) * (strlen((char *)code) + 1));
-    strcpy((char *)new->code, (char *)code);
-    new->next = (*list);
-    (*list) = new;
-}
-
-/**
 Funkcja sprawdzajaca, czy aktualny fragment kodu w buforze odpowiada jakiejs literze
 Jezeli tak, to zapisuje ta litere do podanego pliku
     listCodes_t **list - poczatek listy, ktora chcemy wyswietlic
