@@ -17,7 +17,7 @@ void help(FILE *stream) {
                      "-h - displays this help message\n"
                      "-x - force compression\n"
                      "-d - force decompression\n\n"
-                     "-c \"cipher\" - encrypts/decrypts the entire output using the given cipher\n"
+                     "-c \"cipher\" - encrypts/decrypts the entire output using the given cipher (max length: 4096)\n"
                      "(if not provided, default cipher \"Politechnika_Warszawska\" is used)\n\n";
     char *helpMsg3 = "Related to compression level (if provided, program behaviour will be automatically changed to \"force compression\"):\n"
                      "-o0 - input string will not be compressed at all (default)\n"
@@ -51,9 +51,9 @@ void analyzeArgs(int argc, char **argv, settings_t *s) {
                 fprintf(stderr, "%s: %s -> Output encryption has already been enabled! (ignoring...)\n", argv[0], argv[i]);
             else {
                 s->cipher = true;
-                if(i + 1 != argc) {
+                if(i + 1 != argc && argv[i + 1][0] != '-') {
                     cipherLen = (int)strlen(argv[i + 1]);
-                    if(cipherLen > 4096)
+                    if(cipherLen > 4096) /* sprawdzenie limitu na dlugosc szyfru */
                         fprintf(stderr, "%s: Provided cipher is too long! Changing the cipher to default...\n", argv[0]);
                     else {
                         for(j = 0; j < cipherLen; j++) /* przepisywanie ustalonego szyfru do ustawien */
@@ -140,7 +140,7 @@ int fileIsGood(FILE *in, uchar xorCorrectValue, bool displayMsg) {
     const char *impossibleOutput = "Provided file cannot be decompressed since it is not a possible output of this compressor!\n";
 
 
-    /* Sprawdzenie poprawnosci oznaczenia na poczatku pliku */
+    /* Sprawdzenie wielkosci pliku */
     fseek(in, 0, SEEK_END); /* pobranie pozycji koncowej */
     eof = ftell(in);
     fseek(in, 0, SEEK_SET);
@@ -149,6 +149,7 @@ int fileIsGood(FILE *in, uchar xorCorrectValue, bool displayMsg) {
         return 4;
     }
 
+    /* Sprawdzenie poprawnosci oznaczenia na poczatku pliku */
     fread(&c, sizeof(char), 1, in);
     if(c != 'C') {
         fseek(in, 0, SEEK_SET);
@@ -177,8 +178,7 @@ int fileIsGood(FILE *in, uchar xorCorrectValue, bool displayMsg) {
     
     fseek(in, 0, SEEK_SET); /* ustawienie strumienia z powrotem na poczatek przed zakonczeniem dzialania funkcji */
 #ifdef DEBUG
-    /* wyswietlenie wyliczonej sumy kontrolnej na stderr */
-    if(displayMsg)
+    if(displayMsg) /* wyswietlenie wyliczonej sumy kontrolnej na stderr */
         fprintf(stderr, "Control sum XOR: %d\n", xor);
 #endif
     

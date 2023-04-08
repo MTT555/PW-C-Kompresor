@@ -12,7 +12,7 @@ bool addToListCodes(listCodes_t **list, int character, uchar *code) {
     new->code = NULL;
     if(!tryMalloc((void **)(&(new->code)), sizeof(char) * (strlen((char *)code) + 1)))
         return false;
-    strcpy((char *)new->code, (char *)code);
+    strcpy((char *)new->code, (char *)code); /* przekopiowanie kodu */
     new->next = (*list);
     (*list) = new;
     return true;
@@ -31,11 +31,8 @@ void freeListCodes(listCodes_t **head) {
 	while(iterator != NULL) {
 		temp = iterator;
 		iterator = iterator->next;
-        if(temp->code != NULL) {
+        if(temp->code != NULL)
             free(temp->code);
-            temp->code = NULL;
-        }
 		free(temp);
-        temp = NULL;
 	}
 }

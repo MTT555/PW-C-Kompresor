@@ -86,20 +86,20 @@ int main(int argc, char **argv) {
 				if(i != inputEOF)
 					fread(&c, sizeof(char), 1, in);
 				else if((s.compLevel == 12 && (currentBits == 8 || currentBits == 4)) || (s.compLevel == 16 && currentBits == 8))
-					c = '\0';
+					c = '\0'; /* w tych przypadkach uzupelniamy niedobor bitow znakiem '\0' */
 				else
 					break;
 				
-				currentBits += 8;
+				currentBits += 8; /* odczytanie jednego 8-bitowego znaku z pliku */
 				tempCode <<= 8;
 				tempCode += (int)c;
-				if(currentBits == s.compLevel) {
+				if(currentBits == s.compLevel) { /* jezeli mamy zapelnione tyle bitow ile wynosi poziom kompresji */
 					if(checkIfOnTheList(&head, tempCode) == 1) {
 						tempPtr = head;
 						head = addToTheList(&head, tempCode);
-						if(head == NULL) {
+						if(head == NULL) { /* jezeli alokacja pamieci sie nie powiodla */
 							fprintf(stderr, "%s: Compression memory failure!\n", argv[0]);
-							fclose(in);
+							fclose(in); /* to zwalniamy pamiec i zwracamy blad nr 6 */
 							fclose(out);
 							freeRecursively(tempPtr);
 							free(tempPtr);
@@ -109,8 +109,8 @@ int main(int argc, char **argv) {
 					tempCode = 0;
 					currentBits = 0;
 				} else if (currentBits >= s.compLevel) { /* taki przypadek wystapi jedynie w kompresji 12-bit */
-					temp = tempCode % 16;
-					tempCode >>= 4;
+					temp = tempCode % 16; /* mamy zapisane 16 bitow wiec musimy odciac ostatnie 4 */
+					tempCode >>= 4; /* i zapisac je pod zmienna tymczasowa */
 					if(checkIfOnTheList(&head, tempCode) == 1) {
 						tempPtr = head;
 						head = addToTheList(&head, tempCode);
@@ -123,18 +123,17 @@ int main(int argc, char **argv) {
 							return 6;
 						}
 					}
-					tempCode = temp;
-					currentBits = 4;
+					tempCode = temp; /* przepisanie odcietej czesci kodu ze zmiennej tymczasowej */
+					currentBits = 4; /* ustawienie liczbyu zapisanych bitow na 4 */
 				}
 			}
 
 			sortTheCountList(&head); /* sortowanie listy wystapien znakow niemalejaco */
 #ifdef DEBUG
-			/* wypisanie listy z wystapieniami */
-			showList(&head, stderr);
+			showList(&head, stderr); /* wypisanie listy z wystapieniami */
 #endif
 			fseek(in, 0, SEEK_SET); /* ustawienie kursora w pliku z powrotem na jego poczatek */
-			if(!huffman(in, out, s, &head)) {
+			if(!huffman(in, out, s, &head)) { /* ruszenie algorytmu Huffmana */
 				fprintf(stderr, "%s: Decompression memory failure!\n", argv[0]);
 				freeRecursively(head);
 				free(head);

@@ -3,15 +3,14 @@
 #include "utils.h"
 #include "output.h"
 
-void compressedToFile(FILE *input, FILE *output, settings_t s, int *cipherPos,
-listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
+void compressedToFile(FILE *input, FILE *output, settings_t s, int *cipherPos, listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
     /* Deklaracja potrzebnych zmiennych */
     uchar c;
-    int i, j, inputEOF;
+    int i, j, inputEOF, temp;
     int tempCode = 0, currentBits = 0; /* zmienne przechowujace tymczasowy kod znaku oraz ilosc obecnie odczytanych bitow */
     uchar flags, ending = '\0'; /* ilosc niezapisanych bitow konczacych plik */
     listCodes_t *iterator = NULL; /* iterator po liscie kodow */
-    bool endingZero = false;
+    bool endingZero = false; /* zmienna informujaca o koniecznosci odrzucenia koncowego nadmiarowego znaku '\0' */
 #ifdef DEBUG
     int outputEOF;
 #endif
@@ -26,21 +25,21 @@ listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
         if(i != inputEOF)
             fread(&c, sizeof(char), 1, input);
         else if((s.compLevel == 12 && (currentBits == 8 || currentBits == 4)) || (s.compLevel == 16 && currentBits == 8)) {
-            c = '\0';
+            c = '\0'; /* w tych przypadkach uzupelniamy niedobor bitow znakiem '\0' */
             if(!(s.compLevel == 12 && currentBits == 8))
-                endingZero = true;
+                endingZero = true; /* w tym przypadku ustawiamy informacje o koniecznosci usuniecia tego znaku przy dekompresji na true */
         }
         else
             break;
         
-        currentBits += 8;
+        currentBits += 8; /* odczytanie jednego 8-bitowego znaku z pliku */
         tempCode <<= 8;
         tempCode += (int)c;
-        if(currentBits == s.compLevel) {
+        if(currentBits == s.compLevel) { /* jezeli mamy zapelnione tyle bitow ile wynosi poziom kompresji */
             iterator = (*head);
             while (iterator != NULL) {
                 if(iterator->character == tempCode) {
-                    for(j = 0; j < (int)strlen((char *)(iterator->code)); j++)
+                    for(j = 0; j < (int)strlen((char *)(iterator->code)); j++) /* to przepisujemy kolejne bity odpowiadajace temu znakowi do bufora */
                         saveBitIntoPack(output, s, cipherPos, buffer, packPos, xor, iterator->code[j] == '1' ? 1 : 0);
                     break;
                 }
@@ -50,20 +49,20 @@ listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
             tempCode = 0;
             currentBits = 0;
         } else if (currentBits >= s.compLevel) { /* taki przypadek wystapi jedynie w kompresji 12-bit */
-            int temp = tempCode % 16;
-            tempCode >>= 4;
+            temp = tempCode % 16; /* mamy zapisane 16 bitow wiec musimy odciac ostatnie 4 */
+            tempCode >>= 4; /* i zapisac je pod zmienna tymczasowa */
             iterator = (*head); /* ustawienie iteratora na poczatek przy kazdym nastepnym symbolu */
             while (iterator != NULL) {
                 if(iterator->character == tempCode) {
-                    for(j = 0; j < (int)strlen((char *)(iterator->code)); j++)
+                    for(j = 0; j < (int)strlen((char *)(iterator->code)); j++) /* przepisanie odpowiadajcego kodu do bufora */
                         saveBitIntoPack(output, s, cipherPos, buffer, packPos, xor, iterator->code[j] == '1' ? 1 : 0);
                     break;
                 }
                 else
                     iterator = iterator->next;
             }
-            tempCode = temp;
-            currentBits = 4;
+            tempCode = temp; /* przepisanie odcietej czesci kodu ze zmiennej tymczasowej */
+            currentBits = 4; /* ustawienie liczby zapisanych bitow na 4 */
         }
     }
 
@@ -76,7 +75,7 @@ listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
         ending = (uchar)(8 - *packPos);
     else if(*packPos <= 16 && *packPos > 8)
         ending = (uchar)(16 - *packPos);
-    for(i = 0; i <= (int)ending + 8; i++) /* dopychamy union packa dodatkowymi zerami, aby zapisac ostatni znak do pliku */
+    for(i = 0; i <= (int)ending + 8; i++) /* dopychamy union packa dodatkowymi bitami zerowymi, aby zapisac ostatni znak do pliku */
         saveBitIntoPack(output, s, cipherPos, buffer, packPos, xor, 0);
 #ifdef DEBUG
     outputEOF = ftell(output); /* zapisanie pozycji koncowej */
@@ -115,7 +114,7 @@ listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
     /* Wyswietlenie wiadomosci koncowej */
     fprintf(stderr, "File successfully compressed!\n");
 #ifdef DEBUG
-    if(inputEOF > outputEOF)
+    if(inputEOF > outputEOF) /* informacja o ile zmniejszyla, badz zwiekszyla sie wielkosc pliku wynikowego */
         fprintf(stderr, "File size reduced by %.2f%%!\n", 100 - 100 * (double)outputEOF / inputEOF);
     else
         fprintf(stderr, "File size increased by %.2f%%!\n", 100 * (double)outputEOF / inputEOF - 100);

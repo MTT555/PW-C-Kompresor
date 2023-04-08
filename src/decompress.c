@@ -53,8 +53,8 @@ bool decompress(FILE *input, FILE *output, settings_t s) {
     allFlag.cipher = c & 32 ? true : false; /* odczytanie szyfrowania (32 == 0b00100000) */
     allFlag.redundantZero = c & 16 ? true : false; /* sprawdzenie, czy konieczne bedzie odlaczenie nadmiarowego koncowego znaku '\0' (16 == 0b00010000) */
     allFlag.redundantBits = c & 7; /* odczytanie ilosci nadmiarowych bitow konczacych (7 == 0b00000111) */
-    defFlag.compLevel = allFlag.compLevel;
-    defFlag.cipher = allFlag.cipher;
+    defFlag.compLevel = allFlag.compLevel; /* ustawienie odpowiednich wartosci flagi domyslnej */
+    defFlag.cipher = allFlag.cipher; /* uzywanej do kazdego innego symbolu oprocz ostatniego */
     defFlag.redundantZero = false;
     defFlag.redundantBits = 0;
     fseek(input, 4, SEEK_SET);
@@ -79,8 +79,8 @@ bool decompress(FILE *input, FILE *output, settings_t s) {
         }
         if(i != inputEOF - 1) /* analizowanie kazdego bitu przy pomocy funkcji */
             if(!analyzeBits(output, c, defFlag, &list, &iterator, &currentMode, &buf, &codeBuf, &currentBits, &tempCode)) {
-                freeListCodes(&list);
-                freeDTree(head);
+                freeListCodes(&list); /* przy nieudanej analizie bitow */
+                freeDTree(head); /* czyscimy pamiec i zwracamy false tj. blad */
                 free(buf.buf);
                 free(codeBuf.buf);
                 return false;

@@ -64,7 +64,13 @@ bool huffman(FILE *input, FILE *output, settings_t s, count_t **head) {
     }
 
     /* Tworzenie drzewa Huffmana */
-    createHuffmanTree(output, head, code, s, &xor, 0, &listC, &buffer, &packPos, &cipherPos, &roadBuf);
+    if(!createHuffmanTree(output, head, code, s, &xor, 0, &listC, &buffer, &packPos, &cipherPos, &roadBuf)) {
+        freeListCodes(&listC); /* w wypadku niepowodzenia zwalniamy pamiec */
+        freeList(head_ptr);
+        free(roadBuf.buf);
+        free(code);
+        return false;
+    }
 
     /* Po zapisaniu calego slownika do pliku trzeba wyraznie zaznaczyc jego koniec */
     saveBitIntoPack(output, s, &cipherPos, &buffer, &packPos, &xor, 1);

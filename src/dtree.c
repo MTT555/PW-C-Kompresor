@@ -4,18 +4,18 @@
 #include "alloc.h"
 
 int goDown(dnode_t **head) {
-    if((*head)->left == NULL) {
+    if((*head)->left == NULL) { /* jezeli lewy wezel jest wolny */
         if(!tryMalloc((void **)(&((*head)->left)), sizeof(dnode_t)))
             return -1;
-        (*head)->left->prev = (*head);
+        (*head)->left->prev = (*head); /* zapisanie poprzedniego wezla */
         (*head)->left->left = NULL;
         (*head)->left->right = NULL;
         (*head) = (*head)->left;
         return 0;
-    } else {
+    } else { /* w przeciwnym razie zajmujemy prawy wezel */
         if(!tryMalloc((void **)(&((*head)->right)), sizeof(dnode_t)))
             return -1;
-        (*head)->right->prev = (*head);
+        (*head)->right->prev = (*head); /* zapisanie poprzedniego wezla */
         (*head)->right->left = NULL;
         (*head)->right->right = NULL;
         (*head) = (*head)->right;

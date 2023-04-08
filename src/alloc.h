@@ -17,4 +17,10 @@ Funkcja dokonujaca probe realokacji pamieci na wiekszy blok
 */
 bool tryRealloc(void **ptr, unsigned long int size);
 
+/**
+Funkcje zwracaja:
+    true - alokacja/realokacja sie powiodla
+    false - niepowodzenie
+*/
+
 #endif

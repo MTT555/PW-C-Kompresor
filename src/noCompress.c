@@ -8,22 +8,22 @@ void rewriteFile(FILE *input, FILE *output, int n, settings_t s) {
     int i;
     uchar xor = (uchar)183; /* (183 = 0b10110111) */
     int cipherLen, cipherPos = 0;
-    uchar xxxx[4] = "CTXX";
+    uchar xxxx[4] = "CTXX"; /* cztery bity poczatkowe (wyjasnione na koncu pliku huffman.c) */
     xxxx[2] = (uchar)40; /* zapalone bity szyfrowania i kompresji (40 == 0b00101000) */
-    if(s.cipher) {
+    if(s.cipher) { /* jezeli mamy szyfrowac */
         cipherLen = (int)strlen((char *)s.cipherKey);
-        fwrite(xxxx, sizeof(char), 4, output);
+        fwrite(xxxx, sizeof(char), 4, output); /* to zapisujemy bity poczatkowe */
         for(i = 0; i < n; i++) {
             fread(&c, sizeof(char), 1, input);
-            c += s.cipherKey[cipherPos % cipherLen];
+            c += s.cipherKey[cipherPos % cipherLen]; /* szyfrujemy kazdy znak */
             cipherPos++;
-            fwrite(&c, sizeof(char), 1, output);
-            xor ^= c;
+            fwrite(&c, sizeof(char), 1, output); /* zapisujemy znaki do pliku wyjsciowego */
+            xor ^= c; /* wyliczamy sume kontrolna XOR */
         }
         fseek(output, 3, SEEK_SET);
-        fwrite(&xor, sizeof(char), 1, output);
+        fwrite(&xor, sizeof(char), 1, output); /* zapisanie wartosci sumy na czwartym bajcie pliku */
         fprintf(stderr, "File successfully encrypted!\n");
-    } else {
+    } else { /* jezeli nie szyfrujemy, to zwyczajnie przepisujemy plik bez zmian */
         for(i = 0; i < n; i++) {
             fread(&c, sizeof(char), 1, input);
             fwrite(&c, sizeof(char), 1, output);
@@ -37,11 +37,11 @@ void decryptFile(FILE *input, FILE *output, int n, uchar *cipherKey) {
     int i, cipherPos = 0;
     int cipherLength = (int)strlen((char *)cipherKey);
 
-    for(i = 4; i < n; i++) {
+    for(i = 4; i < n; i++) { /* pominiecie czterech bajtow poczatkowych poswieconych na oznaczenie */
         fread(&c, sizeof(char), 1, input);
-        c -= cipherKey[cipherPos % cipherLength];
+        c -= cipherKey[cipherPos % cipherLength]; /* odszyfrowanie */
         cipherPos++;
-        fwrite(&c, sizeof(char), 1, output);
+        fwrite(&c, sizeof(char), 1, output); /* zapisanie znakow do pliku wyjsciowego */
     }
     fprintf(stderr, "File successfully decrypted!\n");
 }

@@ -11,7 +11,7 @@ mod_t *mode, buffer_t *buf, buffer_t *codeBuf, int *currentBits, int *tempCode) 
     int i, down;
     int bits = 0; /* ilosc przeanalizowanych bitow */
     int currentCode; /* obecny kod przejscia w sciezce */
-    while (bits != 8 - f.redundantBits) {
+    while (bits != 8 - f.redundantBits) { /* f.redundantBits bedzie != 0 jedynie przy ostatnim analizowanym znaku */
         switch(*mode) {
             case dictRoad: {
                 currentCode = 2 * returnBit(c, bits) + returnBit(c, bits + 1);
@@ -106,30 +106,30 @@ bool compareBuffer(listCodes_t **list, uchar *buf, FILE *stream, int compLevel, 
     int temp;
     while (iterator != NULL) {
         if(strcmp((char *)iterator->code, (char *)buf) == 0) {
-            if(compLevel == 8) {
+            if(compLevel == 8) { /* dla kompresji 8-bit po prostu piszemy symbol */
                 tempC = (uchar)(iterator->character);
                 fwrite(&tempC, sizeof(char), 1, stream);
             }
-            else if(compLevel == 16) {
+            else if(compLevel == 16) { /* dla kompresji 16-bit */
                 tempC = (uchar)((iterator->character) / (1 << 8));
-                fwrite(&tempC, sizeof(char), 1, stream);
-                if(!redundantZero) {
+                fwrite(&tempC, sizeof(char), 1, stream); /* piszemy 2 symbole */
+                if(!redundantZero) { /* chyba ze oznaczenie o nadmiarowym znaku '\0' ustawione na true */
                     tempC = (uchar)(iterator->character);
                     fwrite(&tempC, sizeof(char), 1, stream);
                 }
             }
-            else if(compLevel == 12) {
+            else if(compLevel == 12) { /* dla kompresji 12-bit */
                 *tempCode <<= 12;
                 *tempCode += iterator->character;
                 *currentBits += 12;
-                if(*currentBits == 12) {
-                    temp = *tempCode % 16;
+                if(*currentBits == 12) { /* jezeli liczba zajetych bitow wynosi dokladnie 12 */
+                    temp = *tempCode % 16; /* odcinamy 4 ostatnie bity i przechowujemy pod zmienna tymczasowa */
                     *tempCode >>= 4;
                     tempC = (uchar)(*tempCode);
-                    fwrite(&tempC, sizeof(char), 1, stream);
-                    *tempCode = temp;
+                    fwrite(&tempC, sizeof(char), 1, stream); /* zapisujemy jeden znak */
+                    *tempCode = temp; /* i przywracamy 4 odciete bity do tempCode */
                     *currentBits = 4;
-                } else {
+                } else { /* w przeciwnym wypadku wynosi 16, wiec robimy to samo co dla kompresji 16-bit */
                     tempC = (uchar)((*tempCode) / (1 << 8));
                     fwrite(&tempC, sizeof(char), 1, stream);
                     if(!redundantZero) {
