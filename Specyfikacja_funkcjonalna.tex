@@ -1,0 +1,213 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\usepackage{makecell}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\PassOptionsToPackage{hyphens}{url} % url is loaded by hyperref
+\usepackage[unicode=true]{hyperref}
+\hypersetup{
+            pdftitle={Specyfikacja funkcjonalna programu realizującego kompresję plików tekstowych wykorzystującego algorytm Huffmana},
+            pdfauthor={Adrian Chmiel, Mateusz Tyl},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+
+\title{Specyfikacja funkcjonalna programu realizującego kompresję plików tekstowych wykorzystującego algorytm Huffmana}
+\author{Autorzy: Adrian Chmiel, Mateusz Tyl}
+\date{08.04.2023}
+
+
+
+\begin{document}
+\maketitle
+\begin{center}
+Historia zmian dokumentu:\\
+\end{center}
+
+\begin{tabular}{|c|c|c|c|}
+  \hline 
+  Autor: & Data: & Opis zmiany:& Wersja dokumentu \\
+  \hline
+  Mateusz Tyl & 25.03.2023 & Dodanie pierwszego szkicu & 1.0 \\
+  \hline
+  Mateusz Tyl & 08.04.2023 & \makecell{Dodanie informacji o nowych \\funkcjonalnościach, poprawki} & 2.0\\
+  \hline
+\end{tabular} 
+\section{Cel projektu}\label{header-n231}
+
+Przeznaczeniem progamu jest kompresja plików tekstowych z wykorzystaniem \emph{algorytmu Huffmanna}.\\
+Program oferuje różnego rodzaju funkcjonalności na które składają się:
+\begin{itemize}
+\item
+Kompresja danych w trybach 8,12,16 bitowym
+\item
+Możliwość zaszyfrowania danych wyjściowych
+\item
+Odpowiednio dostosowana struktura pliku wyjściowego w celu łatwego zaimplemetowania dekompresora
+\item
+Obsługa sum kontrolnych w celu sprawdzania poprawności pliku, opcjonalnie wymuszenie kompresji.\end{itemize}
+\section{Teoria}\label{header-n281}
+Algorytm Huffmana wykorzystany w tym programie to przykład jednego z najprostszych i najłatwiejszych w implementacji algorytmów wykorzystujących kompresję bezstratną.\\
+Zasada działania opiera się na utworzeniu dla każdego znaku w pliku nieskompresowanym kodu binarnego o zmiennej długości. Kody tworzy się za pomocą drzewa binarnego, badając częstotliwości wystąpień każdego ze znaków. Dla częściej występujących znaków otrzymamy krótsze kody, dla rzadziej występujących dłuższe. Kompresując plik zamieniamy każdy znak na odpowiadający  mu kod i zapisujemy kolejno po sobie w pliku wyjściowym.\\
+Przykładowo, dla pliku zawierającego tekst \texttt{alamakota} otrzymamy następujący zestaw kodów:\\
+Character: k, Code: 1111\\
+Character: o, Code: 1110\\
+Character: l, Code: 1101\\
+Character: m, Code: 1100\\
+Character: t, Code: 101\\
+Character: \textbackslash n, Code: 100\\
+Character: a, Code: 0\\
+Zatem po kompresji otrzymamy następujący ciąg danych: \\
+01101011000111111101010100\\
+Plik skompresowany tworzony przez program zawiera jeszcze na początku nagłówek, słownik oraz ewentualnie na końcu dodatkowe zera wypełniające brakujące bity. Więcej o tym w kolejnych rozdziałach.
+\section{Dane wejściowe}\label{header-n233}
+Program wymaga przekazania pliku tekstowego, który ma zostać skompresowany. Plik może zawierać również znaki spoza alfabetu angielskiego, w tym polskie litery i inne znaki specjalne. \\Dalsze instrukcje zostaną przedstawione w następnym rozdziale.
+\section{Argumenty wywołania programu}\label{header-n256}
+
+Program działa w trybie wsadowym. Wymaganymi parametrami są kolejno: nazwa pliku do skompresowania, nazwa pliku wyjściowego.
+\\Lista parametrów opcjonalnych:
+
+\begin{itemize}
+\item
+  \texttt{-o0} - brak kompresji
+\item
+   \texttt{-o1} - kompresja 8 bitowa
+\item
+   \texttt{-o2} - kompresja 12 bitowa
+\item
+   \texttt{-o3} - kompresja 16 bitowa
+\item
+ \texttt{-h} - wyświetl pomoc do programu
+\item
+ \texttt{-c} - zaszyfruj wynik działania programu
+\item
+ \texttt{-x} - wymuś kompresję
+\item
+ \texttt{-DDEBUG} - włącz tryb debugowania
+\end{itemize}
+W przypadku niepodania argumentów opcjonalnych domyślnie ustawiona zostanie kompresja 8 bitowa wraz z wyłączonym szyfrowaniem i wymuszaniem kompresji.
+
+\section{Przykład wywołania programu}\label{header-n233}
+
+\begin{itemize}
+\item
+ ./program input output
+\\Program wczyta plik o nazwie input i skompresuje go do pliku output z domyślnymi ustawieniami
+\item
+ ./program input output -c
+\\Program wczyta plik o nazwie input i skompresuje go do pliku output z domyślnymi ustawieniami oraz włączonym szyfrowaniem
+\item
+ ./program input output -o3 -c
+\\Program wczyta plik o nazwie input i skompresuje go do pliku output wykorzystując kompresję 16 bitową i włączone szyfrowanie 
+\item
+ ./program lub ./program -h
+\\Zostanie wyświetlona pomoc do programu
+\item
+ ./program input output -DDEBUG -x
+\\Program przejdzie w tryb debugowania, zostanie włączone wymuszanie kompresji
+
+\end{itemize}
+
+\section{Struktura pliku wyjściowego}\label{header-n279}
+Pierwsze cztery bajty pliku wyjściowego zarezerwowane są na nagłówek. \\
+Pierwsze dwa bajty nagłówka to inicjały autorów - CT.\\
+Kolejny bajt to maska, z której można odczytać szczegółowe informacje o pliku. Ostatnim bajtem nagłówka jest wynik wyliczonej sumy kontrolnej.\\
+Następnie pojawia się słownik, po nim znajdują się kolejno po sobie skompresowane dane w postaci kodów Huffmana o zmiennej długości.\\
+W przypadku gdy po zapisaniu wszystkich danych ilość bitów na końcu pliku jest niekompletna, zostanie wykonane dopełnienie zerami.
+\section{Struktura maski w nagłówku pliku}\label{header-n279}
+
+    Szablon bitowy: 0bKKSZCEEE
+\begin{itemize}
+    \item K - sposób kompresji: 00 - brak, 01 - 8-bit, 10 - 12-bit, 11 - 16-bit
+   \item  S - szyfrowanie: 0 - nie, 1 - tak
+   \item  Z - zapisanie informacji, czy konieczne będzie usunięcie nadmiarowego znaku \textbackslash0 z końca pliku podczas dekompresji
+   \item  C - dodatkowe sprawdzenie, czy ten plik jest skompresowany: 0 - nie, 1 - tak
+   \item  E - ilość niezapisanych bitów kończących zapisana binarnie
+\end{itemize}
+ \section{Szyfrowanie}\label{header-n281} 
+Szyfrowanie pliku odbywa się za pomocą \emph{Szyfrowania Vigenère’a}. Domyślnie kluczem szyfrowania jest: 
+\texttt{Politechnika\textunderscore Warszawska}
+
+\section{Komunikaty błędów}\label{header-n281}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Błąd podczas wczytywania pliku wejściowego: \texttt{Input file could not be opened!}
+\item
+Plik wejściowy jest pusty: \texttt{Input file is empty!}
+\item
+Błąd podczas wczytywania pliku wyjściowego:  \texttt{Output file could not be opened!}
+\item
+Pominięcie niezindentyfikowanych argumentów: \texttt{Unknown argument! (ignoring...)}
+\item
+Wystąpił błąd podczas alokowania pamięci: \texttt{Failed memory allocation!}
+\item
+Napotkano na błąd podczas zarządzania pamięcią: \texttt{Compression memory failure!}
+
+\end{enumerate}
+
+\section{Zwracane wartości}\label{header-n281}
+
+Program po zakończeniu pracy zwraca wartość typu całkowitego, która może być użyteczna w przypadku identyfikacji różnego rodzaju niepowodzeń:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+0 - Program zakończył się pomyślnie
+\item
+1 - Podano za mało argumentów
+\item
+2 - Błąd podczas wczytywania pliku wejściowego
+\item
+3 - Błąd podczas wczytywania pliku wyjściowego
+\item
+6 - Błąd przy alokowaniu/dealokowaniu pamięci
+
+\end{enumerate}
+
+\end{document}
