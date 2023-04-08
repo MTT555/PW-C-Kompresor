@@ -4,6 +4,7 @@
 #include "utils.h"
 
 void help(FILE *stream) {
+    /* podzial na 5 tablic w celu uzyskania pelnej zgodnosci ze standardem ANSII */
     char *helpMsg1 = "\n---------------------------------- HUFFMAN COMPRESSOR HELPBOX ----------------------------------\n\n"
                      "Compressor & decompressor made by Adrian Chmiel & Mateusz Tyl\n\n"
                      "Usage: [program_name] [input_file] [output_file] [arguments]\n\n"
@@ -41,7 +42,7 @@ void help(FILE *stream) {
 
 void analyzeArgs(int argc, char **argv, settings_t *s) {
     int i, j;
-    bool help_displayed = false, setCompLevel = false, setCipher = false; /* zmienna zapobiegajaca wielokrotnemu wyswietlaniu helpboxa oraz wielokrotnemu zmienianiu stopnia kompresji i szyfru */
+    bool help_displayed = false, setCompLevel = false, setCipher = false; /* zmienne zapobiegajace wielokrotnemu ustawianiu tych samych opcji */
 	char compMode[7]; /* zmienna pomocnicza do przechowywania trybu kompresji */
 	char progBehaviour[20]; /* zmienna pomocnicza do przechowywania zachowania programu (wymuszenie kompresji/dekompresji) */
     int cipherLen = 0;

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "list.h"
 #include "bits_analyze.h"
 #include "decompress.h"
@@ -100,3 +101,64 @@ short returnBit(uchar c, int x) {
     ch >>= (7 - x);
     return ch % 2;
 }
+
+bool compareBuffer(listCodes_t **list, uchar *buf, FILE *stream, int compLevel, bool redundantZero, int *currentBits, int *tempCode) {
+    listCodes_t *iterator = (*list);
+    uchar tempC;
+    int temp = 0;
+    while (iterator != NULL) {
+        if(strcmp((char *)iterator->code, (char *)buf) == 0) {
+            if(compLevel == 8) {
+                tempC = (uchar)(iterator->character);
+                fwrite(&tempC, sizeof(char), 1, stream);
+            }
+            else if(compLevel == 16) {
+                tempC = (uchar)((iterator->character) / (1 << 8));
+                fwrite(&tempC, sizeof(char), 1, stream);
+                if(!redundantZero) {
+                    tempC = (uchar)(iterator->character);
+                    fwrite(&tempC, sizeof(char), 1, stream);
+                }
+            }
+            else if(compLevel == 12) {
+                *tempCode <<= 12;
+                *tempCode += iterator->character;
+                *currentBits += 12;
+                if(*currentBits == 12) {
+                    temp = *tempCode % 16;
+                    *tempCode >>= 4;
+                    tempC = (uchar)(*tempCode);
+                    fwrite(&tempC, sizeof(char), 1, stream);
+                    *tempCode = temp;
+                    *currentBits = 4;
+                } else {
+                    tempC = (uchar)((*tempCode) / (1 << 8));
+                    fwrite(&tempC, sizeof(char), 1, stream);
+                    if(!redundantZero) {
+                        tempC = (uchar)(*tempCode);
+                        fwrite(&tempC, sizeof(char), 1, stream);
+                    }
+                    *tempCode = 0;
+                    *currentBits = 0;
+                }
+            }
+            return true;
+        }
+        iterator = iterator->next;
+    }
+    return false;
+}
+
+/**
+Funkcja sprawdzajaca, czy aktualny fragment kodu w buforze odpowiada jakiejs literze
+Jezeli tak, to zapisuje ta litere do podanego pliku
+    listCodes_t **list - poczatek listy, ktora chcemy wyswietlic
+    uchar *buf - bufor, ktory mozliwe, ze odpowiada jednej z liter
+    FILE *stream - strumien, w ktorym ma zostac wydrukowana litera
+    int compLevel - 
+    bool endingZero - 
+    int *currentBits - 
+    int *tempCode - 
+Zwraca true, jezeli jakis znak zostal znaleziony, w przeciwnym wypadku false
+*/
+bool compareBuffer(listCodes_t **list, uchar *buf, FILE *stream, int compLevel, bool endingZero, int *currentBits, int *tempCode);

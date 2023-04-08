@@ -7,7 +7,7 @@ Wyjasnienie nazewnictwa:
     dnode - wezel tego drzewa
 */
 
-/* Zmienna sluzaca do obslugi budowania pseudodrzewa na podstawie slownika zapisanego w pliku */
+/* dnode_t - typ sluzacy do obslugi budowania pseudodrzewa na podstawie slownika zapisanego w pliku */
 typedef struct dnode {
     struct dnode *prev; /* ojciec */
     struct dnode *left; /* lewy syn */

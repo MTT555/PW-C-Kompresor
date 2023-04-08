@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
 	int i, inputEOF, fileCheck, temp;
 	count_t *head = NULL, *tempPtr = NULL;
 	FILE *in, *out;
-	int tempCode = 0, currentBits = 0; /* tymczasowy kod wczytanego znaku oraz ilosc obecne wczytanych bitow (dla kompresji 12- i 16-bit) */
+	int tempCode = 0, currentBits = 0; /* tymczasowy kod wczytanego znaku oraz ilosc obecnie wczytanych bitow (dla kompresji 12- i 16-bit) */
 	
 	settings_t s;
 	s.comp = false; /* domyslnie wylaczone wymuszenie kompresji i dekompresji */

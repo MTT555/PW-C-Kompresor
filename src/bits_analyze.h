@@ -19,18 +19,12 @@ typedef enum {
 Funkcja do analizy kolejnych bitow danego chara z pliku skompresowanego
     FILE *output - plik wyjsciowy
     uchar c - znak analizowany
-    int compLevel - poziom kompresji podany w bitach
+    flag_t f - zmienna przekazujaca odczytane flagi
     listCodes_t **list - lista kodow znakow
-    short redundantBits - ilosc koncowych bitow do porzucenia w tym znaku 
-    bool redundantZero - zmienna odpowiedzialna za sprawdzanie czy pominac nadmiarowy koncowy znak zerowy podczas zapisu (zazwyczaj false)
     dnode_t **iterator - pseudoiterator po pomocniczym drzewie dnode_t
-    mod_t *mode - aktualny tryb dzialania analizy bitow (typ zdefiniowany w decompress.h)
-    uchar *buffer - bufor na odczytane bity
-    int *curBufSize - aktualna wielkosc buforu na odczytane bity
-    uchar *codeBuf - bufor na kolejne przejscia po drzewie
-    int *curCodeBufSize - aktualna wielkosc bufora dla kodow przejsc po drzewie
-    int *bufPos - aktualna pozycja w buforze na bity
-    int *codeBufPos - aktualna pozycja w buforze kodow
+    mod_t *mode - aktualny tryb dzialania analizy bitow
+    buffer_t *buf - bufor na odczytanie kody
+    buffer_t *codeBuf - bufor na aktualny kod przejsc po drzewie
     int *currentBits - ilosc aktualnie zajetych bitow (w ramach wsparcia dla dekompresji 12-bit)
     int *tempCode - aktualny kod odczytanego symbolu (w ramach wsparcia dla dekompresji 12-bit)
 */
@@ -43,5 +37,15 @@ Funkcja zwracajaca pozadany bit z danego chara
     int x - numer bitu, ktory ma byc zwrocony
 */
 short returnBit(uchar c, int x);
+
+/**
+Funkcja sprawdzajaca, czy aktualny fragment kodu w buforze odpowiada jakiejs literze
+Jezeli tak, to zapisuje ta litere do podanego pliku
+    listCodes_t **list - poczatek listy, ktora chcemy wyswietlic
+    uchar *buf - bufor, ktory mozliwe, ze odpowiada jednej z liter
+    FILE *stream - strumien, w ktorym ma zostac wydrukowana litera
+Zwraca true, jezeli jakis znak zostal znaleziony, w przeciwnym wypadku false
+*/
+bool compareBuffer(listCodes_t **list, uchar *buf, FILE *stream, int compLevel, bool endingZero, int *currentBits, int *tempCode);
 
 #endif

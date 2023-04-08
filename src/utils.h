@@ -44,7 +44,7 @@ void help(FILE *stream);
 Funkcja sluzaca do analizy argumentow podanych przez uzytkownika na wejsciu
     int argc - ilosc argumentow
     char **argv - zawartosc tych argumentow
-    bool *cipher, *comp, *decomp, int *compLevel - wartosci tych zmiennych przekazemy przez pointery do main
+    settings_t *s - wskaznik przez ktory przekazemy wszystkie nadane przez argumenty ustawienia
 */
 void analyzeArgs(int argc, char **argv, settings_t *s);
 
