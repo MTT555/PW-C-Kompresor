@@ -25,7 +25,7 @@
 \PassOptionsToPackage{hyphens}{url} % url is loaded by hyperref
 \usepackage[unicode=true]{hyperref}
 \hypersetup{
-            pdftitle={Specyfikacja implementacyjna programu realizującego kompresję plików wykorzystującego algorytm Huffmana},
+            pdftitle={Specyfikacja implementacyjna programu realizującego kompresję plików tekstowych wykorzystującego algorytm Huffmana},
             pdfauthor={Adrian Chmiel, Mateusz Tyl},
             pdfborder={0 0 0},
             breaklinks=true}
@@ -73,6 +73,8 @@ Historia zmian dokumentu:\\
   Autor: & Data: & Opis zmiany:& Wersja dokumentu \\
   \hline
   Mateusz Tyl & 08.04.2023 & Dodanie pierwszego szkicu & 1.0 \\
+\hline
+  Mateusz Tyl & 08.04.2023 & Dodanie informacji o plikach & 2.0 \\
 \end{tabular} 
 \section{Cel dokumentu}\label{header-n231}
 
@@ -81,5 +83,89 @@ Celem tego dokumentu jest przedstawienie informacji o sposobie działania progra
 Program został napisany w całości w języku C. Wykorzystano także język powłoki bash oraz skrypty Makefile i CMake do implementacji funkcjonalności pomocniczych.\\
 Program jest przystosowany do pracy i kompilacji na systemach Unixowych.\\
 Do dyspozycji programisty przygotowano szeroki zakres testów do wykonania w celu sprawdzenia poprawności działania programu.
+W programie zaimplementowano kompresor oraz dekompresor służący do przetestowania poprawności działania kompresora.
+
+\section{Omówienie kodu źródłowego}\label{header-n231}
+Program oferuje kilka modułów, które współpracują ze sobą. Niektóre moduły pracują niezależnie od innych.
+
+\begin{itemize}
+\section{Folder "gen"}\label{header-n231}
+\item
+gen.c -> Program pomocniczy służący do generowania gotowych testów do tego kompresora. Program generuje losowe znaki, zależnie od ustawień podanych przez użytkownika i zapisuje je w pliku.\\ Lista argumentów: [nazwa-pliku-wyjsciowego] [ilosc znakow] [ilosc roznych znakow, ktore moga wystapic w outpucie] [seed]
+\item
+testhufftree.c -> Program pomocniczy odpowiedzialny za wygenerowanie testu w wyniku którego możliwe było przeciążenie pamięci przez tworzenie drzewa Huffmana. Jedynym argumentem jest nazwa pliku wyjściowego
+\item
+testmax.c -> Program pomocniczy odpowiedzialny za wygenerowanie testu o wielkości ok. 1.5 MB. Argumentem jest nazwa pliku wyjściowego
+\item
+testo3.c -> Program pomocniczy odpowiedzialny za wygenerowanie testu testo3.in zawierającego wszystkie możliwe znaki/słowa dla wszystkich możliwych poziomów kompresji
+\section{Folder "src"}\label{header-n231}
+\item
+alloc.* -> zawiera funkcje służące do bezpiecznej alokacji pamięci
+\item
+bits\textunderscore analyze.* -> zawiera funkcje służące do analizy kolejnych bitów zawartych kolejnych znakach przy dekompresji. Sprawdza, czy alokacja pamięci się powiodła i wypisuje stosowny komunikat w przypadku błędu
+\item
+countCharacters.* -> zawiera funkcje odpowiedzialne za zliczanie wystąpień wszystkich znaków w pliku wejściowym. W pliku nagłówkowym zdefiniowano strukturę countChars służącą do przechowywania ilości wystąpień każdego ze znaków oraz drzewa Huffmana. Struktura zawiera w sobie zmienną zliczającą znaki, zmienną przechowującą dany znak oraz trzy wskaźniki na struktury odpowiedzialne za realizację drzewa Huffmana. Plik źródłowy zawiera funkcje do dodawania nowych znaków do listy, sortowanie, zwalnianie pamięci, wyświetlanie listy.
+\item
+decompress.* -> zawiera funkcje odpowiedzialne za dekompresję. Funkcja compress jest główną funkcją dekompresującą, przyjmuje dwa argumenty - nazwa pliku wejściowego, nazwa pliku wyjściowego. Funkcja compareBuffer sprawdza, czy aktualny fragment kodu w buforze odpowiada jakiejś literze. Jeżeli tak, to zapisuje tę literę do podanego pliku.
+\item
+dtree.* -> zawiera typ pomocniczego pseudodrzewa do dekompresji oraz związane z nim funkcje
+\item
+huffman.* -> zawiera główne funkcje realizujące algorytm Huffmana. Funkcje odpowiedzialne są za generację kodów Huffmana dla każdego znaku w pliku wejściowym. Tworzone drzewo Huffmana wykorzystuje strukturę countCharacters. Zaimplementowano tworzenie słownika na bazie drzewa Huffmana oraz ogólnej struktury kompresowanego pliku.  Więcej szczegółów na ten temat w specyfikacji funkcjonalnej.
+\item
+list.* -> zawiera implementację listy liniowej służącej do przechowywania kodów znaków oraz funkcje służące do jej obsługi.
+\item
+main.c -> odpowiada za sprawdzanie danych wejściowych oraz sterowanie całym programem
+\item
+noCompress.* -> zawiera funkcje obsługujące plik w wypadku, gdy nie zachodzi żadna kompresja
+\item
+output.* -> zawiera funkcje realizujące zapis skompresowanego pliku
+\item
+utils.* -> zawiera pomocnicze typy oraz funkcje, obsługę komunikatów wyświetlanych użytkownikowi
+\section{Inne pliki w głównym katalogu}\label{header-n231}
+test -> katalog zawierający przykładowe pliki do przetestowania, w tym pliki dźwiękowe i graficzne
+\item
+CMake.sh -> skrypt automatyzujący kompilację przy pomocy CMake
+\item
+CMakeLists.txt -> zawiera komendy do kompilacji przy użyciu CMake
+\item
+compare.c -> służy do porównywania, czy dwa podane pliki są jednakowe (weryfikacja, czy otrzymaliśmy plik początkowy po wykonaniu kompresji, a następnie dekompresji) Użycie: ./compare <file1> <file2>
+\item
+encoding.sh -> skrypt sprawdzający na wiele sposobów kodowanie danego pliku (może wymagać instalacji dodatkowych pakietów). Informacje na temat instalacji wymaganych pakietów są zawarte w tym pliku.
+\item
+Makefile -> zawiera komendy do standardowej kompilacji oraz przykładowe testy programu
+\item
+README.md -> plik do wstawienia informacji na githuba
+
+\end{itemize}
+
+\section{CMake}\label{header-n231}
+Przekazujemy do dyspozycji programisty skrypt CMake służący do automatyzacji procesu kompilacji. W katalogu głównym programu znajdują się do tego przeznaczone pliki: CMake.sh i CMakeLists.txt.
+\section{Makefile}\label{header-n231}
+W pliku Makefile znajdują się różnego rodzaju testy do sprawdzenia poprawności działania programu.
+Testów jest 10, każdy z nich jest oznaczony w następujący sposób: testX, gdzie X to numer testu od 1 do 10.
+\\Listę testów wraz z ich opisem przedstawiono poniżej:
+\begin{itemize}
+\item
+test1 - Przypadek, gdy plik wejściowy jest pusty
+\item
+test2- Próba dekompresji uszkodzonego pliku skompresowanego
+\item
+test3 - Test kompresji całego tekstu Pana Tadeusza
+\item
+test4 - Test pliku o wielkości ok. 1.5 MB z kompresją 16-bit
+\item
+test5 - Test kompresji i szyfrowania muzyki
+\item
+test6 - Test kompresji i szyfrowania zdjecia
+\item
+test7 - Test wygenerowany przy pomocy gen/gen.c
+\item
+test8 - Test na rozbudowane drzewo Huffmana
+\item
+test9 - Wymuszenie dekompresji dla pliku nieskompresowanego
+\item
+test10 - Przypadek, gdy plik nie istnieje\\
+Przeprowadzenie wszystkich testów za jednym razem możemy wykonać komendą \texttt{make all}
+\end{itemize}
 
 \end{document}
