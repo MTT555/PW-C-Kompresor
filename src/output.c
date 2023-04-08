@@ -6,8 +6,6 @@
 #include "huffman.h"
 #include "output.h"
 
-#define CHARS
-
 void compressedToFile(FILE *input, FILE *output, int compLevel, bool cipher, uchar *cipherKey, int *cipherPos,
 listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
     /* Deklaracja potrzebnych zmiennych */

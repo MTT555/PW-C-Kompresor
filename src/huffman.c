@@ -63,7 +63,7 @@ bool huffman(FILE *input, FILE *output, int compLevel, bool cipher, count_t **he
 
     /* Tworzenie drzewa Huffmana */
     createHuffmanTree(output, head, code, cipher, compLevel, &xor, 0,
-    &listC, &buffer, &packPos, cipherKey, &cipherPos, roadBuffer, &roadPos);
+    &listC, &buffer, &packPos, cipherKey, &cipherPos, roadBuffer, &roadPos, &roadBufSize);
 
     /* Po zapisaniu calego slownika do pliku trzeba wyraznie zaznaczyc jego koniec */
     saveBitIntoPack(output, cipher, cipherKey, &cipherPos, &buffer, &packPos, &xor, 1);
@@ -83,7 +83,7 @@ bool huffman(FILE *input, FILE *output, int compLevel, bool cipher, count_t **he
 }
 
 bool addToTheListCodes(FILE *output, int compLevel, bool cipher, listCodes_t **listC, pack_t *buffer, int *packPos,
-int character, int *code, int length, uchar *xor, uchar *cipherKey, int *cipherPos, uchar *roadBuffer, int *roadPos) {
+int character, int *code, int length, uchar *xor, uchar *cipherKey, int *cipherPos, uchar *roadBuffer, int *roadPos, int *roadBufSize) {
     int i;
     listCodes_t *new = NULL;
     if(!tryMalloc((void **)&new, sizeof(listCodes_t)))
@@ -112,30 +112,45 @@ int character, int *code, int length, uchar *xor, uchar *cipherKey, int *cipherP
     return true;
 }
 
-bool createHuffmanTree(FILE *output, count_t **head, int *code, bool cipher, int compLevel, uchar *xor,
-int top, listCodes_t **listC, pack_t *buffer, int *packPos, uchar *cipherKey, int *cipherPos, uchar *roadBuffer, int *roadPos) {
+bool createHuffmanTree(FILE *output, count_t **head, int *code, bool cipher, int compLevel, uchar *xor, int top, 
+listCodes_t **listC, pack_t *buffer, int *packPos, uchar *cipherKey, int *cipherPos, uchar *roadBuffer, int *roadPos, int *roadBufSize) {
     if ((*head)->left) {
         code[top] = 0;
+        if(*roadPos == *roadBufSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
+            if(!tryRealloc((void **)&roadBuffer, 2 * (*roadBufSize) * sizeof(char)))
+                return false;
+            *roadBufSize *= 2;
+        }
         roadBuffer[(*roadPos)++] = '0'; /* zapisanie dwoch zer na przejscie w dol */
         roadBuffer[(*roadPos)++] = '0';
         if(!createHuffmanTree(output, &((*head)->left), code, cipher, compLevel, xor,
-        top + 1, listC, buffer, packPos, cipherKey, cipherPos, roadBuffer, roadPos))
+        top + 1, listC, buffer, packPos, cipherKey, cipherPos, roadBuffer, roadPos, roadBufSize))
             return false;
     }
     if ((*head)->right) {
         code[top] = 1;
+        if(*roadPos == *roadBufSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
+            if(!tryRealloc((void **)&roadBuffer, 2 * (*roadBufSize) * sizeof(char)))
+                return false;
+            *roadBufSize *= 2;
+        }
         roadBuffer[(*roadPos)++] = '0'; /* zapisanie dwoch zer na przejscie w dol */
         roadBuffer[(*roadPos)++] = '0';
         if(!createHuffmanTree(output, &((*head)->right), code, cipher, compLevel, xor,
-        top + 1, listC, buffer, packPos, cipherKey, cipherPos, roadBuffer, roadPos))
+        top + 1, listC, buffer, packPos, cipherKey, cipherPos, roadBuffer, roadPos, roadBufSize))
             return false;
     }
     if (!((*head)->left) && !((*head)->right)) { /* jezeli dostalismy sie w koncu do liscia */
         if(!addToTheListCodes(output, compLevel, cipher, listC, buffer, packPos, (*head)->character,
-        code, top, xor, cipherKey, cipherPos, roadBuffer, roadPos)) /* dodajemy kazdy kod do listy */
+        code, top, xor, cipherKey, cipherPos, roadBuffer, roadPos, roadBufSize)) /* dodajemy kazdy kod do listy */
             return false;
     }
     /* wyjscie do gory znajduje sie na koncu tej funkcji, poniewaz jest to funkcja rekurencyjna */
+    if(*roadPos == *roadBufSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
+        if(!tryRealloc((void **)&roadBuffer, 2 * (*roadBufSize) * sizeof(char)))
+            return false;
+        *roadBufSize *= 2;
+    }
     roadBuffer[(*roadPos)++] = '1';
     roadBuffer[(*roadPos)++] = '0';
     return true;
