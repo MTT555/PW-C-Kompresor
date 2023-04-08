@@ -15,8 +15,11 @@ Funkcja dodajaca odczytany kod wraz ze znakiem do listy
     listCodes_t **list - lista, do ktorej chcemy dokonac zapisu
     int character - znak, ktory chcemy zapisac
     uchar *code - kod tego znaku
+Zwraca
+    true - dodanie do listy sie powiodlo
+    false - nastapily problemy z pamiecia
 */
-void addToListCodes(listCodes_t **list, int character, uchar *code);
+bool addToListCodes(listCodes_t **list, int character, uchar *code);
 
 /**
 Funkcja drukujaca odczytany slownik na wybrany strumien

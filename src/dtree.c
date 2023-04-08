@@ -1,17 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "dtree.h"
+#include "alloc.h"
 
 int goDown(dnode_t **head) {
     if((*head)->left == NULL) {
-        (*head)->left = malloc(sizeof(dnode_t));
+        if(!tryMalloc((void **)&((*head)->left), sizeof(dnode_t)))
+            return -1;
         (*head)->left->prev = (*head);
         (*head)->left->left = NULL;
         (*head)->left->right = NULL;
         (*head) = (*head)->left;
         return 0;
     } else {
-        (*head)->right = malloc(sizeof(dnode_t));
+        if(!tryMalloc((void **)&((*head)->left), sizeof(dnode_t)))
+            return -1;
         (*head)->right->prev = (*head);
         (*head)->right->left = NULL;
         (*head)->right->right = NULL;

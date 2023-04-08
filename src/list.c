@@ -2,15 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include "list.h"
+#include "alloc.h"
 
-void addToListCodes(listCodes_t **list, int character, uchar *code) {
+bool addToListCodes(listCodes_t **list, int character, uchar *code) {
     listCodes_t *new = NULL;
-    new = malloc(sizeof(listCodes_t));
+    if(!tryMalloc((void **)&new, sizeof(listCodes_t))) /* przy nieudanej probie alokacji */
+		return true; /* zwracamy NULL */
     new->character = character;
-    new->code = malloc(sizeof(char) * (strlen((char *)code) + 1));
+    new->code = NULL;
+    if(!tryMalloc((void **)(&(new->code)), sizeof(char) * (strlen((char *)code) + 1)))
+        return false;
     strcpy((char *)new->code, (char *)code);
     new->next = (*list);
     (*list) = new;
+    return true;
 }
 
 void printListCodes(listCodes_t **list, FILE *stream) {

@@ -8,29 +8,9 @@ add_executable(compare compare.c)
 
 add_executable(generate gen/gen.c)
 
-add_executable(compressor src/main.c
-    src/countCharacters.c src/countCharacters.h
-    src/decompress.c src/decompress.h
-    src/huffman.c src/huffman.h
-    src/output.c src/output.h
-    src/utils.c src/utils.h
-    src/list.c src/list.h
-    src/dtree.c src/dtree.h
-    src/bits_analyze.c src/bits_analyze.h
-    src/alloc.c src/alloc.h
-    src/noCompress.c src/noCompress.h
-)
+file(GLOB SOURCE_FILES src/*.c src/*.h)
 
-add_executable(debug src/main.c
-    src/countCharacters.c src/countCharacters.h
-    src/decompress.c src/decompress.h
-    src/huffman.c src/huffman.h
-    src/output.c src/output.h
-    src/utils.c src/utils.h
-    src/list.c src/list.h
-    src/dtree.c src/dtree.h
-    src/bits_analyze.c src/bits_analyze.h
-    src/alloc.c src/alloc.h
-    src/noCompress.c src/noCompress.h
-)
+add_executable(compressor ${SOURCE_FILES})
+
+add_executable(debug ${SOURCE_FILES})
 target_compile_definitions(debug PRIVATE -DDEBUG)

@@ -1,10 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "countCharacters.h"
+#include "alloc.h"
 
 count_t *addToTheList(count_t **head, int character) {
 	count_t *new = NULL;
-	new = malloc(sizeof(count_t));
+	if(!tryMalloc((void **)&new, sizeof(count_t))) /* przy nieudanej probie alokacji */
+		return NULL; /* zwracamy NULL */
 	new->character = character;
 	new->amount = 1;
 	new->next = (*head);
@@ -69,7 +71,7 @@ Funkcja zwalniajaca pamiec z wszystkich elementow listy
 */
 void freeList(count_t *head) {
 	int i, n = 0;
-	count_t **toFree = malloc(65535 * sizeof(count_t)); /*uzaleznic od compLevel*/
+	count_t *toFree[65535];
 	count_t *iterator = head;
 	while (iterator != NULL) {
 		toFree[n] = iterator;
@@ -79,7 +81,6 @@ void freeList(count_t *head) {
 	for(i = 0; i < n; i++) {
 		freeRecursively(toFree[i]);
 	}
-	free(toFree);
 }
 
 /**

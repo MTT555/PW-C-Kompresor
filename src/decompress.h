@@ -11,8 +11,11 @@
 Funkcja dekompresujaca dany plik pochodzacy z tego kompresora
     FILE *input - plik wejsciowy
     FILE *output - plik wyjsciowy
+Zwraca
+    true - dekompresja sie powiodla
+    false - nastapily problemy z pamiecia
 */
-void decompress(FILE *input, FILE *output);
+bool decompress(FILE *input, FILE *output);
 
 /**
 Funkcja dodajaca odczytany kod wraz ze znakiem do listy

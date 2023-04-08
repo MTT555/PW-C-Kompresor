@@ -11,8 +11,8 @@
 int main(int argc, char **argv) {
 	/* Deklaracja zmiennych */
 	uchar c;
-	int i, inputEOF, fileCheck;
-	count_t *head = NULL;
+	int i, inputEOF, fileCheck, temp;
+	count_t *head = NULL, *tempPtr = NULL;
 	FILE *in, *out;
 	int tempCode = 0, currentBits = 0; /* tymczasowy kod wczytanego znaku oraz ilosc obecne wczytanych bitow (dla kompresji 12- i 16-bit) */
 	
@@ -95,15 +95,35 @@ int main(int argc, char **argv) {
 				tempCode <<= 8;
 				tempCode += (int)c;
 				if(currentBits == s.compLevel) {
-					if(checkIfOnTheList(&head, tempCode) == 1)
+					if(checkIfOnTheList(&head, tempCode) == 1) {
+						tempPtr = head;
 						head = addToTheList(&head, tempCode);
+						if(head == NULL) {
+							fprintf(stderr, "%s: Compression memory failure!\n", argv[0]);
+							fclose(in);
+							fclose(out);
+							freeRecursively(tempPtr);
+							free(tempPtr);
+							return 6;
+						}
+					}
 					tempCode = 0;
 					currentBits = 0;
 				} else if (currentBits >= s.compLevel) { /* taki przypadek wystapi jedynie w kompresji 12-bit */
-					int temp = tempCode % 16;
+					temp = tempCode % 16;
 					tempCode >>= 4;
-					if(checkIfOnTheList(&head, tempCode) == 1)
+					if(checkIfOnTheList(&head, tempCode) == 1) {
+						tempPtr = head;
 						head = addToTheList(&head, tempCode);
+						if(head == NULL) {
+							fprintf(stderr, "%s: Compression memory failure!\n", argv[0]);
+							fclose(in);
+							fclose(out);
+							freeRecursively(tempPtr);
+							free(tempPtr);
+							return 6;
+						}
+					}
 					tempCode = temp;
 					currentBits = 4;
 				}
@@ -115,7 +135,14 @@ int main(int argc, char **argv) {
 			showList(&head, stderr);
 #endif
 			fseek(in, 0, SEEK_SET); /* ustawienie kursora w pliku z powrotem na jego poczatek */
-			huffman(in, out, s.compLevel, s.cipher, &head);
+			if(!huffman(in, out, s.compLevel, s.cipher, &head)) {
+				fprintf(stderr, "%s: Decompression memory failure!\n", argv[0]);
+				freeRecursively(head);
+				free(head);
+				fclose(in);
+				fclose(out);
+				return 6;
+			}
 			freeRecursively(head);
 			free(head);
 		}
@@ -126,7 +153,12 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "File check code: %d\n", fileCheck);
 #endif
 		if(!fileCheck) { /* dekompresja jedynie, jezeli fileCheck zwrocil 0 */
-			decompress(in, out);
+			if(!decompress(in, out)) {
+				fprintf(stderr, "%s: Decompression memory failure!\n", argv[0]);
+				fclose(in);
+				fclose(out);
+				return 6;
+			}
 		} else {
 			fclose(in);
 			fclose(out);

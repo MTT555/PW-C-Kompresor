@@ -7,22 +7,23 @@ void rewriteFile(FILE *input, FILE *output, int n, settings_t s) {
     char c;
     int i;
     uchar xor = (uchar)183; /* (183 = 0b10110111) */
-    uchar cipherKey[] = "Politechnika_Warszawska";
     int cipherPos = 0;
     int cipherLen = (int)strlen((char *)s.cipherKey);
+    uchar *xxxx = (uchar *)"CTXX";
+    xxxx[2] = (uchar)40; /* zapalone bity szyfrowania i kompresji (40 == 0b00101000) */
 
     if(s.cipher) {
-        fprintf(output, "CT%cX", (uchar)40); /* zapalone bity szyfrowania i kompresji (40 == 0b00101000) */
+        fwrite(xxxx, sizeof(char), 4, output);
         for(i = 0; i < n; i++) {
             fread(&c, sizeof(char), 1, input);
-            c += cipherKey[cipherPos % cipherLen];
+            c += s.cipherKey[cipherPos % cipherLen];
             cipherPos++;
             fwrite(&c, sizeof(char), 1, output);
             xor ^= c;
         }
         fseek(output, 3, SEEK_SET);
         fwrite(&xor, sizeof(char), 1, output);
-        fprintf(stderr, "Due to chosen settings, file has been rewritten with encryption but no compression!\n");
+        fprintf(stderr, "File successfully encrypted!\n");
     } else {
         for(i = 0; i < n; i++) {
             fread(&c, sizeof(char), 1, input);
@@ -30,4 +31,18 @@ void rewriteFile(FILE *input, FILE *output, int n, settings_t s) {
         }
         fprintf(stderr, "Due to chosen settings, file has been rewritten with no changes!\n");
     }
+}
+
+void decryptFile(FILE *input, FILE *output, int n, uchar *cipherKey) {
+    char c;
+    int i, cipherPos = 0;
+    int cipherLength = (int)strlen((char *)cipherKey);
+
+    for(i = 4; i < n; i++) {
+        fread(&c, sizeof(char), 1, input);
+        c -= cipherKey[cipherPos % cipherLength];
+        cipherPos++;
+        fwrite(&c, sizeof(char), 1, output);
+    }
+    fprintf(stderr, "File successfully decrypted!\n");
 }

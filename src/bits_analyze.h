@@ -32,7 +32,7 @@ Funkcja do analizy kolejnych bitow danego chara z pliku skompresowanego
     int *currentBits - ilosc aktualnie zajetych bitow (w ramach wsparcia dla dekompresji 12-bit)
     int *tempCode - aktualny kod odczytanego symbolu (w ramach wsparcia dla dekompresji 12-bit)
 */
-void analyzeBits(FILE *output, uchar c, int compLevel, listCodes_t **list,
+bool analyzeBits(FILE *output, uchar c, int compLevel, listCodes_t **list,
     short redundantBits, bool redundantZero, dnode_t **iterator, mod_t *mode,
     uchar *buffer, int *curBufSize, uchar *codeBuf, int *curCodeBufSize,
     int *bufPos, int *codeBufPos, int *currentBits, int *tempCode);

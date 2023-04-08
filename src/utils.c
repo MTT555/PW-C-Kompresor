@@ -32,7 +32,8 @@ void help(FILE *stream) {
                            "2 - Input file could not be opened\n"
                            "3 - Output file could not be opened\n"
                            "4 - Input file is empty\n"
-                           "5 - Decompression has been forced but the input file could not be decompressed\n\n"
+                           "5 - Decompression has been forced but the input file could not be decompressed\n"
+                           "6 - Memory allocation/reallocation failure!\n\n"
                            "------------------------------------------------------------------------------------------------\n\n";
     fprintf(stream, "%s%s%s%s", help_message1, help_message2, help_message3, help_message4);
 }

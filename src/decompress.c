@@ -7,19 +7,21 @@
 #include "bits_analyze.h"
 #include "dtree.h"
 #include "utils.h"
+#include "alloc.h"
+#include "noCompress.h"
 
 /**
 Funkcja dekompresujaca dany plik pochodzacy z tego kompresora
     FILE *input - plik wejsciowy
     FILE *output - plik wyjsciowy
 */
-void decompress(FILE *input, FILE *output) {
+bool decompress(FILE *input, FILE *output) {
     /* Deklaracja wszystkich zmiennych statycznych i nadanie im odpowiednich wartosci poczatkowych */
     int i; /* iteracje po petlach */
     uchar c; /* do odczytywania kolejnych znakow */
-    uchar *cipher_key = (uchar *)"Politechnika_Warszawska"; /* klucz szyfrowania definiowany w cipher.h */
+    uchar *cipherKey = (uchar *)"Politechnika_Warszawska"; /* klucz szyfrowania definiowany w cipher.h */
     int cipherPos = 0; /* aktualna pozycja w szyfrze */
-    int cipherLength = (int)strlen((char *)cipher_key);
+    int cipherLength = (int)strlen((char *)cipherKey);
     mod_t currentMode = dictRoad; /* zmienna przechowujaca aktualny tryb czytania pliku */
     int bufPos = 0, codeBufPos = 0; /* aktualna pozycja w buforze na odczytane bity oraz w buforze dla kodow */
     int currentBits = 0; /* ilosc aktualnie zajetych bitow (w ramach wsparcia dla dekompresji 12-bit) */
@@ -35,10 +37,13 @@ void decompress(FILE *input, FILE *output) {
 
     /* Deklaracja wszystkich zmiennych dynamicznych, odpowiednia alokacja pamieci i inicjacja */
     listCodes_t *list = NULL; /* lista na przechowanie odczytanego slownika */
-    dnode_t *head = malloc(sizeof(dnode_t)); /* pomocnicze drzewo dnode i alokacja pamieci na korzen */
+    dnode_t *head = NULL; /* pomocnicze drzewo dnode i alokacja pamieci na korzen */
     dnode_t *iterator = head; /* ustawienie pseudoiteratora po drzewie */
-    uchar *buffer = malloc(curBufSize * sizeof(char)); /* bufor na odczytane bity */
-    uchar *codeBuf = malloc(curCodeBufSize * sizeof(char)); /* bufor dla kodow przejsc po drzewie */
+    uchar *buffer = NULL; /* bufor na odczytane bity */
+    uchar *codeBuf = NULL; /* bufor dla kodow przejsc po drzewie */
+    if(!tryMalloc((void **)&head, sizeof(dnode_t)) || !tryMalloc((void **)&buffer, sizeof(curBufSize * sizeof(char)))
+        || !tryMalloc((void **)&codeBuf, sizeof(curCodeBufSize * sizeof(char))))
+        return false;
     head->prev = NULL;
     head->left = NULL;
     head->right = NULL;
@@ -60,28 +65,37 @@ void decompress(FILE *input, FILE *output) {
         compLevel, cipher ? "true" : "false", redundantBits, redundantZero ? "true" : "false");
 #endif
 
-    /* przypadek pliku nieskompresowanego, ale zaszyfrowanego */
+    /* Przypadek pliku nieskompresowanego, ale zaszyfrowanego */
     if(compLevel == 0 && cipher) {
-        for(i = 4; i < inputEOF; i++) {
-            fread(&c, sizeof(char), 1, input);
-            c -= cipher_key[cipherPos % cipherLength];
-            cipherPos++;
-            fwrite(&c, sizeof(char), 1, output);
-        }
-        return;
+        decryptFile(input, output, inputEOF, cipherKey);
+        return true;
     }
+
+    /* Analiza pliku */
     for(i = 4; i < inputEOF; i++) {
         fread(&c, sizeof(char), 1, input);
         if(cipher) { /* odszyfrowanie */
-            c -= cipher_key[cipherPos % cipherLength];
+            c -= cipherKey[cipherPos % cipherLength];
             cipherPos++;
         }
         if(i != inputEOF - 1) /* analizowanie kazdego bitu przy pomocy funkcji */
-            analyzeBits(output, c, compLevel, &list, 0, false, &iterator, &currentMode,
-                buffer, &curBufSize, codeBuf, &curCodeBufSize, &bufPos, &codeBufPos, &currentBits, &tempCode);
+            if(!analyzeBits(output, c, compLevel, &list, 0, false, &iterator, &currentMode,
+                buffer, &curBufSize, codeBuf, &curCodeBufSize, &bufPos, &codeBufPos, &currentBits, &tempCode)) {
+                freeListCodes(&list);
+                freeDTree(head);
+                free(buffer);
+                free(codeBuf);
+                return false;
+            }
     }
-    analyzeBits(output, c, compLevel, &list, redundantBits, redundantZero, &iterator, &currentMode,
-        buffer, &curBufSize, codeBuf, &curCodeBufSize, &bufPos, &codeBufPos, &currentBits, &tempCode);
+    if(!analyzeBits(output, c, compLevel, &list, redundantBits, redundantZero, &iterator, &currentMode,
+        buffer, &curBufSize, codeBuf, &curCodeBufSize, &bufPos, &codeBufPos, &currentBits, &tempCode)) {
+        freeListCodes(&list);
+        freeDTree(head);
+        free(buffer);
+        free(codeBuf);
+        return false;
+    }
     
     /* Komunikat koncowy */
     fprintf(stderr, "File successfully decompressed!\n");
@@ -99,6 +113,7 @@ void decompress(FILE *input, FILE *output) {
     freeDTree(head);
     free(buffer);
     free(codeBuf);
+    return true;
 }
 
 /**
@@ -111,29 +126,40 @@ Zwraca true, jezeli jakis znak zostal znaleziony, w przeciwnym wypadku false
 */
 bool compareBuffer(listCodes_t **list, uchar *buf, FILE *stream, int compLevel, bool redundantZero, int *currentBits, int *tempCode) {
     listCodes_t *iterator = (*list);
+    uchar tempC;
+    int temp = 0;
     while (iterator != NULL) {
         if(strcmp((char *)iterator->code, (char *)buf) == 0) {
-            if(compLevel == 8)
-                fprintf(stream, "%c", (uchar)(iterator->character));
+            if(compLevel == 8) {
+                tempC = (uchar)(iterator->character);
+                fwrite(&tempC, sizeof(char), 1, stream);
+            }
             else if(compLevel == 16) {
-                fprintf(stream, "%c", (uchar)((iterator->character) / (1 << 8)));
-                if(!redundantZero)
-                    fprintf(stream, "%c", (uchar)(iterator->character));
+                tempC = (uchar)((iterator->character) / (1 << 8));
+                fwrite(&tempC, sizeof(char), 1, stream);
+                if(!redundantZero) {
+                    tempC = (uchar)(iterator->character);
+                    fwrite(&tempC, sizeof(char), 1, stream);
+                }
             }
             else if(compLevel == 12) {
                 *tempCode <<= 12;
                 *tempCode += iterator->character;
                 *currentBits += 12;
                 if(*currentBits == 12) {
-                    int temp = *tempCode % 16;
+                    temp = *tempCode % 16;
                     *tempCode >>= 4;
-                    fprintf(stream, "%c", (uchar)(*tempCode));
+                    tempC = (uchar)(*tempCode);
+                    fwrite(&tempC, sizeof(char), 1, stream);
                     *tempCode = temp;
                     *currentBits = 4;
                 } else {
-                    fprintf(stream, "%c", (uchar)((*tempCode) / (1 << 8)));
-                    if(!redundantZero)
-                        fprintf(stream, "%c", (uchar)(*tempCode));
+                    tempC = (uchar)((*tempCode) / (1 << 8));
+                    fwrite(&tempC, sizeof(char), 1, stream);
+                    if(!redundantZero) {
+                        tempC = (uchar)(*tempCode);
+                        fwrite(&tempC, sizeof(char), 1, stream);
+                    }
                     *tempCode = 0;
                     *currentBits = 0;
                 }

@@ -15,21 +15,30 @@ Funkcja wykonujaca kompresje algorytmem Huffmana
     bool cipher - zmienna mowiaca, czy tekst ma zostac rowniez zaszyfrowany
     uchar *cipherKey - klucz szyfrowania (nieistotny, gdy cipher == false)
     count_t **head - glowa listy zawierajaca ilosci wystapien danych znakow
+Zwraca
+    true - kompresja sie powiodla
+    false - nastapily problemy z pamiecia
 */
-void huffman(FILE *input, FILE *output, int compLevel, bool cipher, count_t **head);
+bool huffman(FILE *input, FILE *output, int compLevel, bool cipher, count_t **head);
 
 /**
 Funkcja rekurencyjna odpowiedzialna za budowe drzewa Huffmana
     args
+Zwraca
+    true - tworzenie danego wierzcholka drzewa sie powiodlo
+    false - nastapily problemy z pamiecia
 */
-void createHuffmanTree(FILE *output, count_t **head, int *code, bool cipher, int compLevel, uchar *xor,
+bool createHuffmanTree(FILE *output, count_t **head, int *code, bool cipher, int compLevel, uchar *xor,
     int top, listCodes_t **listC, pack_t *buffer, int *packPos, uchar *cipherKey, int *cipherPos, uchar *roadBuffer, int *roadPos);
 
 /**
 Funkcja realizujaca dodanie danego kodu do slownika kodow oraz odpowiedni zapis tego faktu do pliku
     args
+Zwraca
+    true - dodanie do listy sie powiodlo
+    false - nastapily problemy z pamiecia
 */
-void addToTheListCodes(FILE *output, int compLevel, bool cipher, listCodes_t **listC, pack_t *buffer, int *packPos,
+bool addToTheListCodes(FILE *output, int compLevel, bool cipher, listCodes_t **listC, pack_t *buffer, int *packPos,
     int character, int *code, int length, uchar *xor, uchar *cipherKey, int *cipherPos, uchar *roadBuffer, int *roadPos);
 
 #endif

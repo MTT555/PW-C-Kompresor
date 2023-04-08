@@ -5,12 +5,13 @@
 #include "decompress.h"
 #include "dtree.h"
 #include "huffman.h"
+#include "alloc.h"
 
-void analyzeBits(FILE *output, uchar c, int compLevel, listCodes_t **list,
+bool analyzeBits(FILE *output, uchar c, int compLevel, listCodes_t **list,
 short redundantBits, bool redundantZero, dnode_t **iterator, mod_t *mode,
 uchar *buffer, int *curBufSize, uchar *codeBuf, int *curCodeBufSize, 
 int *bufPos, int *codeBufPos, int *currentBits, int *tempCode) {
-    int i;
+    int i, down;
     short bits = 0; /* ilosc przeanalizowanych bitow */
     short currentCode = 0; /* obecny kod przejscia w sciezce */
     while (bits != 8 - redundantBits) {
@@ -30,17 +31,38 @@ int *bufPos, int *codeBufPos, int *currentBits, int *tempCode) {
                     *iterator = (*iterator)->prev;
                     (*codeBufPos)--; /* wyjscie o jeden w gore */
                 } else if(currentCode == 1) {
-                    codeBuf[*codeBufPos] = '0' + goDown(iterator); /* przejscie o jeden w dol */
-                    (*codeBufPos)++;
+                    down = goDown(iterator);
+                    if(down == -1)
+                        return false;
+                    if(*codeBufPos == *curCodeBufSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
+                        if(!tryRealloc((void **)&codeBuf, 2 * (*curCodeBufSize) * sizeof(char)))
+                            return false;
+                        *curCodeBufSize *= 2;
+                    }
+                    codeBuf[*codeBufPos] = '0' + down; /* przejscie o jeden w dol */
+                    (*codeBufPos)++; /*dodac checka*/
                     codeBuf[*codeBufPos] = '\0';
                     *mode = dictWord;
                 } else if(currentCode == 0) {
-                    codeBuf[*codeBufPos] = '0' + goDown(iterator); /* przejscie o jeden w dol */
-                    (*codeBufPos)++;
+                    down = goDown(iterator);
+                    if(down == -1)
+                        return false;
+                    if(*codeBufPos == *curCodeBufSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
+                        if(!tryRealloc((void **)&codeBuf, 2 * (*curCodeBufSize) * sizeof(char)))
+                            return false;
+                        *curCodeBufSize *= 2;
+                    }
+                    codeBuf[*codeBufPos] = '0' + down; /* przejscie o jeden w dol */
+                    (*codeBufPos)++;/*dodac checka*/
                 }
                 break;
             }
             case dictWord: {
+                if(*bufPos == *curBufSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
+                    if(!tryRealloc((void **)&buffer, 2 * (*curBufSize) * sizeof(char)))
+                        return false;
+                    *curBufSize *= 2;
+                }
                 buffer[(*bufPos)++] = returnBit(c, bits++);
                 buffer[(*bufPos)++] = returnBit(c, bits++);
                 if(*bufPos == compLevel) {
@@ -58,6 +80,11 @@ int *bufPos, int *codeBufPos, int *currentBits, int *tempCode) {
                 break;
             }
             case bitsToWords: {
+                if(*bufPos == *curBufSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
+                    if(!tryRealloc((void **)&buffer, 2 * (*curBufSize) * sizeof(char)))
+                        return false;
+                    *curBufSize *= 2;
+                }
                 buffer[(*bufPos)++] = '0' + returnBit(c, bits);
                 buffer[*bufPos] = '\0';
                 bits++;
@@ -67,6 +94,7 @@ int *bufPos, int *codeBufPos, int *currentBits, int *tempCode) {
             }
         }
     }
+    return true;
 }
 
 short returnBit(uchar c, int x) {

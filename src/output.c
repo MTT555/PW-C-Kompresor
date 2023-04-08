@@ -134,7 +134,7 @@ pack_t *buffer, int *packPos, uchar *xor, int bit) {
             buffer->chars.out += cipherKey[(*cipherPos) % cipherLen]; /* dokonujemy szyfrowania znaku */
             cipherPos++;
         }
-        fprintf(output, "%c", buffer->chars.out); /* wydrukuj znak */
+        fwrite(&(buffer->chars.out), sizeof(char), 1, output); /* wydrukuj znak */
         (*xor) ^= buffer->chars.out; /* uwzglednienie znaku w sumie kontrolnej  */
 #ifdef CHARS
         /* wyswietlenie zapisanego znaku wraz z jego kodem na stderr */
