@@ -4,8 +4,6 @@
 #include "huffman.h"
 #include "utils.h"
 #include "decompress.h"
-#include "list.h"
-#include "alloc.h"
 #include "noCompress.h"
 
 int main(int argc, char **argv) {
@@ -149,7 +147,7 @@ int main(int argc, char **argv) {
 		}
 	}
 	else if(s.decomp) { /* jezeli ma zostac wykonana dekompresja */
-		fileCheck = fileIsGood(in, (uchar)183, true); /* (183 = 0b10110111) */
+		fileCheck = fileIsGood(in, (uchar)XOR, true); /* (183 = 0b10110111) */
 #ifdef DEBUG
 		fprintf(stderr, "File check code: %d\n", fileCheck);
 #endif

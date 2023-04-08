@@ -3,7 +3,7 @@
 #include "alloc.h"
 #include "utils.h"
 
-bool tryMalloc(void **ptr, int size) {
+bool tryMalloc(void **ptr, unsigned long int size) {
     *ptr = malloc(size);
     if(*ptr == NULL) { /* sprawdzam, czy alokacja pamieci sie powiodla */
 #ifdef DEBUG
@@ -14,7 +14,7 @@ bool tryMalloc(void **ptr, int size) {
     return true;
 }
 
-bool tryRealloc(void **ptr, int size) {
+bool tryRealloc(void **ptr, unsigned long int size) {
     if(size < sizeof(*ptr)) { /* sprawdzam, czy blok wyjsciowy nie bedzie mniejszy od poczatkowego */
 #ifdef DEBUG
         fprintf(stderr, "Attempt of reallocing to smaller block of memory - terminating!\n");

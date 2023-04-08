@@ -38,8 +38,8 @@ bool decompress(FILE *input, FILE *output, settings_t s) {
     buf.pos = 0; /* aktualna pozycja w buforze na odczytane bity */
     codeBuf.curSize = 8192; /* aktualna wielkosc buforu dla kodow przejsc po drzewie */
     codeBuf.pos = 0; /* aktualna pozycja w buforze dla kodow */
-    if(!tryMalloc((void **)&head, sizeof(dnode_t)) || !tryMalloc((void **)(&(buf.buf)), sizeof(buf.curSize * sizeof(char)))
-        || !tryMalloc((void **)(&(codeBuf.buf)), sizeof(codeBuf.curSize * sizeof(char))))
+    if(!tryMalloc((void **)&head, sizeof(dnode_t)) || !tryMalloc((void **)(&(buf.buf)), buf.curSize * sizeof(char))
+        || !tryMalloc((void **)(&(codeBuf.buf)), codeBuf.curSize * sizeof(char)))
         return false;
     iterator = head;
     head->prev = NULL;

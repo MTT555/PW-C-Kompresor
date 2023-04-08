@@ -1,18 +1,16 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include "list.h"
 #include "bits_analyze.h"
 #include "decompress.h"
 #include "dtree.h"
-#include "huffman.h"
 #include "alloc.h"
 
 bool analyzeBits(FILE *output, uchar c, flag_t f, listCodes_t **list, dnode_t **iterator,
 mod_t *mode, buffer_t *buf, buffer_t *codeBuf, int *currentBits, int *tempCode) {
     int i, down;
-    short bits = 0; /* ilosc przeanalizowanych bitow */
-    short currentCode = 0; /* obecny kod przejscia w sciezce */
+    int bits = 0; /* ilosc przeanalizowanych bitow */
+    int currentCode; /* obecny kod przejscia w sciezce */
     while (bits != 8 - f.redundantBits) {
         switch(*mode) {
             case dictRoad: {
@@ -96,7 +94,7 @@ mod_t *mode, buffer_t *buf, buffer_t *codeBuf, int *currentBits, int *tempCode) 
     return true;
 }
 
-short returnBit(uchar c, int x) {
+int returnBit(uchar c, int x) {
     uchar ch = c;
     ch >>= (7 - x);
     return ch % 2;
@@ -105,7 +103,7 @@ short returnBit(uchar c, int x) {
 bool compareBuffer(listCodes_t **list, uchar *buf, FILE *stream, int compLevel, bool redundantZero, int *currentBits, int *tempCode) {
     listCodes_t *iterator = (*list);
     uchar tempC;
-    int temp = 0;
+    int temp;
     while (iterator != NULL) {
         if(strcmp((char *)iterator->code, (char *)buf) == 0) {
             if(compLevel == 8) {
@@ -148,17 +146,3 @@ bool compareBuffer(listCodes_t **list, uchar *buf, FILE *stream, int compLevel, 
     }
     return false;
 }
-
-/**
-Funkcja sprawdzajaca, czy aktualny fragment kodu w buforze odpowiada jakiejs literze
-Jezeli tak, to zapisuje ta litere do podanego pliku
-    listCodes_t **list - poczatek listy, ktora chcemy wyswietlic
-    uchar *buf - bufor, ktory mozliwe, ze odpowiada jednej z liter
-    FILE *stream - strumien, w ktorym ma zostac wydrukowana litera
-    int compLevel - 
-    bool endingZero - 
-    int *currentBits - 
-    int *tempCode - 
-Zwraca true, jezeli jakis znak zostal znaleziony, w przeciwnym wypadku false
-*/
-bool compareBuffer(listCodes_t **list, uchar *buf, FILE *stream, int compLevel, bool endingZero, int *currentBits, int *tempCode);

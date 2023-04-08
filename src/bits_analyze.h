@@ -36,7 +36,7 @@ Funkcja zwracajaca pozadany bit z danego chara
     uchar c - znak
     int x - numer bitu, ktory ma byc zwrocony
 */
-short returnBit(uchar c, int x);
+int returnBit(uchar c, int x);
 
 /**
 Funkcja sprawdzajaca, czy aktualny fragment kodu w buforze odpowiada jakiejs literze
@@ -44,6 +44,10 @@ Jezeli tak, to zapisuje ta litere do podanego pliku
     listCodes_t **list - poczatek listy, ktora chcemy wyswietlic
     uchar *buf - bufor, ktory mozliwe, ze odpowiada jednej z liter
     FILE *stream - strumien, w ktorym ma zostac wydrukowana litera
+    int compLevel - poziom kompresji
+    bool endingZero - informacja o nadmiarowym koncowym znaku '\0'
+    int *currentBits - obecna ilosc zajetych bitow
+    int *tempCode - obecny tymczasowy kod symbolu
 Zwraca true, jezeli jakis znak zostal znaleziony, w przeciwnym wypadku false
 */
 bool compareBuffer(listCodes_t **list, uchar *buf, FILE *stream, int compLevel, bool endingZero, int *currentBits, int *tempCode);

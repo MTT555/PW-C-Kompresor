@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <string.h>
 #include "huffman.h"
 #include "utils.h"
 #include "countCharacters.h"
@@ -10,7 +9,7 @@
 bool huffman(FILE *input, FILE *output, settings_t s, count_t **head) {
     /* Deklaracja potrzebnych zmiennych */
     char *xxxx = "CTFX"; 
-    uchar xor = (uchar)183; /* ustawienie poczatkowej wartosci sumy kontrolnej (183 = 0b10110111) */
+    uchar xor = (uchar)XOR; /* ustawienie poczatkowej wartosci sumy kontrolnej (183 = 0b10110111) */
     pack_t buffer; /* typ pomocniczny do zapisu bitowego z output.h */
     int packPos = 0; /* zmienna zapisujaca przejscia po drzewie od ostatniego zapisu znaku */
     int cipherPos = 0; /* aktualna pozycja w tym szyfrze */
@@ -85,7 +84,7 @@ bool huffman(FILE *input, FILE *output, settings_t s, count_t **head) {
 }
 
 bool addToTheListCodes(FILE *output, settings_t s, listCodes_t **listC, pack_t *buffer, int *packPos,
-int character, int *code, int length, uchar *xor, int *cipherPos, buffer_t *roadBuf) {
+int character, const int *code, int length, uchar *xor, int *cipherPos, buffer_t *roadBuf) {
     int i;
     listCodes_t *new = NULL;
     if(!tryMalloc((void **)&new, sizeof(listCodes_t)))

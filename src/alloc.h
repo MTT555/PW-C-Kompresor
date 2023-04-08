@@ -6,15 +6,15 @@
 /**
 Funkcja dokonujaca probe alokacji pamieci
     void **ptr - wskaznik, pod ktory chcemy zaalokowac pamiec
-    int size - ilosc pamieci w bajtach
+    unsigned long int size - ilosc pamieci w bajtach
 */
-bool tryMalloc(void **ptr, int size);
+bool tryMalloc(void **ptr, unsigned long int size);
 
 /**
 Funkcja dokonujaca probe realokacji pamieci na wiekszy blok
     void **ptr - wskaznik, ktorego pamiec chcemy realokowac
-    int size - ilosc pamieci w bajtach
+    unsigned long int size - ilosc pamieci w bajtach
 */
-bool tryRealloc(void **ptr, int size);
+bool tryRealloc(void **ptr, unsigned long int size);
 
 #endif

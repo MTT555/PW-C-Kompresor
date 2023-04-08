@@ -1,9 +1,6 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include "utils.h"
-#include "countCharacters.h"
-#include "huffman.h"
 #include "output.h"
 
 void compressedToFile(FILE *input, FILE *output, settings_t s, int *cipherPos,

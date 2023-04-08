@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include "utils.h"
 
@@ -41,11 +40,10 @@ void help(FILE *stream) {
 }
 
 void analyzeArgs(int argc, char **argv, settings_t *s) {
-    int i, j;
+    int i, j, cipherLen;
     bool help_displayed = false, setCompLevel = false, setCipher = false; /* zmienne zapobiegajace wielokrotnemu ustawianiu tych samych opcji */
 	char compMode[7]; /* zmienna pomocnicza do przechowywania trybu kompresji */
 	char progBehaviour[20]; /* zmienna pomocnicza do przechowywania zachowania programu (wymuszenie kompresji/dekompresji) */
-    int cipherLen = 0;
 
     for(i = 3; i < argc; i++)
         if(strcmp(argv[i], "-c") == 0) { /* argument -c mowiacy, ze wynik dzialania programu ma zostac dodatkowo zaszyfrowany */
