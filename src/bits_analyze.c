@@ -40,7 +40,7 @@ int *bufPos, int *codeBufPos, int *currentBits, int *tempCode) {
                         *curCodeBufSize *= 2;
                     }
                     codeBuf[*codeBufPos] = '0' + down; /* przejscie o jeden w dol */
-                    (*codeBufPos)++; /*dodac checka*/
+                    (*codeBufPos)++;
                     codeBuf[*codeBufPos] = '\0';
                     *mode = dictWord;
                 } else if(currentCode == 0) {
@@ -53,7 +53,7 @@ int *bufPos, int *codeBufPos, int *currentBits, int *tempCode) {
                         *curCodeBufSize *= 2;
                     }
                     codeBuf[*codeBufPos] = '0' + down; /* przejscie o jeden w dol */
-                    (*codeBufPos)++;/*dodac checka*/
+                    (*codeBufPos)++;
                 }
                 break;
             }

@@ -5,7 +5,7 @@
 
 int goDown(dnode_t **head) {
     if((*head)->left == NULL) {
-        if(!tryMalloc((void **)&((*head)->left), sizeof(dnode_t)))
+        if(!tryMalloc((void **)(&((*head)->left)), sizeof(dnode_t)))
             return -1;
         (*head)->left->prev = (*head);
         (*head)->left->left = NULL;
@@ -13,7 +13,7 @@ int goDown(dnode_t **head) {
         (*head) = (*head)->left;
         return 0;
     } else {
-        if(!tryMalloc((void **)&((*head)->left), sizeof(dnode_t)))
+        if(!tryMalloc((void **)(&((*head)->right)), sizeof(dnode_t)))
             return -1;
         (*head)->right->prev = (*head);
         (*head)->right->left = NULL;

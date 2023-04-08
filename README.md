@@ -6,6 +6,8 @@ Program w języku C realizujący bezstratną kompresję oraz dekompresję plikó
   * **gen.c** -> służy do generowania gotowych testów do tego kompresora \
     Użycie *(pola \<charactersRange> i \<seed> można pominąć)*:
     > `./generate <outputFile> <charactersAmount> <charactersRange> <seed>` 
+  * **testhufftree.c** -> odpowiedzialny za wygenerowanie testu w wyniku którego możliwe było przeciążenie pamięci przez tworzenie drzewa Huffmana
+  * **testmax.c** -> odpowiedzialny za wygenerowanie testu o wielkości ok. 1.5 MB
   * **testo3.c** -> odpowiedzialny za wygenerowanie testu testo3.in zawierającego wszystkie możliwe znaki/słowa dla wszystkich możliwych poziomów kompresji
 * **src**
   * **alloc.\*** -> zawiera funkcje służące do bezpiecznej alokacji pamięci

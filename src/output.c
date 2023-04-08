@@ -6,12 +6,14 @@
 #include "huffman.h"
 #include "output.h"
 
-void compressedToFile(FILE *input, FILE *output, int compLevel, bool cipher, uchar *cipherKey, listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
+#define CHARS
+
+void compressedToFile(FILE *input, FILE *output, int compLevel, bool cipher, uchar *cipherKey, int *cipherPos,
+listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
     /* Deklaracja potrzebnych zmiennych */
     uchar c;
     int i, j, inputEOF;
     int tempCode = 0, currentBits = 0; /* zmienne przechowujace tymczasowy kod znaku oraz ilosc obecnie odczytanych bitow */
-    int cipherPos = 0; /* zmienna przechowujaca aktualna pozycje w szyfrze */
     uchar flags, ending = '\0'; /* ilosc niezapisanych bitow konczacych plik */
     listCodes_t *iterator = NULL; /* iterator po liscie kodow */
     bool endingZero = false;
@@ -44,7 +46,7 @@ void compressedToFile(FILE *input, FILE *output, int compLevel, bool cipher, uch
             while (iterator != NULL) {
                 if(iterator->character == tempCode) {
                     for(j = 0; j < (int)strlen((char *)(iterator->code)); j++)
-                        saveBitIntoPack(output, cipher, cipherKey, &cipherPos, buffer, packPos, xor, iterator->code[j] == '1' ? 1 : 0);
+                        saveBitIntoPack(output, cipher, cipherKey, cipherPos, buffer, packPos, xor, iterator->code[j] == '1' ? 1 : 0);
                     break;
                 }
                 else
@@ -59,7 +61,7 @@ void compressedToFile(FILE *input, FILE *output, int compLevel, bool cipher, uch
             while (iterator != NULL) {
                 if(iterator->character == tempCode) {
                     for(j = 0; j < (int)strlen((char *)(iterator->code)); j++)
-                        saveBitIntoPack(output, cipher, cipherKey, &cipherPos, buffer, packPos, xor, iterator->code[j] == '1' ? 1 : 0);
+                        saveBitIntoPack(output, cipher, cipherKey, cipherPos, buffer, packPos, xor, iterator->code[j] == '1' ? 1 : 0);
                     break;
                 }
                 else
@@ -80,7 +82,7 @@ void compressedToFile(FILE *input, FILE *output, int compLevel, bool cipher, uch
     else if(*packPos <= 16 && *packPos > 8)
         ending = (uchar)(16 - *packPos);
     for(i = 0; i <= (int)ending + 8; i++) /* dopychamy union packa dodatkowymi zerami, aby zapisac ostatni znak do pliku */
-        saveBitIntoPack(output, cipher, cipherKey, &cipherPos, buffer, packPos, xor, 0);
+        saveBitIntoPack(output, cipher, cipherKey, cipherPos, buffer, packPos, xor, 0);
 #ifdef DEBUG
     outputEOF = ftell(output); /* zapisanie pozycji koncowej */
 #endif
@@ -132,7 +134,7 @@ pack_t *buffer, int *packPos, uchar *xor, int bit) {
     if((*packPos) == 16) { /* jezeli bufer jest pelen */
         if(cipher) { /* jezeli plik ma zostac zaszyfrowany */
             buffer->chars.out += cipherKey[(*cipherPos) % cipherLen]; /* dokonujemy szyfrowania znaku */
-            cipherPos++;
+            (*cipherPos)++;
         }
         fwrite(&(buffer->chars.out), sizeof(char), 1, output); /* wydrukuj znak */
         (*xor) ^= buffer->chars.out; /* uwzglednienie znaku w sumie kontrolnej  */

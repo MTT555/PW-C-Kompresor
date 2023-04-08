@@ -7,23 +7,24 @@
 #include "utils.h"
 #include "list.h"
 
+/* flag_t - typ sluzacy za przechowywanie ustawien odczytanych z pliku do dekompresji */
+typedef struct {
+    int compLevel; /* poziom kompresji */
+    bool cipher; /* koniecznosc odszyfrowania */
+    bool redundantZero; /* koniecznosc odlaczenia nadmiarowego koncowego znaku '\0' */
+    int redundantBits; /* ilosc nadmiarowych bitow do odrzucenia */
+} flag_t;
+
 /**
 Funkcja dekompresujaca dany plik pochodzacy z tego kompresora
     FILE *input - plik wejsciowy
     FILE *output - plik wyjsciowy
+    settings_t s - ustawienia
 Zwraca
     true - dekompresja sie powiodla
     false - nastapily problemy z pamiecia
 */
-bool decompress(FILE *input, FILE *output);
-
-/**
-Funkcja dodajaca odczytany kod wraz ze znakiem do listy
-    listCodes_t **list - lista, do ktorej chcemy dokonac zapisu
-    int character - znak, ktory chcemy zapisac
-    uchar *code - kod tego znaku
-*/
-void addtoListCodes(listCodes_t **list, int character, uchar *code);
+bool decompress(FILE *input, FILE *output, settings_t s);
 
 /**
 Funkcja sprawdzajaca, czy aktualny fragment kodu w buforze odpowiada jakiejs literze

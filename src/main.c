@@ -21,6 +21,7 @@ int main(int argc, char **argv) {
 	s.decomp = false;
 	s.cipher = false; /* domyslnie szyfrowanie wylaczone */
 	s.compLevel = 8; /* domyslna kompresja 8-bit */
+	strcpy((char *)s.cipherKey, "Politechnika_Warszawska");
 	
 	/* Wyswietlenie pomocy pliku w wypadku podania jedynie argumentu --h */
 	if(argc == 1 || (argc == 2 && strcmp(argv[1], "-h") == 0)) {
@@ -153,7 +154,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "File check code: %d\n", fileCheck);
 #endif
 		if(!fileCheck) { /* dekompresja jedynie, jezeli fileCheck zwrocil 0 */
-			if(!decompress(in, out)) {
+			if(!decompress(in, out, s)) {
 				fprintf(stderr, "%s: Decompression memory failure!\n", argv[0]);
 				fclose(in);
 				fclose(out);

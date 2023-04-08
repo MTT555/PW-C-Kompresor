@@ -44,14 +44,13 @@ void analyzeArgs(int argc, char **argv, settings_t *s) {
 	char compMode[7]; /* zmienna pomocnicza do przechowywania trybu kompresji */
 	char progBehaviour[20]; /* zmienna pomocnicza do przechowywania zachowania programu (wymuszenie kompresji/dekompresji) */
     int cipherLen = 0;
-    uchar *defaultCipher = (uchar *)"Politechnika_Warszawska";
 
     for(i = 3; i < argc; i++)
-        if(strcmp(argv[i], "-c") == 0) {
+        if(strcmp(argv[i], "-c") == 0) { /* argument -c mowiacy, ze wynik dzialania programu ma zostac dodatkowo zaszyfrowany */
             if(setCipher)
                 fprintf(stderr, "%s: %s -> Output encryption has already been enabled! (ignoring...)\n", argv[0], argv[i]);
             else {
-                s->cipher = true; /* argument -c mowiacy, ze wynik dzialania programu ma zostac dodatkowo zaszyfrowany */
+                s->cipher = true;
                 if(i + 1 != argc) {
                     cipherLen = (int)strlen(argv[i + 1]);
                     if(cipherLen > 4096)
@@ -61,16 +60,10 @@ void analyzeArgs(int argc, char **argv, settings_t *s) {
                             s->cipherKey[j] = (uchar)(argv[i + 1][j]);
                         s->cipherKey[j] = '\0';
                         i++;
-                        setCipher = true;
                     }
                 }
-                if(!setCipher) { /* jezeli szyfr nadal nie jest ustawiony to ustawiamy go na domyslny */
-                    cipherLen = (int)strlen((char *)defaultCipher);
-                    for(j = 0; j < cipherLen; j++)
-                        s->cipherKey[j] = defaultCipher[j];
-                    s->cipherKey[j] = '\0';
-                }
-                fprintf(stderr, "%s: Output encryption has been enabled with cipher: \"%s\"!\n", argv[0], s->cipherKey);
+                setCipher = true;
+                fprintf(stderr, "%s: Output encryption/decryption has been enabled with cipher: \"%s\"!\n", argv[0], s->cipherKey);
             }
         } else if(strcmp(argv[i], "-o0") == 0) { /* brak kompresji */
             if(setCompLevel)

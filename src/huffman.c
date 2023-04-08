@@ -64,6 +64,7 @@ bool huffman(FILE *input, FILE *output, int compLevel, bool cipher, count_t **he
     /* Tworzenie drzewa Huffmana */
     createHuffmanTree(output, head, code, cipher, compLevel, &xor, 0,
     &listC, &buffer, &packPos, cipherKey, &cipherPos, roadBuffer, &roadPos);
+
     /* Po zapisaniu calego slownika do pliku trzeba wyraznie zaznaczyc jego koniec */
     saveBitIntoPack(output, cipher, cipherKey, &cipherPos, &buffer, &packPos, &xor, 1);
     saveBitIntoPack(output, cipher, cipherKey, &cipherPos, &buffer, &packPos, &xor, 1);
@@ -71,7 +72,7 @@ bool huffman(FILE *input, FILE *output, int compLevel, bool cipher, count_t **he
     fprintf(stderr, "List of codes:\n");
     printListCodes(&listC, stderr);
 #endif
-    compressedToFile(input, output, compLevel, cipher, cipherKey, &listC, &xor, &buffer, &packPos);
+    compressedToFile(input, output, compLevel, cipher, cipherKey, &cipherPos, &listC, &xor, &buffer, &packPos);
     
     /* Zwalnianie pamieci */
     freeListCodes(&listC);
