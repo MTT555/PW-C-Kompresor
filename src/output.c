@@ -6,7 +6,7 @@
 #include "huffman.h"
 #include "output.h"
 
-void compressedToFile(FILE *input, FILE *output, int compLevel, bool cipher, uchar *cipherKey, int *cipherPos,
+void compressedToFile(FILE *input, FILE *output, settings_t s, int *cipherPos,
 listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
     /* Deklaracja potrzebnych zmiennych */
     uchar c;
@@ -28,9 +28,9 @@ listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
     for(i = 0; i <= inputEOF; i++) {
         if(i != inputEOF)
             fread(&c, sizeof(char), 1, input);
-        else if((compLevel == 12 && (currentBits == 8 || currentBits == 4)) || (compLevel == 16 && currentBits == 8)) {
+        else if((s.compLevel == 12 && (currentBits == 8 || currentBits == 4)) || (s.compLevel == 16 && currentBits == 8)) {
             c = '\0';
-            if(!(compLevel == 12 && currentBits == 8))
+            if(!(s.compLevel == 12 && currentBits == 8))
                 endingZero = true;
         }
         else
@@ -39,12 +39,12 @@ listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
         currentBits += 8;
         tempCode <<= 8;
         tempCode += (int)c;
-        if(currentBits == compLevel) {
+        if(currentBits == s.compLevel) {
             iterator = (*head);
             while (iterator != NULL) {
                 if(iterator->character == tempCode) {
                     for(j = 0; j < (int)strlen((char *)(iterator->code)); j++)
-                        saveBitIntoPack(output, cipher, cipherKey, cipherPos, buffer, packPos, xor, iterator->code[j] == '1' ? 1 : 0);
+                        saveBitIntoPack(output, s, cipherPos, buffer, packPos, xor, iterator->code[j] == '1' ? 1 : 0);
                     break;
                 }
                 else
@@ -52,14 +52,14 @@ listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
             }
             tempCode = 0;
             currentBits = 0;
-        } else if (currentBits >= compLevel) { /* taki przypadek wystapi jedynie w kompresji 12-bit */
+        } else if (currentBits >= s.compLevel) { /* taki przypadek wystapi jedynie w kompresji 12-bit */
             int temp = tempCode % 16;
             tempCode >>= 4;
             iterator = (*head); /* ustawienie iteratora na poczatek przy kazdym nastepnym symbolu */
             while (iterator != NULL) {
                 if(iterator->character == tempCode) {
                     for(j = 0; j < (int)strlen((char *)(iterator->code)); j++)
-                        saveBitIntoPack(output, cipher, cipherKey, cipherPos, buffer, packPos, xor, iterator->code[j] == '1' ? 1 : 0);
+                        saveBitIntoPack(output, s, cipherPos, buffer, packPos, xor, iterator->code[j] == '1' ? 1 : 0);
                     break;
                 }
                 else
@@ -80,7 +80,7 @@ listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
     else if(*packPos <= 16 && *packPos > 8)
         ending = (uchar)(16 - *packPos);
     for(i = 0; i <= (int)ending + 8; i++) /* dopychamy union packa dodatkowymi zerami, aby zapisac ostatni znak do pliku */
-        saveBitIntoPack(output, cipher, cipherKey, cipherPos, buffer, packPos, xor, 0);
+        saveBitIntoPack(output, s, cipherPos, buffer, packPos, xor, 0);
 #ifdef DEBUG
     outputEOF = ftell(output); /* zapisanie pozycji koncowej */
 #endif
@@ -95,13 +95,13 @@ listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
     */
     fseek(output, 2, SEEK_SET); /* powrot kursora w pliku do znaku F */
     flags = (uchar)(8 | ending); /* zapisanie pozycji koncowej do flag oraz informacji, ze plik jest skompresowany */
-    if(compLevel == 8) /* zapis informacji o poziomie kompresji pliku */
+    if(s.compLevel == 8) /* zapis informacji o poziomie kompresji pliku */
         flags |= (uchar)64; /* (64 == 0b01000000) */
-    else if(compLevel == 12)
+    else if(s.compLevel == 12)
         flags |= (uchar)128; /* (128 == 0b10000000) */
-    else if(compLevel == 16)
+    else if(s.compLevel == 16)
         flags |= (uchar)192; /* (192 == 0b11000000) */
-    if(cipher)
+    if(s.cipher)
         flags |= (uchar)32; /* (32 == 0b00100000) */
     if(endingZero)
         flags |= (uchar)16; /* (16 == 0b00010000) */
@@ -126,12 +126,12 @@ listCodes_t **head, uchar *xor, pack_t *buffer, int *packPos) {
 #endif
 }
 
-void saveBitIntoPack(FILE *output, bool cipher, uchar *cipherKey, int *cipherPos,
+void saveBitIntoPack(FILE *output, settings_t s, int *cipherPos,
 pack_t *buffer, int *packPos, uchar *xor, int bit) {
-    int cipherLen = (int)strlen((char *)cipherKey);
+    int cipherLen = (int)strlen((char *)s.cipherKey);
     if((*packPos) == 16) { /* jezeli bufer jest pelen */
-        if(cipher) { /* jezeli plik ma zostac zaszyfrowany */
-            buffer->chars.out += cipherKey[(*cipherPos) % cipherLen]; /* dokonujemy szyfrowania znaku */
+        if(s.cipher) { /* jezeli plik ma zostac zaszyfrowany */
+            buffer->chars.out += s.cipherKey[(*cipherPos) % cipherLen]; /* dokonujemy szyfrowania znaku */
             (*cipherPos)++;
         }
         fwrite(&(buffer->chars.out), sizeof(char), 1, output); /* wydrukuj znak */

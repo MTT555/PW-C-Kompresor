@@ -17,8 +17,7 @@ Funkcja wykonujaca zapis do pliku skompresowanego tekstu
     pack_t *buffer - union pack uzyty wczesniej do zapisu slownika
     int packPos - pozycja ostatniego zajetego bitu w tym packu
 */
-void compressedToFile(FILE *input, FILE *output, int compLevel, bool cipher,
-    uchar *cipher_key, int *cipherPos, listCodes_t **head, uchar *xor, pack_t *buffer, int *pack_pos);
+void compressedToFile(FILE *input, FILE *output, settings_t s, int *cipherPos, listCodes_t **head, uchar *xor, pack_t *buffer, int *pack_pos);
 
 /**
 Funkcja wykonujaca bitowy zapis znaku na podstawie union pack
@@ -29,7 +28,6 @@ Funkcja wykonujaca bitowy zapis znaku na podstawie union pack
     int *packPos - pozycja ostatniego zajetego bitu w tym union packu
     int bit - wartosc bitu, ktora ma zostac nadana
 */
-void saveBitIntoPack(FILE *output, bool cipher, uchar *cipherKey, int *cipherPos,
-    pack_t *buffer, int *packPos, uchar *xor, int bit);
+void saveBitIntoPack(FILE *output, settings_t s, int *cipherPos, pack_t *buffer, int *packPos, uchar *xor, int bit);
 
 #endif

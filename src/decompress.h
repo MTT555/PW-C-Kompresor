@@ -7,7 +7,7 @@
 #include "utils.h"
 #include "list.h"
 
-/* flag_t - typ sluzacy za przechowywanie ustawien odczytanych z pliku do dekompresji */
+/* flag_t - typ sluzacy do przechowywania ustawien odczytanych z pliku do dekompresji */
 typedef struct {
     int compLevel; /* poziom kompresji */
     bool cipher; /* koniecznosc odszyfrowania */

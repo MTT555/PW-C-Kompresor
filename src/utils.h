@@ -27,6 +27,13 @@ typedef struct {
     uchar cipherKey[4096]; /* klucz szyfrowania */
 } settings_t;
 
+/* buffer_t - typ sluzacy do obslugi buforu danych */
+typedef struct {
+    uchar *buf; /* bufor */
+    int curSize; /* aktualna wielkosc buforu */
+    int pos; /* aktualna pozycja w buforze */
+} buffer_t;
+
 /**
 Funkcja wyswietlajaca pomoc zawierajaca instrukcje do prawidlowej obslugi programu
     FILE *stream - strumien outputu, zazwyczaj stdout lub stderr

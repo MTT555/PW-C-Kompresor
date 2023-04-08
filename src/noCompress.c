@@ -8,11 +8,11 @@ void rewriteFile(FILE *input, FILE *output, int n, settings_t s) {
     int i;
     uchar xor = (uchar)183; /* (183 = 0b10110111) */
     int cipherPos = 0;
-    int cipherLen = (int)strlen((char *)s.cipherKey);
-    uchar *xxxx = (uchar *)"CTXX";
+    int cipherLen = 0;
+    uchar xxxx[4] = "CTXX";
     xxxx[2] = (uchar)40; /* zapalone bity szyfrowania i kompresji (40 == 0b00101000) */
-
     if(s.cipher) {
+        cipherLen = (int)strlen((char *)s.cipherKey);
         fwrite(xxxx, sizeof(char), 4, output);
         for(i = 0; i < n; i++) {
             fread(&c, sizeof(char), 1, input);

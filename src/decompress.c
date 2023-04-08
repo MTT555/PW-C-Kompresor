@@ -21,78 +21,80 @@ bool decompress(FILE *input, FILE *output, settings_t s) {
     uchar c; /* do odczytywania kolejnych znakow */
     uchar *cipherKey = s.cipherKey; /* klucz szyfrowania */
     int cipherPos = 0; /* aktualna pozycja w szyfrze */
-    int cipherLength = (int)strlen((char *)cipherKey); 
+    int cipherLength = (int)strlen((char *)cipherKey); /* dlugosc szyfru */
     mod_t currentMode = dictRoad; /* zmienna przechowujaca aktualny tryb czytania pliku */
-    int bufPos = 0, codeBufPos = 0; /* aktualna pozycja w buforze na odczytane bity oraz w buforze dla kodow */
     int currentBits = 0; /* ilosc aktualnie zajetych bitow (w ramach wsparcia dla dekompresji 12-bit) */
     int tempCode = 0; /* aktualny kod odczytanego symbolu (w ramach wsparcia dla dekompresji 12-bit) */
-    int curBufSize = 8192; /* aktualna wielkosc buforu na odczytane bity */
-    int curCodeBufSize = 8192; /* aktualna wielkosc buforu dla kodow przejsc po drzewie */
-    flag_t f; /* zmienna na odczytanie flag */
+    flag_t defFlag, allFlag; /* zmienna na odczytanie flag */
+    buffer_t buf, codeBuf; /* przechowywanie buforu */
     int inputEOF; /* zmienne zawierajace pozycje koncowe pliku wejsciowego i wyjsciowego */
 #ifdef DEBUG
     int outputEOF;
 #endif
-
     /* Deklaracja wszystkich zmiennych dynamicznych, odpowiednia alokacja pamieci i inicjacja */
     listCodes_t *list = NULL; /* lista na przechowanie odczytanego slownika */
     dnode_t *head = NULL, *iterator = NULL; /* pomocnicze drzewo dnode oraz pseudoiterator po nim */
-    uchar *buffer = NULL; /* bufor na odczytane bity */
-    uchar *codeBuf = NULL; /* bufor dla kodow przejsc po drzewie */
-    if(!tryMalloc((void **)&head, sizeof(dnode_t)) || !tryMalloc((void **)&buffer, sizeof(curBufSize * sizeof(char)))
-        || !tryMalloc((void **)&codeBuf, sizeof(curCodeBufSize * sizeof(char))))
+    fseek(input, 0, SEEK_END); /* odczytanie, gdzie jest koniec pliku */
+    inputEOF = ftell(input);
+    buf.buf = NULL; /* bufor na odczytane bity */
+    codeBuf.buf = NULL; /* bufor dla kodow przejsc po drzewie */
+    buf.curSize = 8192; /* aktualna wielkosc buforu na odczytane bity */
+    buf.pos = 0; /* aktualna pozycja w buforze na odczytane bity */
+    codeBuf.curSize = 8192; /* aktualna wielkosc buforu dla kodow przejsc po drzewie */
+    codeBuf.pos = 0; /* aktualna pozycja w buforze dla kodow */
+    if(!tryMalloc((void **)&head, sizeof(dnode_t)) || !tryMalloc((void **)(&(buf.buf)), sizeof(buf.curSize * sizeof(char)))
+        || !tryMalloc((void **)(&(codeBuf.buf)), sizeof(codeBuf.curSize * sizeof(char))))
         return false;
     iterator = head;
     head->prev = NULL;
     head->left = NULL;
     head->right = NULL;
-    fseek(input, 0, SEEK_END); /* odczytanie, gdzie jest koniec pliku */
-    inputEOF = ftell(input);
 
     /* Odczytywanie flag */
     fseek(input, 2, SEEK_SET); /* ustawienie kursora na trzeci znak zawierajacy flagi */
     fread(&c, sizeof(char), 1, input);
-    f.compLevel = (c & 192) >> 6 ? 4 * (((c & 192) >> 6) + 1) : 0; /* odczytanie poziomu kompresji (192 == 0b11000000) */
-    f.cipher = c & 32 ? true : false; /* odczytanie szyfrowania (32 == 0b00100000) */
-    f.redundantZero = c & 16 ? true : false; /* sprawdzenie, czy konieczne bedzie odlaczenie nadmiarowego koncowego znaku '\0' (16 == 0b00010000) */
-    f.redundantBits = c & 7; /* odczytanie ilosci nadmiarowych bitow konczacych (7 == 0b00000111) */
+    allFlag.compLevel = (c & 192) >> 6 ? 4 * (((c & 192) >> 6) + 1) : 0; /* odczytanie poziomu kompresji (192 == 0b11000000) */
+    allFlag.cipher = c & 32 ? true : false; /* odczytanie szyfrowania (32 == 0b00100000) */
+    allFlag.redundantZero = c & 16 ? true : false; /* sprawdzenie, czy konieczne bedzie odlaczenie nadmiarowego koncowego znaku '\0' (16 == 0b00010000) */
+    allFlag.redundantBits = c & 7; /* odczytanie ilosci nadmiarowych bitow konczacych (7 == 0b00000111) */
+    defFlag.compLevel = allFlag.compLevel;
+    defFlag.cipher = allFlag.cipher;
+    defFlag.redundantZero = false;
+    defFlag.redundantBits = 0;
     fseek(input, 4, SEEK_SET);
 #ifdef DEBUG
     /* wyswietlenie odczytanych wartosci na stderr */
     fprintf(stderr, "The following values have been read: "
         "compression level: %d, encrypted: %s, redundant ending bits: %d, redundant '\\0' symbol: %s\n",
-        f.compLevel, f.cipher ? "true" : "false", f.redundantBits, f.redundantZero ? "true" : "false");
+        allFlag.compLevel, allFlag.cipher ? "true" : "false", allFlag.redundantBits, allFlag.redundantZero ? "true" : "false");
 #endif
 
     /* Przypadek pliku nieskompresowanego, ale zaszyfrowanego */
-    if(!f.compLevel && f.cipher) {
+    if(!allFlag.compLevel && allFlag.cipher) {
         decryptFile(input, output, inputEOF, cipherKey);
         return true;
     }
-
     /* Analiza pliku */
     for(i = 4; i < inputEOF; i++) {
         fread(&c, sizeof(char), 1, input);
-        if(f.cipher) { /* odszyfrowanie */
+        if(allFlag.cipher) { /* odszyfrowanie */
             c -= cipherKey[cipherPos % cipherLength];
             cipherPos++;
         }
         if(i != inputEOF - 1) /* analizowanie kazdego bitu przy pomocy funkcji */
-            if(!analyzeBits(output, c, f.compLevel, &list, 0, false, &iterator, &currentMode,
-                buffer, &curBufSize, codeBuf, &curCodeBufSize, &bufPos, &codeBufPos, &currentBits, &tempCode)) {
+            if(!analyzeBits(output, c, defFlag, &list, &iterator, &currentMode, &buf, &codeBuf, &currentBits, &tempCode)) {
                 freeListCodes(&list);
                 freeDTree(head);
-                free(buffer);
-                free(codeBuf);
+                free(buf.buf);
+                free(codeBuf.buf);
                 return false;
             }
     }
-    if(!analyzeBits(output, c, f.compLevel, &list, f.redundantBits, f.redundantZero, &iterator, &currentMode,
-        buffer, &curBufSize, codeBuf, &curCodeBufSize, &bufPos, &codeBufPos, &currentBits, &tempCode)) {
+    if(!analyzeBits(output, c, allFlag, &list, &iterator, &currentMode, &buf, &codeBuf, &currentBits, &tempCode)) {
         freeListCodes(&list);
         freeDTree(head);
-        free(buffer);
-        free(codeBuf);
+        free(buf.buf);
+        free(codeBuf.buf);
         return false;
     }
     
@@ -110,8 +112,8 @@ bool decompress(FILE *input, FILE *output, settings_t s) {
     /* Zwalnianie pamieci */
     freeListCodes(&list);
     freeDTree(head);
-    free(buffer);
-    free(codeBuf);
+    free(buf.buf);
+    free(codeBuf.buf);
     return true;
 }
 

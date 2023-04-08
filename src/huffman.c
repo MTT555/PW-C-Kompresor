@@ -7,28 +7,31 @@
 #include "output.h"
 #include "alloc.h"
 
-bool huffman(FILE *input, FILE *output, int compLevel, bool cipher, count_t **head) {
+bool huffman(FILE *input, FILE *output, settings_t s, count_t **head) {
+    /* Deklaracja potrzebnych zmiennych */
     char *xxxx = "CTFX"; 
     uchar xor = (uchar)183; /* ustawienie poczatkowej wartosci sumy kontrolnej (183 = 0b10110111) */
     pack_t buffer; /* typ pomocniczny do zapisu bitowego z output.h */
     int packPos = 0; /* zmienna zapisujaca przejscia po drzewie od ostatniego zapisu znaku */
-    uchar *cipherKey = (uchar *)"Politechnika_Warszawska"; /* klucz szyfrowania */
     int cipherPos = 0; /* aktualna pozycja w tym szyfrze */
     count_t *nodeptr1 = NULL, *nodeptr2 = NULL, *node1 = NULL, *node2 = NULL;
     int *code = NULL; /* tu przechowujemy poszczegolne kody znakow */
     listCodes_t *listC = NULL; /* lista do przechowywania kodow znakow */
     count_t *head_ptr = (*head);
-    int roadBufSize = 8192; /* aktualna wielkosc buferu na droge */
-    uchar *roadBuffer = NULL; /* tymczasowe przechowywanie drogi przed zapisem do pliku */
-    int roadPos = 0; /* ilosc aktualnie zapisanych bitow na droge */
+    
+    /* Obsluga buforu */
+    buffer_t roadBuf; /* tymczasowe przechowywanie drogi przed zapisem do pliku */
+    roadBuf.buf = NULL;
+    roadBuf.curSize = 8192; /* aktualna wielkosc buferu na droge */
+    roadBuf.pos = 0; /* ilosc aktualnie zapisanych bitow na droge */
 
-    if(!tryMalloc((void **)&code, (1 << (compLevel + 1)) * sizeof(int))
-        || !tryMalloc((void **)&roadBuffer, roadBufSize * sizeof(char)))
+    if(!tryMalloc((void **)&code, (1 << (s.compLevel + 1)) * sizeof(int))
+        || !tryMalloc((void **)(&(roadBuf.buf)), roadBuf.curSize * sizeof(char)))
         return false;
 
     buffer.whole = 0; /* czyszcze całosc unii pack_t */
-    roadBuffer[roadPos++] = 0; /* zapelnienie dwoch pierwszych bitow, ktore za kazdym nastepnym razem beda pomijane */
-    roadBuffer[roadPos++] = 0;
+    roadBuf.buf[roadBuf.pos++] = 0; /* zapelnienie dwoch pierwszych bitow, ktore za kazdym nastepnym razem beda pomijane */
+    roadBuf.buf[roadBuf.pos++] = 0;
 
     /* Zajecie pierwszych 4 bajtow outputu na pozniejsze oznaczenia pliku (wiecej info na koncu tego pliku) */
     fwrite(xxxx, sizeof(char), 4, output);
@@ -62,28 +65,27 @@ bool huffman(FILE *input, FILE *output, int compLevel, bool cipher, count_t **he
     }
 
     /* Tworzenie drzewa Huffmana */
-    createHuffmanTree(output, head, code, cipher, compLevel, &xor, 0,
-    &listC, &buffer, &packPos, cipherKey, &cipherPos, roadBuffer, &roadPos, &roadBufSize);
+    createHuffmanTree(output, head, code, s, &xor, 0, &listC, &buffer, &packPos, &cipherPos, &roadBuf);
 
     /* Po zapisaniu calego slownika do pliku trzeba wyraznie zaznaczyc jego koniec */
-    saveBitIntoPack(output, cipher, cipherKey, &cipherPos, &buffer, &packPos, &xor, 1);
-    saveBitIntoPack(output, cipher, cipherKey, &cipherPos, &buffer, &packPos, &xor, 1);
+    saveBitIntoPack(output, s, &cipherPos, &buffer, &packPos, &xor, 1);
+    saveBitIntoPack(output, s, &cipherPos, &buffer, &packPos, &xor, 1);
 #ifdef DEBUG
     fprintf(stderr, "List of codes:\n");
     printListCodes(&listC, stderr);
 #endif
-    compressedToFile(input, output, compLevel, cipher, cipherKey, &cipherPos, &listC, &xor, &buffer, &packPos);
+    compressedToFile(input, output, s, &cipherPos, &listC, &xor, &buffer, &packPos);
     
     /* Zwalnianie pamieci */
     freeListCodes(&listC);
     freeList(head_ptr);
-    free(roadBuffer);
+    free(roadBuf.buf);
     free(code);
     return true;
 }
 
-bool addToTheListCodes(FILE *output, int compLevel, bool cipher, listCodes_t **listC, pack_t *buffer, int *packPos,
-int character, int *code, int length, uchar *xor, uchar *cipherKey, int *cipherPos, uchar *roadBuffer, int *roadPos, int *roadBufSize) {
+bool addToTheListCodes(FILE *output, settings_t s, listCodes_t **listC, pack_t *buffer, int *packPos,
+int character, int *code, int length, uchar *xor, int *cipherPos, buffer_t *roadBuf) {
     int i;
     listCodes_t *new = NULL;
     if(!tryMalloc((void **)&new, sizeof(listCodes_t)))
@@ -101,58 +103,55 @@ int character, int *code, int length, uchar *xor, uchar *cipherKey, int *cipherP
     (*listC) = new;
 
     /* zapis nowego znaku w slowniku do bufera */
-    for(i = 2; i < (*roadPos) - 2; i++) /* i = 2, poniewaz 2 pierwsze symbole sa zawsze jednoznacznie przewidywalne */
-        saveBitIntoPack(output, cipher, cipherKey, cipherPos, buffer, packPos, xor, roadBuffer[i] - '0');
-    *roadPos = 0; /* zerowanie pozycji */
+    for(i = 2; i < roadBuf->pos - 2; i++) /* i = 2, poniewaz 2 pierwsze symbole sa zawsze jednoznacznie przewidywalne */
+        saveBitIntoPack(output, s, cipherPos, buffer, packPos, xor, roadBuf->buf[i] - '0');
+    roadBuf->pos = 0; /* zerowanie pozycji */
     /* zapisanie 01 na przejscie w dol i napotkanie liscia tj. slowa */
-    saveBitIntoPack(output, cipher, cipherKey, cipherPos, buffer, packPos, xor, 0);
-    saveBitIntoPack(output, cipher, cipherKey, cipherPos, buffer, packPos, xor, 1);
-    for(i = 0; i < compLevel; i++)
-        saveBitIntoPack(output, cipher, cipherKey, cipherPos, buffer, packPos, xor, (new->character / (1 << (compLevel - 1 - i))) % 2);
+    saveBitIntoPack(output, s, cipherPos, buffer, packPos, xor, 0);
+    saveBitIntoPack(output, s, cipherPos, buffer, packPos, xor, 1);
+    for(i = 0; i < s.compLevel; i++)
+        saveBitIntoPack(output, s, cipherPos, buffer, packPos, xor, (new->character / (1 << (s.compLevel - 1 - i))) % 2);
     return true;
 }
 
-bool createHuffmanTree(FILE *output, count_t **head, int *code, bool cipher, int compLevel, uchar *xor, int top, 
-listCodes_t **listC, pack_t *buffer, int *packPos, uchar *cipherKey, int *cipherPos, uchar *roadBuffer, int *roadPos, int *roadBufSize) {
+bool createHuffmanTree(FILE *output, count_t **head, int *code, settings_t s, uchar *xor, int top, 
+listCodes_t **listC, pack_t *buffer, int *packPos, int *cipherPos, buffer_t *roadBuf) {
     if ((*head)->left) {
         code[top] = 0;
-        if(*roadPos == *roadBufSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
-            if(!tryRealloc((void **)&roadBuffer, 2 * (*roadBufSize) * sizeof(char)))
+        if(roadBuf->pos == roadBuf->curSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
+            if(!tryRealloc((void **)(&(roadBuf->buf)), 2 * (roadBuf->curSize) * sizeof(char)))
                 return false;
-            *roadBufSize *= 2;
+            roadBuf->curSize *= 2;
         }
-        roadBuffer[(*roadPos)++] = '0'; /* zapisanie dwoch zer na przejscie w dol */
-        roadBuffer[(*roadPos)++] = '0';
-        if(!createHuffmanTree(output, &((*head)->left), code, cipher, compLevel, xor,
-        top + 1, listC, buffer, packPos, cipherKey, cipherPos, roadBuffer, roadPos, roadBufSize))
+        roadBuf->buf[(roadBuf->pos)++] = '0'; /* zapisanie dwoch zer na przejscie w dol */
+        roadBuf->buf[(roadBuf->pos)++] = '0';
+        if(!createHuffmanTree(output, &((*head)->left), code, s, xor, top + 1, listC, buffer, packPos, cipherPos, roadBuf))
             return false;
     }
     if ((*head)->right) {
         code[top] = 1;
-        if(*roadPos == *roadBufSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
-            if(!tryRealloc((void **)&roadBuffer, 2 * (*roadBufSize) * sizeof(char)))
+        if(roadBuf->pos == roadBuf->curSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
+            if(!tryRealloc((void **)(&(roadBuf->buf)), 2 * (roadBuf->curSize) * sizeof(char)))
                 return false;
-            *roadBufSize *= 2;
+            roadBuf->curSize *= 2;
         }
-        roadBuffer[(*roadPos)++] = '0'; /* zapisanie dwoch zer na przejscie w dol */
-        roadBuffer[(*roadPos)++] = '0';
-        if(!createHuffmanTree(output, &((*head)->right), code, cipher, compLevel, xor,
-        top + 1, listC, buffer, packPos, cipherKey, cipherPos, roadBuffer, roadPos, roadBufSize))
+        roadBuf->buf[(roadBuf->pos)++] = '0'; /* zapisanie dwoch zer na przejscie w dol */
+        roadBuf->buf[(roadBuf->pos)++] = '0';
+        if(!createHuffmanTree(output, &((*head)->right), code, s, xor, top + 1, listC, buffer, packPos, cipherPos, roadBuf))
             return false;
     }
-    if (!((*head)->left) && !((*head)->right)) { /* jezeli dostalismy sie w koncu do liscia */
-        if(!addToTheListCodes(output, compLevel, cipher, listC, buffer, packPos, (*head)->character,
-        code, top, xor, cipherKey, cipherPos, roadBuffer, roadPos, roadBufSize)) /* dodajemy kazdy kod do listy */
+    if (!((*head)->left) && !((*head)->right)) { /* jezeli dostalismy sie w koncu do liscia, probujemy dodac kazdy kod do listy */
+        if(!addToTheListCodes(output, s, listC, buffer, packPos, (*head)->character, code, top, xor, cipherPos, roadBuf))
             return false;
     }
     /* wyjscie do gory znajduje sie na koncu tej funkcji, poniewaz jest to funkcja rekurencyjna */
-    if(*roadPos == *roadBufSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
-        if(!tryRealloc((void **)&roadBuffer, 2 * (*roadBufSize) * sizeof(char)))
+    if(roadBuf->pos == roadBuf->curSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
+        if(!tryRealloc((void **)(&(roadBuf->buf)), 2 * (roadBuf->curSize) * sizeof(char)))
             return false;
-        *roadBufSize *= 2;
+        roadBuf->curSize *= 2;
     }
-    roadBuffer[(*roadPos)++] = '1';
-    roadBuffer[(*roadPos)++] = '0';
+    roadBuf->buf[(roadBuf->pos)++] = '1';
+    roadBuf->buf[(roadBuf->pos)++] = '0';
     return true;
 }
 

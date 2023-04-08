@@ -29,7 +29,9 @@ Program w języku C realizujący bezstratną kompresję oraz dekompresję plikó
   > `./compare <file1> <file2>` 
 * **encoding.sh** -> skrypt sprawdzający na wiele sposobów kodowanie danego pliku *(może wymagać instalacji dodatkowych pakietów)*
 * **Makefile** -> zawiera komendy do standardowej kompilacji oraz przykładowe testy programu
-* **README.md** - właśnie go czytasz :)
+* **Readme.md** - właśnie go czytasz :)
+* **Specyfikacja_funkcjonalna.tex**
+* **Specyfikacja_implementacyjna.tex**
 
 W celu wyświetlenia prawidłowego sposobu uruchamiania programu głównego można go po prostu uruchomić bez podawania żadnych argumentów wejściowych (bądź jedynie z argumentem -h).
 

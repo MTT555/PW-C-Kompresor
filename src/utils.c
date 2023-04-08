@@ -4,38 +4,39 @@
 #include "utils.h"
 
 void help(FILE *stream) {
-    char help_message1[] = "\n---------------------------------- HUFFMAN COMPRESSOR HELPBOX ----------------------------------\n\n"
-                           "Compressor & decompressor made by Adrian Chmiel & Mateusz Tyl\n\n"
-                           "Usage: [program_name] [input_file] [output_file] [arguments]\n\n"
-                           "program_name - location of the program itself\n"
-                           "input_file - location of the file that contains the string that is supposed to be compressed\n"
-                           "output_file - location of the file that is supposed to save the result of the program\n";
-    char help_message2[] = "arguments - arguments that change the settings and behaviour of the program\n\n"
-                           "[input_file] and [output_file] fields are mandatory!\n"
-                           "[arguments] field is optional and lets you provide more than one argument\n\n"
-                           "Possible arguments:\n"
-                           "-h - displays this help message\n"
-                           "-c - encrypts the entire output\n"
-                           "-x - force compression\n"
-                           "-d - force decompression\n\n"
-                           "Related to compression level (if provided, program behaviour will be automatically changed to \"force compression\"):\n";
-    char help_message3[] = "-o0 - input string will not be compressed at all (default)\n"
-                           "-o1 - input string will go under 8-bit Huffmann compression\n"
-                           "-o2 - input string will go under 12-bit Huffmann compression\n"
-                           "-o3 - input string will go under 16-bit Huffmann compression\n\n"
-                           "You should not provide more than one of the possible compression levels!\n"
-                           "Arguments -x and -d are mutually exclusive! Both of them should not be provided simultaneously!\n";
-    char help_message4[] = "In case more than a single value is given, only the first one will be valid!\n\n"
-                           "Error codes:\n"
-                           "0 - Program finished successfully\n"
-                           "1 - Too few arguments have been provided\n"
-                           "2 - Input file could not be opened\n"
-                           "3 - Output file could not be opened\n"
-                           "4 - Input file is empty\n"
-                           "5 - Decompression has been forced but the input file could not be decompressed\n"
-                           "6 - Memory allocation/reallocation failure!\n\n"
-                           "------------------------------------------------------------------------------------------------\n\n";
-    fprintf(stream, "%s%s%s%s", help_message1, help_message2, help_message3, help_message4);
+    char *helpMsg1 = "\n---------------------------------- HUFFMAN COMPRESSOR HELPBOX ----------------------------------\n\n"
+                     "Compressor & decompressor made by Adrian Chmiel & Mateusz Tyl\n\n"
+                     "Usage: [program_name] [input_file] [output_file] [arguments]\n\n"
+                     "program_name - location of the program itself\n"
+                     "input_file - location of the file that contains the string that is supposed to be compressed\n"
+                     "output_file - location of the file that is supposed to save the result of the program\n";
+    char *helpMsg2 = "arguments - arguments that change the settings and behaviour of the program\n\n"
+                     "[input_file] and [output_file] fields are mandatory!\n"
+                     "[arguments] field is optional and lets you provide more than one argument\n\n"
+                     "Possible arguments:\n"
+                     "-h - displays this help message\n"
+                     "-x - force compression\n"
+                     "-d - force decompression\n\n"
+                     "-c \"cipher\" - encrypts/decrypts the entire output using the given cipher\n"
+                     "(if not provided, default cipher \"Politechnika_Warszawska\" is used)\n\n";
+    char *helpMsg3 = "Related to compression level (if provided, program behaviour will be automatically changed to \"force compression\"):\n"
+                     "-o0 - input string will not be compressed at all (default)\n"
+                     "-o1 - input string will go under 8-bit Huffmann compression\n"
+                     "-o2 - input string will go under 12-bit Huffmann compression\n"
+                     "-o3 - input string will go under 16-bit Huffmann compression\n\n"
+                     "You should not provide more than one of the possible compression levels!\n";
+    char *helpMsg4 = "Arguments -x and -d are mutually exclusive! Both of them should not be provided simultaneously!\n"
+                     "In case more than a single value is given, only the first one will be valid!\n\n"
+                     "Error codes:\n"
+                     "0 - Program finished successfully\n"
+                     "1 - Too few arguments have been provided\n"
+                     "2 - Input file could not be opened\n"
+                     "3 - Output file could not be opened\n"
+                     "4 - Input file is empty\n"
+                     "5 - Decompression has been forced but the input file could not be decompressed\n"
+                     "6 - Memory allocation/reallocation failure!\n\n";
+    char *helpMsg5 = "------------------------------------------------------------------------------------------------\n\n";
+    fprintf(stream, "%s%s%s%s%s", helpMsg1, helpMsg2, helpMsg3, helpMsg4, helpMsg5);
 }
 
 void analyzeArgs(int argc, char **argv, settings_t *s) {

@@ -80,8 +80,8 @@ int main(int argc, char **argv) {
 	}
 
 	if(s.comp) { /* jezeli ma zostac wykonana kompresja */
-		if(s.compLevel == 0)
-			rewriteFile(in, out, inputEOF, s);
+		if(s.compLevel == 0){
+			rewriteFile(in, out, inputEOF, s);}
 		else {
 			/* wczytuje i zliczam znak po znaku */
 			for(i = 0; i <= inputEOF; i++) {
@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
 			showList(&head, stderr);
 #endif
 			fseek(in, 0, SEEK_SET); /* ustawienie kursora w pliku z powrotem na jego poczatek */
-			if(!huffman(in, out, s.compLevel, s.cipher, &head)) {
+			if(!huffman(in, out, s, &head)) {
 				fprintf(stderr, "%s: Decompression memory failure!\n", argv[0]);
 				freeRecursively(head);
 				free(head);

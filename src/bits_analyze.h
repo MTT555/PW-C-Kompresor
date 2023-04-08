@@ -1,10 +1,12 @@
 #ifndef BITSANALYZE_H
 #define BITSANALYZE_H
 
+#include <stdlib.h>
 #include "huffman.h"
 #include "dtree.h"
 #include "list.h"
 #include "utils.h"
+#include "decompress.h"
 
 /* Zmienna przechowujaca aktualny tryb analizy aktualnych bitow */
 typedef enum {
@@ -32,10 +34,8 @@ Funkcja do analizy kolejnych bitow danego chara z pliku skompresowanego
     int *currentBits - ilosc aktualnie zajetych bitow (w ramach wsparcia dla dekompresji 12-bit)
     int *tempCode - aktualny kod odczytanego symbolu (w ramach wsparcia dla dekompresji 12-bit)
 */
-bool analyzeBits(FILE *output, uchar c, int compLevel, listCodes_t **list,
-    short redundantBits, bool redundantZero, dnode_t **iterator, mod_t *mode,
-    uchar *buffer, int *curBufSize, uchar *codeBuf, int *curCodeBufSize,
-    int *bufPos, int *codeBufPos, int *currentBits, int *tempCode);
+bool analyzeBits(FILE *output, uchar c, flag_t f, listCodes_t **list, dnode_t **iterator,
+    mod_t *mode, buffer_t *buf, buffer_t *codeBuf, int *currentBits, int *tempCode);
 
 /**
 Funkcja zwracajaca pozadany bit z danego chara
