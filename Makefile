@@ -21,10 +21,6 @@ clean:
 	rm -f compressor generate compare debug out comp decomp
 	rm -fdr cmake_build/*
 
-valgrind:
-	cc -o valgrind src/*.c -Wall -pedantic
-	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./valgrind out decomp 2>valogs
-
 # Przypadek, gdy plik wejsciowy jest pusty
 test1: compressor
 	./$< test/empty.in out || [ $$? -eq 4 ]

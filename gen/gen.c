@@ -7,6 +7,10 @@
 Instrukcja, jak uzywac
     cc gen.c
     ./a.out [nazwa_pliku_wyjsciowego] [ilosc znakow] [ilosc roznych znakow, ktore moga wystapic w outpucie] [seed]
+Zwraca:
+    0 - generowanie testu pomyslne
+    1 - nieprawidlowa ilosc argumentow wejsciowych
+    2 - nieudana proba otwarcia pliku
 */
 
 int main(int argc, char **argv) {
@@ -16,14 +20,14 @@ int main(int argc, char **argv) {
     
     if(!(argc == 4 || argc == 5)) {
         fprintf(stderr, "Too few/too many arguments! (argc == %d != 2)\n", argc);
-        return -1;
+        return 1;
     }
     
     strcat(fileName, argv[1]);
     out = fopen(fileName, "wb");
     if(out == NULL) {
         fprintf(stderr, "File could not be opened!\n");
-        return -2;
+        return 2;
     }
 
     n = atoi(argv[2]);
