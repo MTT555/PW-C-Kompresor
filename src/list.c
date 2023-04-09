@@ -7,7 +7,7 @@
 bool addToListCodes(listCodes_t **list, int character, uchar *code) {
     listCodes_t *new = NULL;
     if(!tryMalloc((void **)&new, sizeof(listCodes_t))) /* przy nieudanej probie alokacji */
-		return true; /* zwracamy NULL */
+		return false; /* zwracamy false */
     new->character = character;
     new->code = NULL;
     if(!tryMalloc((void **)(&(new->code)), sizeof(char) * (strlen((char *)code) + 1)))

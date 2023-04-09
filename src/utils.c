@@ -18,8 +18,10 @@ void help(FILE *stream) {
                      "-x - force compression\n"
                      "-d - force decompression\n\n"
                      "-c \"cipher\" - encrypts/decrypts the entire output using the given cipher (max length: 4096)\n"
-                     "(if not provided, default cipher \"Politechnika_Warszawska\" is used)\n\n";
-    char *helpMsg3 = "Related to compression level (if provided, program behaviour will be automatically changed to \"force compression\"):\n"
+                     "If no custom cipher is provided, \"Politechnika_Warszawska\" is used by default)\n";
+    char *helpMsg3 = "Important! If the cipher used during compression doesn't match with the one used during decompression,\n"
+                     "the output will be highly inaccurate!\n\n"
+                     "Related to compression level (if provided, program behaviour will be automatically changed to \"force compression\"):\n"
                      "-o0 - input string will not be compressed at all (default)\n"
                      "-o1 - input string will go under 8-bit Huffmann compression\n"
                      "-o2 - input string will go under 12-bit Huffmann compression\n"

@@ -49,15 +49,25 @@ Funkcja zamieniajaca ze soba wartosci dwoch danych elementow listy
 void swap(count_t *ptr1, count_t *ptr2);
 
 /**
-Funkcja zwalniajaca pamiec z wszystkich elementow listy
-	count_t **head - poczatek listy
+Funkcja zapisujaca wskazniki wszystkich elementow z listy
+	count_t *head - poczatek listy
+	count_t **frPtrs - tablica do ktorej zapisujemy wskazniki
+	int *frPos - ilosc zapisanych juz wskaznikow
 */
-void freeList(count_t *head);
+void savePtrsFromList(count_t *head, count_t **frPtrs, int *frPos);
 
 /**
-Funkcja rekurencyjnie zwalniajaca pamiec z wszystkich synow danego elementu
-	count_t *head - dany element
+Funkcja rekurencyjnie zapisujaca wskazniki do wszystkich synow danego elementu bez powtorzen
+	count_t *head - poczatek listy
+	count_t **frPtrs - tablica do ktorej zapisujemy wskazniki
+	int *frPos - ilosc zapisanych juz wskaznikow
 */
-void freeRecursively(count_t *head);
+void savePtrsRecursively(count_t *head, count_t **frPtrs, int *frPos);
+
+/**
+Zwalnia pamiec z listy characterow i ich kodow w tradycyjny sposob
+	count_t *head - glowa listy, z ktorej chcemy zwolnic pamiec
+*/
+void freeList(count_t *head);
 
 #endif

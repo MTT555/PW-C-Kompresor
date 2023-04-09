@@ -3,7 +3,7 @@
 
 all: compressor debug generate compare
 
-test: test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11 test12 test13 test14
+test: test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11 test12 test13 test14 clean
 
 compressor:
 	cc -o $@ src/*.c -ansi -pedantic -Wall
@@ -17,14 +17,13 @@ generate:
 compare:
 	cc -o $@ compare.c -ansi -pedantic -Wall
 
-valgrind:
-	cc -o valgrind src/*.c -Wall -pedantic -DDEBUG
-	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./valgrind test/1.in out >valogs 2>logs
-
 clean:
 	rm -f compressor generate compare debug out comp decomp
 	rm -fdr cmake_build/*
-	rm -f valgrind
+
+valgrind:
+	cc -o valgrind src/*.c -Wall -pedantic
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./valgrind out decomp 2>valogs
 
 # Przypadek, gdy plik wejsciowy jest pusty
 test1: compressor
@@ -114,12 +113,3 @@ test14: compressor
 	./$< comp decomp
 	cmp test/ala.in decomp
 	@echo "--- Test 14 passed successfully! ---"
-
-ttmp: debug
-	./$< test/ala.in comp -o1 -c
-	@echo ""
-	@echo "--- DECOMPRESSION ---"
-	@echo ""
-	./$< comp decomp
-	cmp test/ala.in decomp
-	@echo "--- Test TEMP passed successfully! ---"

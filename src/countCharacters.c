@@ -65,37 +65,45 @@ void swap(count_t *ptr1, count_t *ptr2) {
 	ptr2->character = temp_c;
 }	
 
-/**
-Funkcja zwalniajaca pamiec z wszystkich elementow listy
-	count_t **head - poczatek listy
-*/
-void freeList(count_t *head) {
-	int i, n = 0;
-	count_t *toFree[65535];
-	count_t *iterator = head;
+void savePtrsFromList(count_t *head, count_t **frPtrs, int *frPos) {
+	count_t *iterator = head, *temp = NULL;
 	while (iterator != NULL) {
-		toFree[n] = iterator;
+		temp = iterator;
 		iterator = iterator->next;
-		n++;
-	}
-	for(i = 0; i < n; i++) {
-		freeRecursively(toFree[i]);
+		savePtrsRecursively(temp, frPtrs, frPos);
 	}
 }
 
-/**
-Funkcja rekurencyjnie zwalniajaca pamiec z wszystkich synow danego elementu
-	count_t *head - dany element
-*/
-void freeRecursively(count_t *head) {
-	if(head != NULL) {
+void savePtrsRecursively(count_t *head, count_t **frPtrs, int *frPos) {
+	int i;
+	bool dontfree = false;
+	if(head != NULL) { /* rekurencyjnie odpalamy funkcje na synach */
 		if(head->left != NULL) {
-			free(head->left);
+			savePtrsRecursively(head->left, frPtrs, frPos);
 			head->left = NULL;
 		}
 		if(head->right != NULL) {
-			free(head->right);
+			savePtrsRecursively(head->right, frPtrs, frPos);
 			head->right = NULL;
 		}
+
+		for(i = 0; i < *frPos; i++)
+			if(frPtrs[i] == head) { /* jezeli wskaznik juz zapisany w tablicy */
+				dontfree = true; /* zapobiegamy jego ponownemu zapisowi */
+				break;
+			}
+		if(!dontfree) { /* jezeli niezapisany to zapisujemy */
+			frPtrs[*frPos] = head;
+			(*frPos)++;
+		}
+	}
+}
+
+void freeList(count_t *head) {
+	count_t *iterator = head, *temp = NULL;
+	while (iterator != NULL) {
+		temp = iterator;
+		iterator = iterator->next;
+		free(temp);
 	}
 }

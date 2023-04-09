@@ -17,6 +17,8 @@ bool huffman(FILE *input, FILE *output, settings_t s, count_t **head) {
     int *code = NULL; /* tu przechowujemy poszczegolne kody znakow */
     listCodes_t *listC = NULL; /* lista do przechowywania kodow znakow */
     count_t *head_ptr = (*head);
+    count_t *frPtrs[1 << 17];
+    int i, frPtrsTabPos = 0;
     
     /* Obsluga buforu */
     buffer_t roadBuf; /* tymczasowe przechowywanie drogi przed zapisem do pliku */
@@ -25,10 +27,10 @@ bool huffman(FILE *input, FILE *output, settings_t s, count_t **head) {
     roadBuf.pos = 0; /* ilosc aktualnie zapisanych bitow na droge */
 
     if(!tryMalloc((void **)&code, (1 << (s.compLevel + 1)) * sizeof(int))
-        || !tryMalloc((void **)(&(roadBuf.buf)), roadBuf.curSize * sizeof(char)))
+         || !tryMalloc((void **)(&(roadBuf.buf)), roadBuf.curSize * sizeof(char)))
         return false;
 
-    buffer.whole = 0; /* czyszcze całosc unii pack_t */
+    buffer.whole = 0; /* czyszcze calosc unii pack_t */
     roadBuf.buf[roadBuf.pos++] = 0; /* zapelnienie dwoch pierwszych bitow, ktore za kazdym nastepnym razem beda pomijane */
     roadBuf.buf[roadBuf.pos++] = 0;
 
@@ -44,8 +46,11 @@ bool huffman(FILE *input, FILE *output, settings_t s, count_t **head) {
         /* usuwamy te dwa elementy z listy */
         (*head) = node2->next;
         /* budujemy nowy wezel zlozony z tych dwoch elementow */
-        if(!tryMalloc((void **)&nodeptr1, sizeof(count_t)))
+        if(!tryMalloc((void **)&nodeptr1, sizeof(count_t))) {
+            free(roadBuf.buf); /* zwalnianie zaalokowanych juz elementow przy nieudanej alokacji nowego wezla*/
+            free(code);
             return false;
+        }
         nodeptr1->left = node1;
         nodeptr1->right = node2;
         nodeptr1->next = NULL;
@@ -55,7 +60,7 @@ bool huffman(FILE *input, FILE *output, settings_t s, count_t **head) {
             nodeptr1->next = (*head);
             (*head) = nodeptr1;
             continue;
-        }
+        } 
         nodeptr2 = (*head);
         while (nodeptr2->next && (nodeptr1->amount > nodeptr2->next->amount))
             nodeptr2 = nodeptr2->next;
@@ -65,8 +70,10 @@ bool huffman(FILE *input, FILE *output, settings_t s, count_t **head) {
 
     /* Tworzenie drzewa Huffmana */
     if(!createHuffmanTree(output, head, code, s, &xor, 0, &listC, &buffer, &packPos, &cipherPos, &roadBuf)) {
-        freeListCodes(&listC); /* w wypadku niepowodzenia zwalniamy pamiec */
-        freeList(head_ptr);
+        freeListCodes(&listC); /* w wypadku niepowodzenia zwalniam pamiec */
+        savePtrsFromList(head_ptr, frPtrs, &frPtrsTabPos);
+        for(i = 0; i < frPtrsTabPos; i++)
+            free(frPtrs[i]);
         free(roadBuf.buf);
         free(code);
         return false;
@@ -83,7 +90,9 @@ bool huffman(FILE *input, FILE *output, settings_t s, count_t **head) {
     
     /* Zwalnianie pamieci */
     freeListCodes(&listC);
-    freeList(head_ptr);
+    savePtrsFromList(head_ptr, frPtrs, &frPtrsTabPos);
+    for(i = 0; i < frPtrsTabPos; i++)
+        free(frPtrs[i]);
     free(roadBuf.buf);
     free(code);
     return true;

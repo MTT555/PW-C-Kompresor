@@ -31,7 +31,7 @@ mod_t *mode, buffer_t *buf, buffer_t *codeBuf, int *currentBits, int *tempCode) 
                     down = goDown(iterator);
                     if(down == -1)
                         return false;
-                    if(codeBuf->pos == codeBuf->curSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
+                    if(codeBuf->curSize - codeBuf->pos <= 1) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
                         if(!tryRealloc((void **)(&(codeBuf->buf)), 2 * (codeBuf->curSize) * sizeof(char)))
                             return false;
                         codeBuf->curSize *= 2;
@@ -44,7 +44,7 @@ mod_t *mode, buffer_t *buf, buffer_t *codeBuf, int *currentBits, int *tempCode) 
                     down = goDown(iterator);
                     if(down == -1)
                         return false;
-                    if(codeBuf->pos == codeBuf->curSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
+                    if(codeBuf->curSize - codeBuf->pos <= 1) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
                         if(!tryRealloc((void **)(&(codeBuf->buf)), 2 * (codeBuf->curSize) * sizeof(char)))
                             return false;
                         codeBuf->curSize *= 2;
@@ -55,7 +55,7 @@ mod_t *mode, buffer_t *buf, buffer_t *codeBuf, int *currentBits, int *tempCode) 
                 break;
             }
             case dictWord: {
-                if(buf->pos == buf->curSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
+                if(buf->curSize - buf->pos <= 1) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
                     if(!tryRealloc((void **)(&(buf->buf)), 2 * (buf->curSize) * sizeof(char)))
                         return false;
                     buf->curSize *= 2;
@@ -77,7 +77,7 @@ mod_t *mode, buffer_t *buf, buffer_t *codeBuf, int *currentBits, int *tempCode) 
                 break;
             }
             case bitsToWords: {
-                if(buf->pos == buf->curSize) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
+                if(buf->curSize - buf->pos <= 1) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
                     if(!tryRealloc((void **)(&(buf->buf)), 2 * (buf->curSize) * sizeof(char)))
                         return false;
                     buf->curSize *= 2;

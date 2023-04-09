@@ -101,8 +101,7 @@ int main(int argc, char **argv) {
 							fprintf(stderr, "%s: Compression memory failure!\n", argv[0]);
 							fclose(in); /* to zwalniamy pamiec i zwracamy blad nr 6 */
 							fclose(out);
-							freeRecursively(tempPtr);
-							free(tempPtr);
+							freeList(tempPtr);
 							return 6;
 						}
 					}
@@ -118,8 +117,7 @@ int main(int argc, char **argv) {
 							fprintf(stderr, "%s: Compression memory failure!\n", argv[0]);
 							fclose(in);
 							fclose(out);
-							freeRecursively(tempPtr);
-							free(tempPtr);
+							freeList(tempPtr);
 							return 6;
 						}
 					}
@@ -135,13 +133,10 @@ int main(int argc, char **argv) {
 			fseek(in, 0, SEEK_SET); /* ustawienie kursora w pliku z powrotem na jego poczatek */
 			if(!huffman(in, out, s, &head)) { /* ruszenie algorytmu Huffmana */
 				fprintf(stderr, "%s: Decompression memory failure!\n", argv[0]);
-				freeRecursively(head);
-				free(head);
 				fclose(in);
 				fclose(out);
 				return 6;
 			}
-			freeRecursively(head);
 			free(head);
 		}
 	}
