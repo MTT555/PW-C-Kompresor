@@ -93,6 +93,10 @@ int decompress(FILE *input, FILE *output, settings_t s) {
             } else if(anBitsVal == 2) {
                 fprintf(stderr, "Decompression failure due to the incorrect cipher!\n"
                                 "Cipher provided during the decompression has to be the exact same as the one provided during the compression to receive an accurate output!\n");
+                freeListCodes(&list);
+                freeDTree(head);
+                free(buf.buf);
+                free(codeBuf.buf);
                 return 2;
             }
         }
@@ -107,6 +111,10 @@ int decompress(FILE *input, FILE *output, settings_t s) {
     } else if(anBitsVal == 2) {
         fprintf(stderr, "Decompression failure due to the incorrect cipher!\n"
                         "Cipher provided during the decompression has to be the exact same as the one provided during the compression to receive an accurate output!\n");
+        freeListCodes(&list);
+        freeDTree(head);
+        free(buf.buf);
+        free(codeBuf.buf);
         return 2;
     }
     

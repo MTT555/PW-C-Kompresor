@@ -85,7 +85,7 @@ Przeznaczeniem progamu jest kompresja plików takich jak pliki tekstowe, graficz
 Program oferuje różnego rodzaju funkcjonalności na które składają się:
 \begin{itemize}
 \item
-Kompresja danych w trybach 8,12,16 bitowym
+Kompresja danych w trybach 8, 12, 16 bitowym
 \item
 Możliwość zaszyfrowania danych wyjściowych
 \item
@@ -156,10 +156,10 @@ W przypadku niepodania argumentów opcjonalnych domyślnie ustawiona zostanie ko
 
 \section{Struktura pliku wyjściowego}\label{header-n279}
 Pierwsze cztery bajty pliku wyjściowego zarezerwowane są na nagłówek. \\
-Pierwsze dwa bajty nagłówka to inicjały autorów - CT.\\
+Pierwsze dwa bajty nagłówka to peirwsze litery nazwisk autorów - CT.\\
 Kolejny bajt to maska, z której można odczytać szczegółowe informacje o pliku. Ostatnim bajtem nagłówka jest wynik wyliczonej sumy kontrolnej.\\
 Następnie pojawia się słownik, po nim znajdują się kolejno po sobie skompresowane dane w postaci kodów Huffmana o zmiennej długości.\\
-W przypadku gdy po zapisaniu wszystkich danych ilość bitów na końcu pliku jest niekompletna, zostanie wykonane dopełnienie zerami.
+W przypadku, gdy po zapisaniu wszystkich danych ilość bitów w ostatnim bajcie jest niekompletna, zostanie wykonane dopełnienie zerami.
 \section{Struktura maski w nagłówku pliku}\label{header-n279}
 
     Szablon bitowy: 0bKKSZCEEE
@@ -168,7 +168,7 @@ W przypadku gdy po zapisaniu wszystkich danych ilość bitów na końcu pliku je
    \item  S - szyfrowanie: 0 - nie, 1 - tak
    \item  Z - zapisanie informacji, czy konieczne będzie usunięcie nadmiarowego znaku \textbackslash0 z końca pliku podczas dekompresji
    \item  C - dodatkowe sprawdzenie, czy ten plik jest skompresowany: 0 - nie, 1 - tak
-   \item  E - ilość niezapisanych bitów kończących zapisana binarnie
+   \item  E - ilość niezapisanych bitów kończących (tj. dopełniających ostatni bajt) zapisana binarnie
 \end{itemize}
  \section{Szyfrowanie}\label{header-n281} 
 Szyfrowanie pliku odbywa się za pomocą \emph{Szyfrowania Vigenère’a}. Domyślnie kluczem szyfrowania jest: 
@@ -197,8 +197,7 @@ Napotkano na błąd podczas zarządzania pamięcią: \texttt{Compression memory 
 
 Program po zakończeniu pracy zwraca wartość typu całkowitego, która może być użyteczna w przypadku identyfikacji różnego rodzaju niepowodzeń:
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
+\begin{itemize}
 \item
 0 - Program zakończył się pomyślnie
 \item
@@ -208,20 +207,26 @@ Program po zakończeniu pracy zwraca wartość typu całkowitego, która może b
 \item
 3 - Błąd podczas wczytywania pliku wyjściowego
 \item
+4 - Pusty plik wejściowy
+\item
+5 - Wymuszono dekompresję dla pliku, który nie może zostać zdekompresowany
+\item
 6 - Błąd przy alokowaniu/dealokowaniu pamięci
+\item
+7 - Podano nieprawidłowy szyfr przy dekompresji
+\end{itemize}
+Należy jednak pamiętać, że podanie nieprawidłowego szyfru może się również zakończyć powodzeniem, lecz uzyskany plik wynikowy nie będzie zgodny z oryginałem tj. plikiem przed kompresją.
 
 \end{enumerate}
 \section{Tryb debugowania}\label{header-n281}
-Tryb debugowania włączony poprzez podanie opcjonalnego parametru -DDEBUG podczas uruchamiania programu pozwala prześledzić działanie programu oraz wyświetlić niektóre komunikaty o błędach, niewidoczne w standardowym trybie.
+Tryb debugowania włączony poprzez podanie opcjonalnego parametru -DDEBUG podczas kompilacji programu, pozwala prześledzić działanie programu oraz wyświetlić niektóre komunikaty o błędach, niewidoczne w standardowym trybie. Makefile daje możliwość kompilacji w trybie debugowania poprzez komendę \texttt{make debug}. Obejmuje on następujące możliwości:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
-Wyświetlenie komunikatów informujących o prawidłowym alokowaniu/dealokowaniu pamięci
+Wyświetlenie komunikatów informujących o nieprawidłowym alokowaniu/realokowaniu pamięci
 \item
 Wyświetlenie aktualnych ustawień kompresji pliku
-\item
-Wyświetlenie wczytanych znaków z pliku wraz z ich licznością
 \item
 Wyświetlenie wygenerowanych kodów Huffmana dla każdego znaku
 \item
@@ -229,11 +234,10 @@ Wyświetlenie obliczonej sumy kontrolnej
 \item
 Wyświetlenie aktualnego klucza szyfrowania
 \item
-Wyświetlenie ile bitów końcowych zostało dopełnionych
+Wyświetlenie, ile bitów końcowych zostało dopełnionych
 \item
 Wyświetlenie statystyk na temat skompresowanego pliku
 
 \end{enumerate}
-
 
 \end{document}

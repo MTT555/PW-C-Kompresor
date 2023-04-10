@@ -142,30 +142,38 @@ README.md -> plik do wstawienia informacji na githuba
 Przekazujemy do dyspozycji programisty skrypt CMake służący do automatyzacji procesu kompilacji. W katalogu głównym programu znajdują się do tego przeznaczone pliki: CMake.sh i CMakeLists.txt.
 \section{Makefile}\label{header-n231}
 W pliku Makefile znajdują się różnego rodzaju testy do sprawdzenia poprawności działania programu.
-Testów jest 10, każdy z nich jest oznaczony w następujący sposób: testX, gdzie X to numer testu od 1 do 10.
+Testów jest 14, każdy z nich jest oznaczony w następujący sposób: testX, gdzie X to numer testu od 1 do 14.
 \\Listę testów wraz z ich opisem przedstawiono poniżej:
 \begin{itemize}
 \item
 test1 - Przypadek, gdy plik wejściowy jest pusty
 \item
-test2- Próba dekompresji uszkodzonego pliku skompresowanego
+test2 - Próba dekompresji uszkodzonego pliku skompresowanego
 \item
 test3 - Test kompresji całego tekstu Pana Tadeusza
 \item
-test4 - Test pliku o wielkości ok. 1.5 MB z kompresją 16-bit
+test4 - Test pliku o wielkości ok. 1.5 MB z kompresją 16-bit i szyfrowaniem
 \item
-test5 - Test kompresji i szyfrowania muzyki
+test5 - Test kompresji i dekompresji muzyki z szyfrowaniem
 \item
-test6 - Test kompresji i szyfrowania zdjecia
+test6 - Test kompresji i dekompresji zdjęcia z szyfrowaniem
 \item
-test7 - Test wygenerowany przy pomocy gen/gen.c
+test7 - Test wygenerowany przy pomocy gen/gen.c (kompresja 8-bit)
 \item
-test8 - Test na rozbudowane drzewo Huffmana
+test8 - Test wygenerowany przy pomocy gen/gen.c (kompresja 12-bit)
 \item
-test9 - Wymuszenie dekompresji dla pliku nieskompresowanego
+test9 - Test wygenerowany przy pomocy gen/gen.c (kompresja 16-bit)
 \item
-test10 - Przypadek, gdy plik nie istnieje\\
-Przeprowadzenie wszystkich testów za jednym razem możemy wykonać komendą \texttt{make all}
+test10 - Test na rozbudowane drzewo Huffmana
+\item
+test11 - Wymuszenie dekompresji dla pliku nieskompresowanego
+\item
+test12 - Przypadek, gdy plik nie istnieje
+\item
+test13 - Test na brak kompresji i brak szyfrowania
+\item
+test14 - Test na brak kompresji z szyfrowaniem\\
 \end{itemize}
+Przeprowadzenie wszystkich testów za jednym razem możemy wykonać komendą \texttt{make test}
 
 \end{document}
