@@ -15,7 +15,7 @@ void compressedToFile(FILE *input, FILE *output, settings_t s, int *cipherPos, l
     int outputEOF;
 #endif
     
-    /* Zapisanie pozycji koncowych pliku wejsciowego oraz wyjsciowego */
+    /* Zapisanie pozycji koncowych pliku wejsciowego */
     fseek(input, 0, SEEK_END);
     inputEOF = ftell(input);
     fseek(input, 0, SEEK_SET);
