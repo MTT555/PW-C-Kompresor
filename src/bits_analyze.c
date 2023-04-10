@@ -6,12 +6,14 @@
 #include "dtree.h"
 #include "alloc.h"
 
-bool analyzeBits(FILE *output, uchar c, flag_t f, listCodes_t **list, dnode_t **iterator,
+int analyzeBits(FILE *output, uchar c, flag_t f, listCodes_t **list, dnode_t **iterator,
 mod_t *mode, buffer_t *buf, buffer_t *codeBuf, int *currentBits, int *tempCode) {
     int i, down;
     int bits = 0; /* ilosc przeanalizowanych bitow */
     int currentCode; /* obecny kod przejscia w sciezce */
     while (bits != 8 - f.redundantBits) { /* f.redundantBits bedzie != 0 jedynie przy ostatnim analizowanym znaku */
+        if(buf->pos > 100000 || codeBuf->pos > 100000) /* zapobieganie przepelnianiu pamieci w momencie podania zlego szyfru do odszyfrowania */
+            return 2;
         switch(*mode) {
             case dictRoad: {
                 currentCode = 2 * returnBit(c, bits) + returnBit(c, bits + 1);
@@ -30,10 +32,10 @@ mod_t *mode, buffer_t *buf, buffer_t *codeBuf, int *currentBits, int *tempCode) 
                 } else if(currentCode == 1) {
                     down = goDown(iterator);
                     if(down == -1)
-                        return false;
+                        return 1;
                     if(codeBuf->curSize - codeBuf->pos <= 1) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
                         if(!tryRealloc((void **)(&(codeBuf->buf)), 2 * (codeBuf->curSize) * sizeof(char)))
-                            return false;
+                            return 1;
                         codeBuf->curSize *= 2;
                     }
                     codeBuf->buf[codeBuf->pos] = '0' + down; /* przejscie o jeden w dol */
@@ -43,10 +45,10 @@ mod_t *mode, buffer_t *buf, buffer_t *codeBuf, int *currentBits, int *tempCode) 
                 } else if(currentCode == 0) {
                     down = goDown(iterator);
                     if(down == -1)
-                        return false;
+                        return 1;
                     if(codeBuf->curSize - codeBuf->pos <= 1) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
                         if(!tryRealloc((void **)(&(codeBuf->buf)), 2 * (codeBuf->curSize) * sizeof(char)))
-                            return false;
+                            return 1;
                         codeBuf->curSize *= 2;
                     }
                     codeBuf->buf[codeBuf->pos] = '0' + down; /* przejscie o jeden w dol */
@@ -57,7 +59,7 @@ mod_t *mode, buffer_t *buf, buffer_t *codeBuf, int *currentBits, int *tempCode) 
             case dictWord: {
                 if(buf->curSize - buf->pos <= 1) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
                     if(!tryRealloc((void **)(&(buf->buf)), 2 * (buf->curSize) * sizeof(char)))
-                        return false;
+                        return 1;
                     buf->curSize *= 2;
                 }
                 buf->buf[(buf->pos)++] = returnBit(c, bits++);
@@ -79,7 +81,7 @@ mod_t *mode, buffer_t *buf, buffer_t *codeBuf, int *currentBits, int *tempCode) 
             case bitsToWords: {
                 if(buf->curSize - buf->pos <= 1) { /* sprawdzenie, czy nie trzeba realokowac tablicy na wieksza */
                     if(!tryRealloc((void **)(&(buf->buf)), 2 * (buf->curSize) * sizeof(char)))
-                        return false;
+                        return 1;
                     buf->curSize *= 2;
                 }
                 buf->buf[(buf->pos)++] = '0' + returnBit(c, bits);
@@ -91,7 +93,7 @@ mod_t *mode, buffer_t *buf, buffer_t *codeBuf, int *currentBits, int *tempCode) 
             }
         }
     }
-    return true;
+    return 0;
 }
 
 int returnBit(uchar c, int x) {

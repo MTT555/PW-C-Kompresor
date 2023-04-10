@@ -3,6 +3,12 @@
 /**
 Program sluzacy do porownywania, czy plik przed kompresja jest taki sam, jak ten otrzymany po dekompresji 
     Pliki podajemy jako argv[1] oraz argv[2]
+Zwraca:
+    0 - pliki maja identyczna zawartosc
+    1 - nieprawidlowa ilosc argumentow wejsciowych
+    2 - nieudana proba otwarcia pliku
+    3 - rozna wielkosc plikow -> pliki maja rozna zawartosc
+    4 - inne symbole na wyswietlonych na stdout pozycjach -> pliki maja rozna zawartosc
 */
 int main(int argc, char **argv) {
     FILE *fptr1 = NULL, *fptr2 = NULL;
@@ -11,15 +17,20 @@ int main(int argc, char **argv) {
     
     if(argc != 3) {
         fprintf(stderr, "Too few/too many arguments! (argc == %d != 3)\n", argc);
-        return -1;
+        return 1;
     }
     
     fptr1 = fopen(argv[1], "rb");
     fptr2 = fopen(argv[2], "rb");
 
-    if(fptr1 == NULL || fptr2 == NULL) {
-        fprintf(stderr, "At least one of the files could not be opened!\n");
-        return -2;
+    if(fptr1 == NULL) {
+        fprintf(stderr, "File1 could not be opened!\n");
+        return 2;
+    }
+    if(fptr2 == NULL) {
+        fprintf(stderr, "File2 could not be opened!\n");
+        fclose(fptr1);
+        return 2;
     }
 
     fseek(fptr1, 0, SEEK_END);
@@ -31,7 +42,7 @@ int main(int argc, char **argv) {
         fclose(fptr1);
         fclose(fptr2);
         fprintf(stderr, "Different sizes of input files -> they cannot be the same!\n");
-        return -3;
+        return 3;
     }
 
     fseek(fptr1, 0, SEEK_SET);
@@ -46,10 +57,15 @@ int main(int argc, char **argv) {
         }
     }
 
-    if(ifTheSame)
-        printf("Files are the exact same!\n");
-
     fclose(fptr1);
     fclose(fptr2);
-    return 0;
+
+    if(ifTheSame) {
+        printf("Files are the exact same!\n");
+        return 0;
+    }
+    else {
+        printf("Files are different from each other!\n");
+        return 4;
+    }
 }

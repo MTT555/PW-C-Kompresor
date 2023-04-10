@@ -21,9 +21,10 @@ Funkcja dekompresujaca dany plik pochodzacy z tego kompresora
     FILE *output - plik wyjsciowy
     settings_t s - ustawienia
 Zwraca
-    true - dekompresja sie powiodla
-    false - nastapily problemy z pamiecia
+    0 - dekompresja sie powiodla
+    1 - blad alokacji pamieci
+    2 - zly szyfr uniemozliwil pomyslna dekompresje
 */
-bool decompress(FILE *input, FILE *output, settings_t s);
+int decompress(FILE *input, FILE *output, settings_t s);
 
 #endif

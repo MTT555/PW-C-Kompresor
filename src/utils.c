@@ -25,19 +25,20 @@ void help(FILE *stream) {
                      "-o0 - input string will not be compressed at all (default)\n"
                      "-o1 - input string will go under 8-bit Huffmann compression\n"
                      "-o2 - input string will go under 12-bit Huffmann compression\n"
-                     "-o3 - input string will go under 16-bit Huffmann compression\n\n"
-                     "You should not provide more than one of the possible compression levels!\n";
-    char *helpMsg4 = "Arguments -x and -d are mutually exclusive! Both of them should not be provided simultaneously!\n"
+                     "-o3 - input string will go under 16-bit Huffmann compression\n\n";
+    char *helpMsg4 = "You should not provide more than one of the possible compression levels!\n"
+                     "Arguments -x and -d are mutually exclusive! Both of them should not be provided simultaneously!\n"
                      "In case more than a single value is given, only the first one will be valid!\n\n"
                      "Error codes:\n"
                      "0 - Program finished successfully\n"
                      "1 - Too few arguments have been provided\n"
                      "2 - Input file could not be opened\n"
                      "3 - Output file could not be opened\n"
-                     "4 - Input file is empty\n"
-                     "5 - Decompression has been forced but the input file could not be decompressed\n"
-                     "6 - Memory allocation/reallocation failure!\n\n";
-    char *helpMsg5 = "------------------------------------------------------------------------------------------------\n\n";
+                     "4 - Input file is empty\n";
+    char *helpMsg5 = "5 - Decompression has been forced but the input file could not be decompressed\n"
+                     "6 - Memory allocation/reallocation failure\n"
+                     "7 - Cipher provided during the decompression is not the same as the one given during the compression\n\n"
+                     "------------------------------------------------------------------------------------------------\n\n";
     fprintf(stream, "%s%s%s%s%s", helpMsg1, helpMsg2, helpMsg3, helpMsg4, helpMsg5);
 }
 

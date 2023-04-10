@@ -27,8 +27,12 @@ Funkcja do analizy kolejnych bitow danego chara z pliku skompresowanego
     buffer_t *codeBuf - bufor na aktualny kod przejsc po drzewie
     int *currentBits - ilosc aktualnie zajetych bitow (w ramach wsparcia dla dekompresji 12-bit)
     int *tempCode - aktualny kod odczytanego symbolu (w ramach wsparcia dla dekompresji 12-bit)
+Zwraca:
+    0 - funkcja przebiegla pomyslnie
+    1 - blad alokacji pamieci
+    2 - zly szyfr uniemozliwia dalsza dekompresje
 */
-bool analyzeBits(FILE *output, uchar c, flag_t f, listCodes_t **list, dnode_t **iterator,
+int analyzeBits(FILE *output, uchar c, flag_t f, listCodes_t **list, dnode_t **iterator,
     mod_t *mode, buffer_t *buf, buffer_t *codeBuf, int *currentBits, int *tempCode);
 
 /**

@@ -10,7 +10,7 @@
 #include "alloc.h"
 #include "noCompress.h"
 
-bool decompress(FILE *input, FILE *output, settings_t s) {
+int decompress(FILE *input, FILE *output, settings_t s) {
     /* Deklaracja wszystkich zmiennych statycznych i nadanie im odpowiednich wartosci poczatkowych */
     int i; /* iteracje po petlach */
     uchar c; /* do odczytywania kolejnych znakow */
@@ -23,6 +23,7 @@ bool decompress(FILE *input, FILE *output, settings_t s) {
     flag_t defFlag; /* zmienne na odczytanie flag, defFlag - uzywana do analizy wszystkich bajtow */
     flag_t allFlag; /* allFlag - uzywana do analizy ostatniego symbolu drukowanego do pliku */
     buffer_t buf, codeBuf; /* przechowywanie buforu */
+    int anBitsVal; /* zmienna na przechowywanie tymczasowego rezultatu funkcji analyzeBits */
     int inputEOF; /* zmienne zawierajace pozycje koncowe pliku wejsciowego i wyjsciowego */
 #ifdef DEBUG
     int outputEOF;
@@ -40,7 +41,7 @@ bool decompress(FILE *input, FILE *output, settings_t s) {
     codeBuf.pos = 0; /* aktualna pozycja w buforze dla kodow */
     if(!tryMalloc((void **)&head, sizeof(dnode_t)) || !tryMalloc((void **)(&(buf.buf)), buf.curSize * sizeof(char))
         || !tryMalloc((void **)(&(codeBuf.buf)), codeBuf.curSize * sizeof(char)))
-        return false;
+        return 1;
     iterator = head;
     head->prev = NULL;
     head->left = NULL;
@@ -68,8 +69,12 @@ bool decompress(FILE *input, FILE *output, settings_t s) {
     /* Przypadek pliku nieskompresowanego, ale zaszyfrowanego */
     if(!allFlag.compLevel && allFlag.cipher) {
         decryptFile(input, output, inputEOF, cipherKey);
-        return true;
+        free(head);
+        free(buf.buf);
+        free(codeBuf.buf);
+        return 0;
     }
+
     /* Analiza pliku */
     for(i = 4; i < inputEOF; i++) {
         fread(&c, sizeof(char), 1, input);
@@ -77,21 +82,32 @@ bool decompress(FILE *input, FILE *output, settings_t s) {
             c -= cipherKey[cipherPos % cipherLength];
             cipherPos++;
         }
-        if(i != inputEOF - 1) /* analizowanie kazdego bitu przy pomocy funkcji */
-            if(!analyzeBits(output, c, defFlag, &list, &iterator, &currentMode, &buf, &codeBuf, &currentBits, &tempCode)) {
+        if(i != inputEOF - 1) { /* analizowanie kazdego bitu przy pomocy funkcji */
+            anBitsVal = analyzeBits(output, c, defFlag, &list, &iterator, &currentMode, &buf, &codeBuf, &currentBits, &tempCode);
+            if(anBitsVal == 1) {
                 freeListCodes(&list); /* przy nieudanej analizie bitow */
-                freeDTree(head); /* czyscimy pamiec i zwracamy false tj. blad */
+                freeDTree(head); /* czyscimy pamiec i zwracamy 1 tj. blad pamieci */
                 free(buf.buf);
                 free(codeBuf.buf);
-                return false;
+                return 1;
+            } else if(anBitsVal == 2) {
+                fprintf(stderr, "Decompression failure due to the incorrect cipher!\n"
+                                "Cipher provided during the decompression has to be the exact same as the one provided during the compression to receive an accurate output!\n");
+                return 2;
             }
+        }
     }
-    if(!analyzeBits(output, c, allFlag, &list, &iterator, &currentMode, &buf, &codeBuf, &currentBits, &tempCode)) {
+    anBitsVal = analyzeBits(output, c, allFlag, &list, &iterator, &currentMode, &buf, &codeBuf, &currentBits, &tempCode);
+    if(anBitsVal == 1) {
         freeListCodes(&list);
         freeDTree(head);
         free(buf.buf);
         free(codeBuf.buf);
-        return false;
+        return 1;
+    } else if(anBitsVal == 2) {
+        fprintf(stderr, "Decompression failure due to the incorrect cipher!\n"
+                        "Cipher provided during the decompression has to be the exact same as the one provided during the compression to receive an accurate output!\n");
+        return 2;
     }
     
     /* Komunikat koncowy */
@@ -110,5 +126,5 @@ bool decompress(FILE *input, FILE *output, settings_t s) {
     freeDTree(head);
     free(buf.buf);
     free(codeBuf.buf);
-    return true;
+    return 0;
 }

@@ -9,7 +9,7 @@
 int main(int argc, char **argv) {
 	/* Deklaracja zmiennych */
 	uchar c;
-	int i, inputEOF, fileCheck, temp;
+	int i, inputEOF, fileCheck, temp, decompVal;
 	count_t *head = NULL, *tempPtr = NULL;
 	FILE *in, *out;
 	int tempCode = 0, currentBits = 0; /* tymczasowy kod wczytanego znaku oraz ilosc obecnie wczytanych bitow (dla kompresji 12- i 16-bit) */
@@ -146,11 +146,17 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "File check code: %d\n", fileCheck);
 #endif
 		if(!fileCheck) { /* dekompresja jedynie, jezeli fileCheck zwrocil 0 */
-			if(!decompress(in, out, s)) {
+			decompVal = decompress(in, out, s); /* pobranie wartosci zwroconej przez funkcje dekompresujaca */
+			if(decompVal == 1) {
 				fprintf(stderr, "%s: Decompression memory failure!\n", argv[0]);
 				fclose(in);
 				fclose(out);
 				return 6;
+			} else if (decompVal == 2) {
+				fprintf(stderr, "%s: Decompression encryption failure!\n", argv[0]);
+				fclose(in);
+				fclose(out);
+				return 7;
 			}
 		} else {
 			fclose(in);
