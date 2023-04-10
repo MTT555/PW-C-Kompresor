@@ -11,6 +11,9 @@ compressor:
 debug:
 	cc -o $@ -DDEBUG src/*.c -ansi -pedantic -Wall
 
+dbfull:
+	cc -o $@ -DDEBUG -DCHARS src/*.c -ansi -pedantic -Wall
+
 generate:
 	cc -o $@ gen/gen.c -ansi -pedantic -Wall
 
@@ -18,7 +21,7 @@ compare:
 	cc -o $@ compare.c -ansi -pedantic -Wall
 
 clean:
-	rm -f compressor generate compare debug out comp decomp
+	rm -f compressor generate compare debug dbfull out comp decomp
 	rm -fdr cmake_build/*
 
 # Przypadek, gdy plik wejsciowy jest pusty
