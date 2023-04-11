@@ -30,8 +30,10 @@ Program w języku C realizujący bezstratną kompresję oraz dekompresję plikó
 * **encoding.sh** -> skrypt sprawdzający na wiele sposobów kodowanie danego pliku *(może wymagać instalacji dodatkowych pakietów)*
 * **Makefile** -> zawiera komendy do standardowej kompilacji oraz przykładowe testy programu
 * **Readme.md** - właśnie go czytasz :)
-* **Specyfikacja_funkcjonalna.tex**
-* **Specyfikacja_implementacyjna.tex**
+* **Specyfikacja_funkcjonalna.pdf** - faktyczna specyfikacja funkcjonalna
+* **Specyfikacja_funkcjonalna.tex** - kod specyfikacji funkcjonalnej zapisany w LaTeX
+* **Specyfikacja_implementacyjna.pdf** - faktyczna specyfikacja implementacyjna
+* **Specyfikacja_implementacyjna.tex** - kod specyfikacji implemetacyjnej zapisany w LaTeX
 
 W celu wyświetlenia prawidłowego sposobu uruchamiania programu głównego można go po prostu uruchomić bez podawania żadnych argumentów wejściowych (bądź jedynie z argumentem -h).
 
