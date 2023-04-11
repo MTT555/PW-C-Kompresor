@@ -1,6 +1,7 @@
 \documentclass[]{article}
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
+\usepackage{graphicx} 
 \usepackage{ifxetex,ifluatex}
 \usepackage{fixltx2e} % provides \textsubscript
 \usepackage{makecell}
@@ -78,6 +79,10 @@ Historia zmian dokumentu:\\
   \hline
   Mateusz Tyl & 08.04.2023 & \makecell{Dodanie informacji o debugowaniu} & 2.1\\
   \hline
+  Adrian Chmiel & 10.04.2023 & \makecell{Drobne poprawki} & 2.2\\
+  \hline
+   Mateusz Tyl & 11.04.2023 & \makecell{Dodanie opisu słownika} & 2.3\\
+  \hline
 \end{tabular} 
 \section{Cel projektu}\label{header-n231}
 
@@ -107,7 +112,7 @@ Zatem po kompresji otrzymamy następujący ciąg danych: \\
 01101011000111111101010100\\
 Plik skompresowany tworzony przez program zawiera jeszcze na początku nagłówek, słownik oraz ewentualnie na końcu dodatkowe zera wypełniające brakujące bity. Więcej o tym w kolejnych rozdziałach.
 \section{Dane wejściowe}\label{header-n233}
-Program wymaga przekazania pliku tekstowego, który ma zostać skompresowany. Plik może zawierać również znaki spoza alfabetu angielskiego, w tym polskie litery i inne znaki specjalne. \\Dalsze instrukcje zostaną przedstawione w następnym rozdziale.
+Program wymaga przekazania dowolnego pliku, który ma zostać skompresowany. Program obsługuje prawidłowo pliki tekstowe, dźwiękowe, graficzne.  \\Dalsze instrukcje zostaną przedstawione w następnym rozdziale.
 \section{Argumenty wywołania programu}\label{header-n256}
 
 Program działa w trybie wsadowym. Wymaganymi parametrami są kolejno: nazwa pliku do skompresowania, nazwa pliku wyjściowego.
@@ -156,7 +161,7 @@ W przypadku niepodania argumentów opcjonalnych domyślnie ustawiona zostanie ko
 
 \section{Struktura pliku wyjściowego}\label{header-n279}
 Pierwsze cztery bajty pliku wyjściowego zarezerwowane są na nagłówek. \\
-Pierwsze dwa bajty nagłówka to peirwsze litery nazwisk autorów - CT.\\
+Pierwsze dwa bajty nagłówka to pierwsze litery nazwisk autorów - CT.\\
 Kolejny bajt to maska, z której można odczytać szczegółowe informacje o pliku. Ostatnim bajtem nagłówka jest wynik wyliczonej sumy kontrolnej.\\
 Następnie pojawia się słownik, po nim znajdują się kolejno po sobie skompresowane dane w postaci kodów Huffmana o zmiennej długości.\\
 W przypadku, gdy po zapisaniu wszystkich danych ilość bitów w ostatnim bajcie jest niekompletna, zostanie wykonane dopełnienie zerami.
@@ -170,6 +175,36 @@ W przypadku, gdy po zapisaniu wszystkich danych ilość bitów w ostatnim bajcie
    \item  C - dodatkowe sprawdzenie, czy ten plik jest skompresowany: 0 - nie, 1 - tak
    \item  E - ilość niezapisanych bitów kończących (tj. dopełniających ostatni bajt) zapisana binarnie
 \end{itemize}
+\section{Słownik}\label{header-n279}
+Kod Huffmana każdego znaku wraz z odpowiadającym mu znakiem można odczytać ze słownika, który znajduje się od razu po nagłówku. Do odczytania słownika będzie potrzebny odpowiedni algorytm.\\
+Algorytm prezentuje się następująco:\\
+Tworzymy pomocnicze drzewo binarne. Rozpoczynamy analizę bitów składających się na słownik. Znajdujemy się w korzeniu drzewa. W zależności na co napotkamy analizując kolejne bity(analizujemy kolejno po dwa) robimy to co następuje:
+\begin{itemize}
+    \item 00 - przechodzimy po drzewie w dół do lewego syna jeżeli ten jest nieodwiedzony, w przeciwnym razie w prawo
+   \item  01 - to samo co 00, ale po tym przejściu znajdziemy się w liściu - wtedy otrzymujemy kod znaku w całości, kolejne 8/12/16(w zależności od poziomu kompresji) bitów to znak którego kod otrzymaliśmy.
+   \item  10 - wycofanie się do ojca
+   \item  11 - koniec słownika
+\end{itemize}
+W przypadku napotkania na 01 możemy z drzewa odczytać cały kod Hufmanna dla konkretnego znaku. Kod czytamy od liścia w stronę korzenia. Z kolejnych 8/12/16(w zależności od poziomu kompresji) bitów możemy odczytać kodowany znak. \\
+\textbf{Uwaga - zawsze po odczytaniu znaku(tzn. odczytaniu 8/12/16 bitów należy w drzewie powrócić do ojca}
+\\\\Przykład: (dla kompresji 8 bitowej)
+Nasz przykładowy słownik:\\
+\begin{center}
+\texttt{0101100010000001011001000101100001100101}
+\end{center}
+Analizujemy pierwsze dwa bity
+\begin{center}
+\texttt{\underline{01}01100010000001011001000101100001100101}
+\end{center}
+Zatem przechodzimy do lewego syna. Znajdujemy się w liściu, co oznacza że właśnie otrzymaliśmy znak. Odczytujemy z drzewa kod Huffmana dla aktualnego znaku. W tym przypadku jest to 0. Lewą gałąź w drzewie oznaczamy zerem, prawą jedynką.
+Odczytujemy kolejne 8 bitów.Te bity to znak, którego kod Huffmana właśnie otrzymaliśmy.
+\begin{center}
+\texttt{01\underline{01100010}000001011001000101100001100101}
+\end{center}
+Otrzymaliśmy zatem pierwszy znak i odpowiadający mu kod Huffmana.\\
+Znak w postaci binarnej: 01100010, w postaci dziesiętnej: 98\\
+Odpowiadający mu kod Huffmana to: 0\\
+Dalej postępujemy tak samo, pamiętając, że jeżeli napotkamy na \texttt{11} to słownik zostaje zakończony.
  \section{Szyfrowanie}\label{header-n281} 
 Szyfrowanie pliku odbywa się za pomocą \emph{Szyfrowania Vigenère’a}. Domyślnie kluczem szyfrowania jest: 
 \texttt{Politechnika\textunderscore Warszawska}
@@ -217,7 +252,6 @@ Program po zakończeniu pracy zwraca wartość typu całkowitego, która może b
 \end{itemize}
 Należy jednak pamiętać, że podanie nieprawidłowego szyfru może się również zakończyć powodzeniem, lecz uzyskany plik wynikowy nie będzie zgodny z oryginałem tj. plikiem przed kompresją.
 
-\end{enumerate}
 \section{Tryb debugowania}\label{header-n281}
 Tryb debugowania włączony poprzez podanie opcjonalnego parametru -DDEBUG podczas kompilacji programu, pozwala prześledzić działanie programu oraz wyświetlić niektóre komunikaty o błędach, niewidoczne w standardowym trybie. Makefile daje możliwość kompilacji w trybie debugowania poprzez komendę \texttt{make debug}. Obejmuje on następujące możliwości:
 
