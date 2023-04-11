@@ -134,9 +134,9 @@ Program działa w trybie wsadowym. Wymaganymi parametrami są kolejno: nazwa pli
 \item
  \texttt{-x} - wymuś kompresję
 \item
- \texttt{-DDEBUG} - włącz tryb debugowania
+ \texttt{-d} - wymuś dekompresję
 \end{itemize}
-W przypadku niepodania argumentów opcjonalnych domyślnie ustawiona zostanie kompresja 8 bitowa wraz z wyłączonym szyfrowaniem i wymuszaniem kompresji.
+W przypadku niepodania argumentów opcjonalnych program automatycznie stwierdzi, czy plik nadaje się do ewentualnej dekompresji, a następnie wykona kompresję (jeżeli dekompresja jest niemożliwa) lub dekompresję.
 
 \section{Przykład wywołania programu}\label{header-n233}
 
@@ -154,8 +154,8 @@ W przypadku niepodania argumentów opcjonalnych domyślnie ustawiona zostanie ko
  ./program lub ./program -h
 \\Zostanie wyświetlona pomoc do programu
 \item
- ./program input output -DDEBUG -x
-\\Program przejdzie w tryb debugowania, zostanie włączone wymuszanie kompresji
+ ./program input output -x
+\\Program wczyta plik o nazwie input i skompresuje go do pliku output wykorzystując kompresję (umożliwia to np. ponowną kompresję pliku już skompresowanego)
 
 \end{itemize}
 
@@ -163,13 +163,13 @@ W przypadku niepodania argumentów opcjonalnych domyślnie ustawiona zostanie ko
 Pierwsze cztery bajty pliku wyjściowego zarezerwowane są na nagłówek. \\
 Pierwsze dwa bajty nagłówka to pierwsze litery nazwisk autorów - CT.\\
 Kolejny bajt to maska, z której można odczytać szczegółowe informacje o pliku. Ostatnim bajtem nagłówka jest wynik wyliczonej sumy kontrolnej.\\
-Następnie pojawia się słownik, po nim znajdują się kolejno po sobie skompresowane dane w postaci kodów Huffmana o zmiennej długości.\\
-W przypadku, gdy po zapisaniu wszystkich danych ilość bitów w ostatnim bajcie jest niekompletna, zostanie wykonane dopełnienie zerami.
+Następnie pojawia się słownik, a na końcu znajdują się kolejno po sobie skompresowane dane w postaci kodów Huffmana o zmiennej długości.\\
+W przypadku, gdy po zapisaniu wszystkich danych ilość bitów w ostatnim bajcie jest niekompletna, zostanie wykonane dopełnienie zerami. Jeżeli użytkownik wybierze zarówno brak kompresji, jak i brak szyfrowania, to otrzymuje on dokładnie ten sam plik, jak ten podany jako wejściowy.
 \section{Struktura maski w nagłówku pliku}\label{header-n279}
 
     Szablon bitowy: 0bKKSZCEEE
 \begin{itemize}
-    \item K - sposób kompresji: 00 - brak, 01 - 8-bit, 10 - 12-bit, 11 - 16-bit
+   \item K - sposób kompresji: 00 - brak, 01 - 8-bit, 10 - 12-bit, 11 - 16-bit
    \item  S - szyfrowanie: 0 - nie, 1 - tak
    \item  Z - zapisanie informacji, czy konieczne będzie usunięcie nadmiarowego znaku \textbackslash0 z końca pliku podczas dekompresji
    \item  C - dodatkowe sprawdzenie, czy ten plik jest skompresowany: 0 - nie, 1 - tak
@@ -178,17 +178,17 @@ W przypadku, gdy po zapisaniu wszystkich danych ilość bitów w ostatnim bajcie
 \section{Słownik}\label{header-n279}
 Kod Huffmana każdego znaku wraz z odpowiadającym mu znakiem można odczytać ze słownika, który znajduje się od razu po nagłówku. Do odczytania słownika będzie potrzebny odpowiedni algorytm.\\
 Algorytm prezentuje się następująco:\\
-Tworzymy pomocnicze drzewo binarne. Rozpoczynamy analizę bitów składających się na słownik. Znajdujemy się w korzeniu drzewa. W zależności na co napotkamy analizując kolejne bity(analizujemy kolejno po dwa) robimy to co następuje:
+Tworzymy pomocnicze drzewo binarne. Rozpoczynamy analizę bitów składających się na słownik. Znajdujemy się w korzeniu drzewa. W zależności na co napotkamy analizując kolejne bity (analizujemy kolejno po dwa) robimy to co następuje:
 \begin{itemize}
-    \item 00 - przechodzimy po drzewie w dół do lewego syna jeżeli ten jest nieodwiedzony, w przeciwnym razie w prawo
-   \item  01 - to samo co 00, ale po tym przejściu znajdziemy się w liściu - wtedy otrzymujemy kod znaku w całości, kolejne 8/12/16(w zależności od poziomu kompresji) bitów to znak którego kod otrzymaliśmy.
+    \item 00 - przechodzimy po drzewie w dół do lewego syna, jeżeli ten jest nieodwiedzony, w przeciwnym razie do prawego syna
+   \item  01 - to samo co 00, ale po tym przejściu znajdziemy się w liściu - wtedy otrzymujemy kod znaku w całości, kolejne 8/12/16 (w zależności od poziomu kompresji) bitów to znak, którego kod otrzymaliśmy.
    \item  10 - wycofanie się do ojca
    \item  11 - koniec słownika
 \end{itemize}
-W przypadku napotkania na 01 możemy z drzewa odczytać cały kod Hufmanna dla konkretnego znaku. Kod czytamy od liścia w stronę korzenia. Z kolejnych 8/12/16(w zależności od poziomu kompresji) bitów możemy odczytać kodowany znak. \\
-\textbf{Uwaga - zawsze po odczytaniu znaku(tzn. odczytaniu 8/12/16 bitów należy w drzewie powrócić do ojca}
-\\\\Przykład: (dla kompresji 8 bitowej)
-Nasz przykładowy słownik:\\
+W przypadku napotkania na 01 możemy z drzewa odczytać cały kod Huffmana dla konkretnego znaku. Kod czytamy od liścia w stronę korzenia. Z kolejnych 8/12/16 (w zależności od poziomu kompresji) bitów możemy odczytać kodowany znak. \\
+\textbf{Uwaga - zawsze po odczytaniu znaku (tzn. odczytaniu 8/12/16 bitów) w drzewie należy wykonać cofnięcie z aktualnej pozycji do ojca!}
+\\\\Przykład (dla kompresji 8 bitowej): \\
+Nasz przykładowy słownik:
 \begin{center}
 \texttt{0101100010000001011001000101100001100101}
 \end{center}
@@ -197,24 +197,28 @@ Analizujemy pierwsze dwa bity
 \texttt{\underline{01}01100010000001011001000101100001100101}
 \end{center}
 Zatem przechodzimy do lewego syna. Znajdujemy się w liściu, co oznacza że właśnie otrzymaliśmy znak. Odczytujemy z drzewa kod Huffmana dla aktualnego znaku. W tym przypadku jest to 0. Lewą gałąź w drzewie oznaczamy zerem, prawą jedynką.
-Odczytujemy kolejne 8 bitów.Te bity to znak, którego kod Huffmana właśnie otrzymaliśmy.
+Odczytujemy kolejne 8 bitów. Te bity to znak, którego kod Huffmana właśnie otrzymaliśmy.
 \begin{center}
 \texttt{01\underline{01100010}000001011001000101100001100101}
 \end{center}
 Otrzymaliśmy zatem pierwszy znak i odpowiadający mu kod Huffmana.\\
 Znak w postaci binarnej: 01100010, w postaci dziesiętnej: 98\\
 Odpowiadający mu kod Huffmana to: 0\\
-Dalej postępujemy tak samo, pamiętając, że jeżeli napotkamy na \texttt{11} to słownik zostaje zakończony.
+Dalej postępujemy tak samo, pamiętając, że jeżeli napotkamy na \texttt{11} to słownik zostaje zakończony. W przypadku braku kompresji słownik nie jest wcale zapisywany.
  \section{Szyfrowanie}\label{header-n281} 
 Szyfrowanie pliku odbywa się za pomocą \emph{Szyfrowania Vigenère’a}. Domyślnie kluczem szyfrowania jest: 
-\texttt{Politechnika\textunderscore Warszawska}
+\texttt{Politechnika\textunderscore Warszawska} \\\\
+W celu zmiany klucza szyfrowania możemy skorzystać z argumentu \texttt{-c "klucz"} np. \\
+\texttt{-c "Huffman"} ustawi klucz szyfrowania na \texttt{Huffman} \\\\
+Ten rodzaj szyfrowania polega na przesuwaniu kolejnych zapisywanych znaków o wartości ASCII kolejnych znaków znajdujących się w kluczu szyfrowania. W momencie, gdy podczas szyfrowania znajdziemy się na końcu klucza, należy po prostu wrócić na jego początek i kontynuować szyfrowanie przechodząc po nim kolejny raz. \\
+Szyfrowaniu podlega słownik oraz skompresowany tekst, a więc wszystko oprócz nagłówka w postaci czterech pierwszych bajtów pliku.
 
 \section{Komunikaty błędów}\label{header-n281}
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
-  Błąd podczas wczytywania pliku wejściowego: \texttt{Input file could not be opened!}
+Błąd podczas wczytywania pliku wejściowego: \texttt{Input file could not be opened!}
 \item
 Plik wejściowy jest pusty: \texttt{Input file is empty!}
 \item
@@ -224,8 +228,11 @@ Pominięcie niezindentyfikowanych argumentów: \texttt{Unknown argument! (ignori
 \item
 Wystąpił błąd podczas alokowania pamięci: \texttt{Failed memory allocation!}
 \item
-Napotkano na błąd podczas zarządzania pamięcią: \texttt{Compression memory failure!}
-
+Napotkano na błąd zarządzania pamięcią podczas kompresji: \texttt{Compression memory failure!}
+\item
+Napotkano na błąd zarządzania pamięcią podczas dekompresji: \texttt{Decompression memory failure!}
+\item
+Podany szyfr nie umożliwia pomyślnej dekompresji: \texttt{Decompression encryption failure!}
 \end{enumerate}
 
 \section{Zwracane wartości}\label{header-n281}
@@ -268,10 +275,12 @@ Wyświetlenie obliczonej sumy kontrolnej
 \item
 Wyświetlenie aktualnego klucza szyfrowania
 \item
-Wyświetlenie, ile bitów końcowych zostało dopełnionych
+Wyświetlenie, ile bitów końcowych zostało dopełnionych w ostatnim bajcie
 \item
 Wyświetlenie statystyk na temat skompresowanego pliku
 
 \end{enumerate}
+
+W Makefile znajduje się też dodatkowy tryb pełnego debugowania możliwy do uzyskania komendą \texttt{make dbfull}, który oprócz wszystkich powyższych informacji wyświetla również na bieżąco każdy symbol drukowany do pliku przy kompresji.
 
 \end{document}

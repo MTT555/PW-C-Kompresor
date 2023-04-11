@@ -96,7 +96,7 @@ Program oferuje kilka modułów, które współpracują ze sobą. Niektóre modu
 \begin{itemize}
 \section{Folder "gen"}\label{header-n231}
 \item
-gen.c -> Program pomocniczy służący do generowania gotowych testów do tego kompresora. Program generuje losowe znaki, zależnie od ustawień podanych przez użytkownika i zapisuje je w pliku.\\ Lista argumentów: [nazwa-pliku-wyjsciowego] [ilosc znakow] [ilosc roznych znakow, ktore moga wystapic w outpucie] [seed]
+gen.c -> Program pomocniczy służący do generowania gotowych testów do tego kompresora. Program generuje losowe znaki, zależnie od ustawień podanych przez użytkownika i zapisuje je w pliku.\\ Lista argumentów: [nazwa pliku wyjściowego] [ilość znaków] [ilość różnych znaków, które mogą wystąpić w outpucie] [seed]
 \item
 testhufftree.c -> Program pomocniczy odpowiedzialny za wygenerowanie testu w wyniku którego możliwe było przeciążenie pamięci przez tworzenie drzewa Huffmana. Jedynym argumentem jest nazwa pliku wyjściowego
 \item
@@ -107,15 +107,15 @@ testo3.c -> Program pomocniczy odpowiedzialny za wygenerowanie testu testo3.in z
 \item
 alloc.* -> zawiera funkcje służące do bezpiecznej alokacji pamięci. Zwraca błędy jeżeli alokacja się nie powiedzie.
 \item
-bits\textunderscore analyze.* -> zawiera funkcje służące do analizy kolejnych bitów zawartych w kolejnych znakach przy dekompresji. Sprawdza, czy alokacja pamięci się powiodła i wypisuje stosowny komunikat w przypadku błędu. Analizuje zapisany słownik w pliku. Funkcje korzystają z pomocniczej struktury dtree realizującej drzewo. W pliku nagłówkowym zdefiniowany jest enum który pełni funkcję zmiennej przechowującej aktualny tryb analizy aktualnych bitów. W zależności od odczytywanych bitów zmienna przyjmuje odpowiedni tryb i przekazuje programowi co ma robić. Tryby są następujące: dictRoad - tryb uaktywnia się gdy przemieszczamy się w drzewie, dictWord - odczytujemy znak gdy dostaniemy się do liścia, bitsToWords - odczytujemy skompresowane dane
+bits\textunderscore analyze.* -> zawiera funkcje służące do analizy kolejnych bitów zawartych w kolejnych znakach przy dekompresji. Sprawdza, czy alokacja pamięci się powiodła i wypisuje stosowny komunikat w przypadku błędu. Analizuje zapisany słownik w pliku. Funkcje korzystają z pomocniczej struktury dtree odwzorowującej drzewo binarne. W pliku nagłówkowym zdefiniowany jest enum, który pełni funkcję zmiennej przechowującej aktualny tryb analizy aktualnych bitów. W zależności od odczytywanych bitów zmienna przyjmuje odpowiedni tryb i przekazuje programowi, co ma robić. Tryby są następujące: dictRoad - tryb uaktywnia się, gdy przemieszczamy się w drzewie, dictWord - uaktywniany, gdy znajdziemy się w liściu w celu odczytania znaku/słowa, bitsToWords - służy do odczytywania skompresowanych danych po odczytaniu całości słownika
 \item
-countCharacters.* -> zawiera funkcje odpowiedzialne za zliczanie wystąpień wszystkich znaków w pliku wejściowym. W pliku nagłówkowym zdefiniowano strukturę countChars służącą do przechowywania ilości wystąpień każdego ze znaków oraz drzewa Huffmana. Struktura zawiera w sobie zmienną zliczającą znaki, zmienną przechowującą dany znak oraz trzy wskaźniki na struktury odpowiedzialne za realizację drzewa Huffmana. Plik źródłowy zawiera funkcje do dodawania nowych znaków do listy, sortowanie, zwalnianie pamięci, wyświetlanie listy.
+countCharacters.* -> zawiera funkcje odpowiedzialne za zliczanie wystąpień wszystkich znaków w pliku wejściowym. W pliku nagłówkowym zdefiniowano strukturę count\_t służącą do przechowywania ilości wystąpień każdego ze znaków oraz drzewa Huffmana. Struktura zawiera w sobie zmienną zliczającą znaki, zmienną przechowującą dany znak oraz trzy wskaźniki na struktury odpowiedzialne za realizację drzewa Huffmana. Plik źródłowy zawiera funkcje do dodawania nowych znaków do listy, sortowanie, zwalnianie pamięci, wyświetlanie listy.
 \item
 decompress.* -> zawiera funkcje odpowiedzialne za dekompresję. Funkcja compress jest główną funkcją dekompresującą, przyjmuje dwa argumenty - nazwa pliku wejściowego, nazwa pliku wyjściowego. Funkcja compareBuffer sprawdza, czy aktualny fragment kodu w buforze odpowiada jakiejś literze. Jeżeli tak, to zapisuje tę literę do podanego pliku.
 \item
 dtree.* -> zawiera typ pomocniczego pseudodrzewa do dekompresji oraz związane z nim funkcje
 \item
-huffman.* -> zawiera główne funkcje realizujące algorytm Huffmana. Funkcje odpowiedzialne są za generację kodów Huffmana dla każdego znaku w pliku wejściowym. Tworzone drzewo Huffmana wykorzystuje strukturę countCharacters. Zaimplementowano tworzenie słownika na bazie drzewa Huffmana oraz ogólnej struktury kompresowanego pliku.  Więcej szczegółów na ten temat w specyfikacji funkcjonalnej.
+huffman.* -> zawiera główne funkcje realizujące algorytm Huffmana. Funkcje odpowiedzialne są za generację kodów Huffmana dla każdego znaku w pliku wejściowym. Tworzone drzewo Huffmana wykorzystuje strukturę count\_t. Zaimplementowano tworzenie słownika na bazie drzewa Huffmana oraz ogólnej struktury kompresowanego pliku.  Więcej szczegółów na ten temat w specyfikacji funkcjonalnej.
 \item
 list.* -> zawiera implementację listy liniowej służącej do przechowywania kodów znaków oraz funkcje służące do jej obsługi.
 \item
@@ -125,7 +125,7 @@ noCompress.* -> zawiera funkcje obsługujące plik w wypadku, gdy nie zachodzi �
 \item
 output.* -> zawiera funkcje realizujące zapis skompresowanego pliku w zależności od wybranego poziomu kompresji przez użytkownika.
 \item
-utils.* -> zawiera pomocnicze typy oraz funkcje, obsługę komunikatów wyświetlanych użytkownikowi. Zdefiniowany jest tutaj union pack pack\textunderscore t służący jako bufor dla znaków. 
+utils.* -> zawiera pomocnicze typy oraz funkcje, obsługę komunikatów wyświetlanych użytkownikowi. Zdefiniowany jest tutaj union pack pack\_t służący jako bufor dla znaków. 
 \section{Inne pliki w głównym katalogu}\label{header-n231}
 test -> katalog zawierający przykładowe pliki do przetestowania, w tym pliki dźwiękowe i graficzne
 \item
@@ -157,7 +157,7 @@ test2 - Próba dekompresji uszkodzonego pliku skompresowanego
 \item
 test3 - Test kompresji całego tekstu Pana Tadeusza
 \item
-test4 - Test pliku o wielkości ok. 1.5 MB z kompresją 16-bit i szyfrowaniem
+test4 - Test kompresji i dekompresji z różnymi szyframi
 \item
 test5 - Test kompresji i dekompresji muzyki z szyfrowaniem
 \item
