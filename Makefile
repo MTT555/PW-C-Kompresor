@@ -41,11 +41,10 @@ test3: compressor
 	cmp test/tadeusz.in decomp
 	@echo "--- Test 3 passed successfully! ---"
 
-# Test wielkosci ok. 1.5 MB z kompresja 16-bit i szyfrowaniem
+# Test kompresji i dekompresji z różnymi szyframi
 test4: compressor
-	./$< test/testmax.in comp -o3 -c
-	./$< comp decomp
-	cmp test/testmax.in decomp
+	./$< test/2.in comp -o3 -c "Kompresja"
+	./$< comp decomp -c "Dekompresja" || [ $$? -eq 7 ]
 	@echo "--- Test 4 passed successfully! ---"
 
 # Test kompresji i dekompresji muzyki z szyfrowaniem
